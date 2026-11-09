@@ -8,7 +8,7 @@
 
 </script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
   --bg:#060605;--bg-panel:#0d0c0a;--bg-card:#161512;--bg-raised:#1a1816;
@@ -10369,6 +10369,138 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   }
   #ore-screen .ore-head-tasti .ore-btn-plain:last-child{order:-1;}
   #ore-screen .ore-head-tasti .ore-btn-plain:first-child{order:1;}
+}
+
+/* ══ RIFINITURE PER IL TELEFONO ══
+   Regole da telefono: niente testo sotto i 9 px, niente campo sotto i 16 px
+   (sotto quella misura l'iPhone ingrandisce la pagina da solo), niente tasto
+   più basso di 44 px, niente trasparenze dove ci passa sotto del testo. */
+@media (max-width:999px){
+  /* ── accesso ── */
+  .login-inp{font-size:16px;}
+  .login-title{font-size:10px;}
+  .login-btn{font-size:11px;letter-spacing:4px;padding:15px 0;}
+  .login-err{font-size:11px;}
+
+  /* ── pagina di scelta ── */
+  .proto-card-sub{font-size:9px;letter-spacing:2px;}
+  .proto-skip-opt-name{font-size:11px;}
+  .proto-skip-opt-sub{font-size:9px;letter-spacing:1.5px;}
+  .proto-group-label{font-size:11px;}
+  .proto-group-sub{font-size:10px;}
+  /* Esci, Timer e Admin: stessa famiglia di tasti, stessa misura */
+  #proto-actions .proto-back,
+  #proto-tools > #timer-tool-btn,
+  #proto-tools > #admin-btn{
+    min-height:46px;padding:0 18px;
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    font-family:var(--font);font-size:10px;font-weight:400;letter-spacing:3px;text-transform:uppercase;
+    color:rgba(216,226,236,0.92);background:none;
+    border:1px solid rgba(200,215,230,0.26);border-radius:2px;
+  }
+  /* Riunioni e Ore: fondo pieno, così il testo che passa sotto non si legge attraverso */
+  #proto-tools > #riu-screen-btn,
+  #proto-tools > #ore-screen-btn{
+    background-color:#16130e !important;
+    background-image:linear-gradient(180deg, rgba(212,168,74,0.07), rgba(212,168,74,0.02)) !important;
+    font-size:11px;
+  }
+  #proto-chart-title{font-size:9px;flex-wrap:wrap;row-gap:8px;}
+  #proto-chart-legend{margin-left:0;}
+
+  /* ── finestre della password (admin e riunione) ── */
+  .admin-pw-box{width:min(92vw,380px);padding:28px 22px;gap:18px;}
+  .admin-pw-title{font-size:11px;}
+  #admin-pw-inp{font-size:18px;padding:10px 2px;}
+  #admin-pw-err{font-size:12px;}
+  .admin-pw-actions{gap:10px;}
+  .admin-pw-cancel,.admin-pw-confirm{
+    min-height:46px;padding:0 18px;font-size:11px;letter-spacing:2.5px;
+  }
+  .admin-pw-confirm{flex:1 1 auto;border-color:rgba(200,175,90,0.6);}
+
+  /* ── ore: i nomi, anche quelli lunghi, restano dentro il loro tasto ── */
+  .ore-strip{grid-template-columns:repeat(auto-fit,minmax(76px,1fr)) !important;}
+  .ore-strip > *{
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    letter-spacing:1.5px !important;padding-left:4px !important;padding-right:4px !important;
+    min-height:46px;
+  }
+
+  /* ── ore: caselle numeriche orizzontali, − numero + ── */
+  #ore-screen .ore-cella{
+    display:grid;grid-template-columns:50px 1fr 50px;
+    grid-template-areas:"lab lab lab" "giu num su" "tar tar tar";
+    align-items:stretch;
+  }
+  #ore-screen .ore-cella .ore-num-label{grid-area:lab;}
+  #ore-screen .ore-cella .ore-freccia.giu{grid-area:giu;}
+  #ore-screen .ore-cella .ore-freccia.su{grid-area:su;}
+  #ore-screen .ore-cella .ore-num{grid-area:num;}
+  #ore-screen .ore-cella .ore-tariffa{grid-area:tar;text-align:center;}
+  #ore-screen .ore-cella .ore-freccia{
+    font-size:0;padding:0;min-height:54px;
+    display:flex;align-items:center;justify-content:center;
+    border:1px solid var(--border-faint);
+  }
+  #ore-screen .ore-cella .ore-freccia.giu{border-radius:2px 0 0 2px;border-right:none;}
+  #ore-screen .ore-cella .ore-freccia.su{border-radius:0 2px 2px 0;border-left:none;}
+  #ore-screen .ore-cella .ore-freccia::before{font-size:22px;font-weight:300;line-height:1;}
+  #ore-screen .ore-cella .ore-freccia.giu::before{content:'\2212';}
+  #ore-screen .ore-cella .ore-freccia.su::before{content:'+';}
+  #ore-screen .ore-cella .ore-num{
+    border:1px solid var(--border-faint);border-radius:0;
+    min-height:54px;padding:6px 2px;font-size:26px;min-width:0;
+  }
+  #ore-screen .ore-cella-perse .ore-num-calc{grid-column:1 / -1;grid-row:2;height:54px;font-size:26px;}
+  #ore-screen .ore-quattro{gap:14px 10px;margin:16px 0 14px;}
+
+  /* ── ore: Oggi/Domani non resta più attaccato in cima, la sezione è corta ── */
+  #ore-screen.ore-a-schede .ore-quando{position:static;backdrop-filter:none;-webkit-backdrop-filter:none;}
+
+  /* ── ore: grafico, comandi leggibili ── */
+  .ore-and-scale .eti{font-size:9px;}
+  .ore-and-scale button{font-size:10px;min-height:34px;padding:0 9px;}
+  .ore-and-leg{gap:8px 14px;}
+  .ore-and-leg button{font-size:10px;min-height:30px;}
+  .ore-and-eti{font-size:9px;}
+
+  /* ── ore: schede, niente vuoto prima di Aggiungi, nota a tutta riga ── */
+  .ore-sch-chiusa .ore-sch-chi-blocco{flex:0 0 auto;}
+  .ore-sch-chiusa .ore-btn-agg{width:100%;min-height:50px;}
+  .ore-sch-nota-inp{width:calc(100% + 8px);max-width:none;font-size:16px;}
+  .ore-lista li .chi, .ore-sch-chi{max-width:110px;}
+}
+
+@media (max-width:999px){
+  /* i nomi in tre colonne: con cinque o sei trainer le righe restano pari */
+  .ore-strip{grid-template-columns:repeat(3,1fr) !important;}
+  /* le sottoscritte delle schede alte uguali, così OPEN e PACE restano allineati */
+  .proto-card-sub{min-height:3em;line-height:1.5;}
+  /* "non hanno ancora segnato oggi": una frase sola, non due colonne */
+  .ore-quando-avviso{display:block;line-height:1.6;}
+  /* una scheda da rifare: nome e Fatta sopra, chi e data sotto, nota a tutta riga */
+  #ore-sch-lista li{position:relative;flex-wrap:wrap;}
+  #ore-sch-lista li .ore-sch-testo{flex:1 1 100%;min-width:0;}
+  #ore-sch-lista li .ore-sch-riga1{display:grid;grid-template-columns:auto 1fr;gap:10px 12px;align-items:center;}
+  #ore-sch-lista li .ore-sch-riga1 .cliente{grid-column:1 / -1;grid-row:1;padding-right:96px;font-size:16px;line-height:1.35;min-height:44px;display:flex;align-items:center;}
+  #ore-sch-lista li .ore-sch-riga1 .ore-sch-chi{grid-column:1;grid-row:2;}
+  #ore-sch-lista li .ore-sch-riga1 .quando{grid-column:2;grid-row:2;}
+  #ore-sch-lista li > .ore-btn-plain.mini{position:absolute;top:16px;right:0;min-height:44px;}
+}
+
+@media (max-width:999px){
+  /* i quattro periodi del grafico in una fila di colonne uguali */
+  .ore-and-scale{display:grid;grid-template-columns:repeat(4,1fr);gap:0;width:100%;}
+  .ore-and-scale .eti{grid-column:1 / -1;margin:0 0 6px;}
+  .ore-and-scale button{margin-left:0;padding:0 4px;letter-spacing:0.3px;white-space:nowrap;}
+  .ore-and-scale button + button{border-left:none;}
+}
+@media (max-width:400px){
+  #ore-screen .ore-head{gap:6px;}
+  #ore-screen .ore-title{font-size:12px;letter-spacing:3px;}
+  #ore-screen .ore-head-tasti .ore-btn-plain{padding:8px 8px;letter-spacing:1.2px;}
+  .ore-and-scale button{font-size:9.5px;}
 }
 </style>
 </head>

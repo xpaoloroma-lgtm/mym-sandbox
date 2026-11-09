@@ -12171,6 +12171,8 @@ function sbDelete(id){
   modifiche locali non sincronizzate dopo un fallimento di rete.
 */
 function sbSync(cb){
+  /* Senza accesso non si legge niente: aspetta il login. */
+  if(typeof sbAuthHasSession === 'function' && !sbAuthHasSession()){ if(cb) cb(); return; }
   fetch(SB_URL+'/rest/v1/sessions?select=id,state,updated_at&order=updated_at.desc',{headers:sbH()})
     .then(function(r){return r.json();})
     .then(function(rows){
@@ -16852,7 +16854,104 @@ function timerReset() {
 }
 
 /* ── LOGIN ── */
-var _LOGIN_PWD = 'sandbox26';  /* ← cambia qui la password */
+/* ── LOGIN ──
+   L'accesso lo controlla Supabase, non questa pagina: qui non c'è nessuna
+   password. I PT scrivono solo la password; l'email è quella dell'account
+   unico della palestra. Il dispositivo resta collegato (localStorage) finché
+   qualcuno non preme "esci". */
+var SB_AUTH_EMAIL = 'mymovement.staff@gmail.com';
+var _SB_SESS_KEY = 'sb_sandbox_sess';
+var _sbSess = null;
+try{ _sbSess = JSON.parse(localStorage.getItem(_SB_SESS_KEY) || 'null'); }catch(e){ _sbSess = null; }
+function _sbSessSave(d){
+  _sbSess = d ? { access_token:d.access_token, refresh_token:d.refresh_token,
+                  expires_at: Date.now() + (Number(d.expires_in)||3600)*1000 } : null;
+  try{
+    if(_sbSess) localStorage.setItem(_SB_SESS_KEY, JSON.stringify(_sbSess));
+    else localStorage.removeItem(_SB_SESS_KEY);
+  }catch(e){}
+}
+function sbAuthHasSession(){ return !!(_sbSess && _sbSess.refresh_token); }
+var _sbNativeFetch = window.fetch.bind(window);
+function _sbAuthCall(grant, body){
+  return _sbNativeFetch(SB_URL+'/auth/v1/token?grant_type='+grant, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':SB_KEY},
+    body:JSON.stringify(body)
+  }).then(function(r){
+    return r.json().catch(function(){ return {}; }).then(function(d){
+      return { ok:r.ok && !!d.access_token, status:r.status, data:d };
+    });
+  });
+}
+/* Ritorna 'ok' | 'wrong' | 'network' */
+function sbAuthLogin(pwd){
+  return _sbAuthCall('password', { email:SB_AUTH_EMAIL, password:pwd })
+    .then(function(res){
+      if(res.ok){ _sbSessSave(res.data); return 'ok'; }
+      return (res.status === 400 || res.status === 401) ? 'wrong' : 'network';
+    }).catch(function(){ return 'network'; });
+}
+var _sbRefreshing = null;
+/* Rinnova il permesso prima che scada. Ritorna 'ok' | 'expired' | 'network'. */
+function sbAuthEnsureFresh(force){
+  if(!sbAuthHasSession()) return Promise.resolve('expired');
+  if(!force && _sbSess.access_token && _sbSess.expires_at - Date.now() > 120000)
+    return Promise.resolve('ok');
+  if(_sbRefreshing) return _sbRefreshing;
+  _sbRefreshing = _sbAuthCall('refresh_token', { refresh_token:_sbSess.refresh_token })
+    .then(function(res){
+      if(res.ok){ _sbSessSave(res.data); return 'ok'; }
+      if(res.status === 400 || res.status === 401){ _sbSessSave(null); sbAuthShowLogin(); return 'expired'; }
+      return 'network';
+    }).catch(function(){ return 'network'; })
+    .then(function(v){ _sbRefreshing = null; return v; });
+  return _sbRefreshing;
+}
+function sbAuthLogout(){
+  var t = _sbSess && _sbSess.access_token;
+  _sbSessSave(null);
+  if(t){
+    try{ _sbNativeFetch(SB_URL+'/auth/v1/logout', { method:'POST',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+t} }).catch(function(){}); }catch(e){}
+  }
+}
+/* Se il permesso non vale più (password cambiata da Paolo), torna alla schermata d'accesso. */
+function sbAuthShowLogin(){
+  try{
+    document.getElementById('proto-select').classList.add('off');
+    document.getElementById('login-splash').classList.remove('off');
+    var err = document.getElementById('login-err');
+    if(err) err.textContent = 'Accesso scaduto: rientra';
+  }catch(e){}
+}
+/* Tutte le chiamate ai dati passano da qui: prima si rinnova il permesso se
+   serve, poi si usa quello dell'utente collegato al posto della chiave
+   pubblica. Così non c'è da toccare nessuna delle chiamate già scritte. */
+window.fetch = function(input, init){
+  var url = (typeof input === 'string') ? input : (input && input.url) || '';
+  if(url.indexOf(SB_URL + '/rest/') !== 0 || !sbAuthHasSession()){
+    return _sbNativeFetch(input, init);
+  }
+  return sbAuthEnsureFresh(false).then(function(){
+    var o = Object.assign({}, init || {});
+    var h = o.headers;
+    if(h && typeof Headers !== 'undefined' && h instanceof Headers){
+      h = new Headers(h);
+      if(_sbSess) h.set('Authorization', 'Bearer ' + _sbSess.access_token);
+    } else {
+      h = Object.assign({}, h || {});
+      if(_sbSess) h['Authorization'] = 'Bearer ' + _sbSess.access_token;
+    }
+    o.headers = h;
+    return _sbNativeFetch(input, o);
+  });
+};
+/* Il telefono si risveglia, il PC riprende: si rinnova subito. */
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState === 'visible') sbAuthEnsureFresh(false);
+});
+setInterval(function(){ sbAuthEnsureFresh(false); }, 60000);
 
 /* ── PROTOCOL ROUTING ── */
 var _currentProto = null;
@@ -17174,34 +17273,39 @@ function protoBack(){
   window._skipGroupAuthorized = false;
   document.getElementById('proto-select').classList.add('off');
   document.getElementById('login-splash').classList.remove('off');
-  sessionStorage.removeItem('open_auth');
+  sbAuthLogout();
   setTimeout(function(){ document.getElementById('login-inp').focus(); }, 80);
 }
 
+var _loginBusy = false;
 function loginSubmit(){
   var inp = document.getElementById('login-inp');
   var err = document.getElementById('login-err');
-  if(inp.value === _LOGIN_PWD){
-    sessionStorage.setItem('open_auth','1');
-    document.getElementById('login-splash').classList.add('off');
-    document.getElementById('proto-select').classList.remove('off');
-  _currentPT=null; document.querySelectorAll('.proto-pt-btn').forEach(function(b){b.classList.remove('selected');}); setTimeout(protoChartBuild,80);
-    document.getElementById('cs').classList.add('off');
-    inp.value = '';
-    err.textContent = '';
-    setTimeout(protoChartBuild, 200);
-    if(typeof csSearchInit === 'function') csSearchInit();
-  } else {
-    inp.classList.add('error');
-    err.textContent = 'Password errata';
-    inp.value = '';
-    setTimeout(function(){ inp.classList.remove('error'); }, 400);
-  }
+  if(_loginBusy) return;
+  var pwd = String(inp.value == null ? '' : inp.value).trim();
+  if(!pwd) return;
+  _loginBusy = true;
+  err.textContent = 'Controllo…';
+  sbAuthLogin(pwd).then(function(esito){
+    _loginBusy = false;
+    if(esito === 'ok'){
+      /* Si ricarica la pagina: così tutto (clienti, esercizi, ore) viene
+         letto con l'accesso appena fatto. Succede solo al primo accesso. */
+      inp.value = '';
+      err.textContent = '';
+      location.reload();
+    } else {
+      inp.classList.add('error');
+      err.textContent = esito === 'wrong' ? 'Password errata' : 'Nessuna connessione: riprova';
+      inp.value = '';
+      setTimeout(function(){ inp.classList.remove('error'); }, 400);
+    }
+  });
 }
 
 window.addEventListener('load', function() {
   /* check session auth */
-  if(sessionStorage.getItem('open_auth') === '1'){
+  if(sbAuthHasSession()){
     document.getElementById('login-splash').classList.add('off');
     document.getElementById('proto-select').classList.remove('off');
   _currentPT=null; document.querySelectorAll('.proto-pt-btn').forEach(function(b){b.classList.remove('selected');}); setTimeout(protoChartBuild,80);

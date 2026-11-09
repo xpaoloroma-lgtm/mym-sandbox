@@ -10283,7 +10283,6 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   .proto-skip-opt:last-child{border-right:none;}
 
   #proto-actions{width:100%;flex-wrap:wrap;justify-content:center;gap:8px !important;}
-  #proto-enter-btn{display:none;}
   #proto-tools{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
   #proto-tools > #timer-tool-btn,
   #proto-tools > #admin-btn{position:static;right:auto;bottom:auto;}
@@ -10501,6 +10500,21 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   #ore-screen .ore-title{font-size:12px;letter-spacing:3px;}
   #ore-screen .ore-head-tasti .ore-btn-plain{padding:8px 8px;letter-spacing:1.2px;}
   .ore-and-scale button{font-size:9.5px;}
+}
+
+@media (max-width:999px){
+  /* Entra: sul telefono sale dal basso appena scegli un protocollo,
+     sopra Riunioni e Ore, così non si deve scorrere per trovarlo. */
+  #proto-select{padding-bottom:calc(166px + env(safe-area-inset-bottom,0px));}
+  #proto-enter-btn{
+    position:fixed;left:14px;right:14px;z-index:21;
+    bottom:calc(80px + env(safe-area-inset-bottom,0px));
+    min-height:56px;padding:0 16px !important;
+    font-size:12px !important;letter-spacing:5px !important;
+    color:#14110b !important;background:#E4B85A !important;
+    border:1px solid #E4B85A !important;
+    box-shadow:0 10px 30px rgba(0,0,0,0.7), 0 0 24px rgba(228,184,90,0.22);
+  }
 }
 </style>
 </head>
@@ -33217,6 +33231,33 @@ document.addEventListener('visibilitychange', function(){
   }
   var cambia = function(){ applica(0); };
   if(mq.addEventListener) mq.addEventListener('change', cambia); else if(mq.addListener) mq.addListener(cambia);
+})();
+</script>
+
+<script>
+/* ══ IL FUMETTO DEL GRAFICO SI SPEGNE QUANDO SI SCORRE ══
+   Col dito resta acceso qualche secondo apposta, per leggerlo. Ma se poi
+   scorri la pagina era rimasto in mezzo: adesso basta scorrere un po', o
+   toccare fuori dal grafico, e sparisce. */
+(function(){
+  var scr = document.getElementById('ore-screen');
+  if(!scr) return;
+  var base = null;
+  function spegni(){
+    scr.querySelectorAll('.ore-and-pop.su').forEach(function(p){ p.classList.remove('su'); });
+    scr.querySelectorAll('.and-mir').forEach(function(m){ m.style.display = 'none'; });
+    scr.querySelectorAll('.and-riga-hi').forEach(function(h){ h.style.display = 'none'; });
+    base = null;
+  }
+  function nelGrafico(t){ return !!(t && t.closest && t.closest('.ore-and-graf, .ore-and-riga')); }
+  scr.addEventListener('touchstart', function(e){
+    if(nelGrafico(e.target)) base = scr.scrollTop; else spegni();
+  }, {passive:true, capture:true});
+  scr.addEventListener('scroll', function(){
+    if(!scr.querySelector('.ore-and-pop.su')) return;
+    if(base === null) base = scr.scrollTop;
+    if(Math.abs(scr.scrollTop - base) > 24) spegni();
+  }, {passive:true});
 })();
 </script>
 </body>

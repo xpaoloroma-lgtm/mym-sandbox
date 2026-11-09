@@ -10239,6 +10239,137 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   0%,100%{ opacity:0.35; transform:scale(0.8); }
   50%    { opacity:1;    transform:scale(1.15); }
 }
+
+/* ══ PAGINA DI SCELTA — impaginazione ══
+   I bottoni in basso erano messi a distanze fisse dal bordo destro, uno per
+   uno: con un po' di spazio in meno uscivano dallo schermo. Adesso sono un
+   gruppo che si allinea da solo. Sul telefono le schede stanno nello schermo
+   e Riunioni e Ore sono affiancate in fondo, senza coprire niente. */
+@media (min-width:1000px){
+  #proto-tools{
+    position:absolute;right:32px;bottom:28px;
+    display:flex;align-items:center;gap:10px;
+  }
+  #proto-tools > button{position:static;right:auto;bottom:auto;margin:0;}
+  #proto-tools > #riu-screen-btn{order:1;}
+  #proto-tools > #ore-screen-btn{order:2;}
+  #proto-tools > #timer-tool-btn{order:3;}
+  #proto-tools > #admin-btn{order:4;}
+}
+@media (max-width:999px){
+  #proto-select{
+    justify-content:flex-start;overflow-y:auto;overflow-x:hidden;
+    gap:22px;padding:16px 14px calc(96px + env(safe-area-inset-bottom,0px));
+  }
+  #proto-pt-strip{width:100%;justify-content:center !important;}
+  #proto-cs-search-wrap{width:100%;margin-left:0;}
+  #proto-cs-search{font-size:16px;padding:10px 4px 10px 26px;}
+  #proto-cs-search-results{width:100%;left:0;right:0;}
+
+  .proto-groups{flex-direction:column;align-items:stretch;gap:22px;width:100%;flex-wrap:nowrap;}
+  .proto-groups-divider{display:none;}
+  .proto-group{width:100%;align-items:stretch;}
+  .proto-group-header{margin-bottom:12px;}
+  .proto-group-cards{display:grid;grid-template-columns:1fr 1fr;gap:6px;width:100%;}
+  .proto-group-cards > *{width:auto;min-width:0;}
+  .proto-card{height:112px;gap:8px;padding:0 8px;}
+  .proto-card-name{font-size:24px;letter-spacing:5px;}
+  .proto-card-sub{font-size:7px;letter-spacing:2px;text-align:center;line-height:1.5;}
+  .proto-card-skip{grid-column:1 / -1;height:auto;}
+  .proto-group-libero .proto-group-cards > *{grid-column:1 / -1;}
+  .proto-skip-label{font-size:24px;letter-spacing:6px;padding:14px 16px 10px;}
+  .proto-skip-options{flex-direction:row;}
+  .proto-skip-opt{min-height:58px;padding:0 16px;border-bottom:none;border-right:1px solid var(--border);}
+  .proto-skip-opt:last-child{border-right:none;}
+
+  #proto-actions{width:100%;flex-wrap:wrap;justify-content:center;gap:8px !important;}
+  #proto-enter-btn{display:none;}
+  #proto-tools{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+  #proto-tools > #timer-tool-btn,
+  #proto-tools > #admin-btn{position:static;right:auto;bottom:auto;}
+  /* Riunioni e Ore: affiancate in fondo, dove arriva il pollice */
+  #proto-tools > #riu-screen-btn,
+  #proto-tools > #ore-screen-btn{
+    position:fixed;bottom:calc(14px + env(safe-area-inset-bottom,0px));
+    width:auto;min-height:56px;z-index:20;margin:0;
+    padding:16px 8px;letter-spacing:4px;font-size:11px;
+    box-shadow:0 -14px 30px rgba(4,4,3,0.9);
+  }
+  #proto-tools > #riu-screen-btn{left:14px;right:calc(50% + 4px);}
+  #proto-tools > #ore-screen-btn{left:calc(50% + 4px);right:14px;}
+  #proto-chart-wrap{width:100%;}
+}
+
+/* ══ ORE SUL TELEFONO: UNA SEZIONE ALLA VOLTA ══
+   Sul PC resta la dashboard con tutto insieme. Sul telefono era una pagina
+   di sei schermate: adesso c'è un menù in basso e si vede una sezione per
+   volta, con uno scorrimento laterale nel verso della voce scelta. */
+#ore-tabs{display:none;}
+@media (max-width:999px){
+  #ore-screen{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px)) !important;}
+  #ore-screen.ore-a-schede .ore-griglia > .ore-panel:not(.ore-attivo){display:none !important;}
+  #ore-screen.ore-a-schede .ore-griglia > .ore-panel.ore-attivo{display:block;margin-bottom:0;}
+  #ore-screen.ore-a-schede .ore-griglia > .ore-panel.ore-da-dx{animation:oreDaDx .32s cubic-bezier(.22,.8,.36,1);}
+  #ore-screen.ore-a-schede .ore-griglia > .ore-panel.ore-da-sx{animation:oreDaSx .32s cubic-bezier(.22,.8,.36,1);}
+  @keyframes oreDaDx{from{transform:translateX(42px);opacity:0;}to{transform:none;opacity:1;}}
+  @keyframes oreDaSx{from{transform:translateX(-42px);opacity:0;}to{transform:none;opacity:1;}}
+
+  #ore-tabs{
+    display:flex;position:fixed;left:0;right:0;bottom:0;z-index:30;
+    padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));
+    background:rgba(10,9,8,0.96);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border-top:1px solid var(--border-faint);
+  }
+  #ore-tabs button{
+    flex:1 1 0;position:relative;min-height:56px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+    background:none;border:none;cursor:pointer;font-family:var(--font);
+    color:var(--text-xlo);transition:color .18s;
+  }
+  #ore-tabs button .ic{font-size:17px;line-height:1;}
+  #ore-tabs button .nm{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;}
+  #ore-tabs button::after{
+    content:'';position:absolute;top:-7px;left:28%;right:28%;height:2px;
+    background:var(--gold);transform:scaleX(0);transition:transform .25s;
+  }
+  #ore-tabs button.on{color:var(--gold);}
+  #ore-tabs button.on::after{transform:scaleX(1);}
+  #ore-tabs .bdg{
+    position:absolute;top:4px;left:calc(50% + 8px);
+    min-width:17px;height:17px;padding:0 5px;border-radius:9px;
+    background:rgba(226,140,140,0.95);color:#140f0f;
+    font-size:10px;font-weight:700;line-height:17px;text-align:center;font-style:normal;
+  }
+  #ore-tabs .bdg:empty{display:none;}
+
+  /* i nomi stanno tutti nello schermo, in colonne uguali, senza tagli */
+  .ore-strip{
+    display:grid !important;grid-template-columns:repeat(auto-fit,minmax(58px,1fr));
+    gap:6px !important;overflow:visible !important;flex-wrap:wrap !important;
+  }
+  .ore-strip > *{width:auto !important;min-width:0 !important;margin:0 !important;}
+}
+@media (prefers-reduced-motion:reduce){
+  #ore-screen .ore-griglia > .ore-panel{animation:none !important;}
+}
+
+@media (max-width:999px){
+  #ore-tabs button .ic{width:20px;height:20px;font-size:inherit;}
+  /* intestazione su una riga sola: indietro, titolo, admin */
+  #ore-screen .ore-head{
+    display:flex;align-items:center;gap:10px;flex-wrap:nowrap;
+    padding:14px 0 12px;margin:0 0 12px;
+  }
+  #ore-screen .ore-head > div:first-child{flex:1 1 auto;min-width:0;order:0;text-align:center;}
+  #ore-screen .ore-title{font-size:13px;letter-spacing:5px;white-space:nowrap;}
+  #ore-screen .ore-head-tasti{display:contents;}
+  #ore-screen .ore-head-tasti .ore-btn-plain{
+    min-height:40px;padding:8px 10px;font-size:9px;letter-spacing:2px;flex:0 0 auto;
+  }
+  #ore-screen .ore-head-tasti .ore-btn-plain:last-child{order:-1;}
+  #ore-screen .ore-head-tasti .ore-btn-plain:first-child{order:1;}
+}
 </style>
 </head>
 <body>
@@ -10348,13 +10479,15 @@ tr.ore-scala td{border-top:1px solid var(--border);}
       </div>
     </div>
   </div>
-  <div style="display:flex;align-items:center;gap:20px;">
+  <div id="proto-actions" style="display:flex;align-items:center;gap:20px;">
     <button class="proto-back" onclick="protoBack()">← esci</button>
     <button id="proto-enter-btn" onclick="protoEnter()" style="opacity:0;pointer-events:none;background:none;border:1px solid rgba(200,175,90,0.78);border-radius:2px;cursor:pointer;font-family:var(--font);font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:rgba(200,175,90,0.90);padding:8px 28px;transition:opacity 0.35s ease, transform 0.35s ease;transform:translateY(4px);">Entra →</button>
+    <div id="proto-tools">
     <button id="timer-tool-btn" onclick="tmrOpen()" title="Timer — intervalli a scalare">⬡ Timer</button>
     <button id="ore-screen-btn" onclick="oreOpen()" title="Conteggio ore — recap e consuntivo giornata">◷ Ore</button>
     <button id="riu-screen-btn" onclick="riuOpen()" title="Riunioni — la settimana e chi c'è">▦ Riunioni</button>
     <button id="admin-btn" onclick="adminPwOpen()">Admin</button>
+    </div>
   </div>
   <div id="proto-chart-wrap">
     <div id="proto-chart-title">
@@ -10374,6 +10507,12 @@ tr.ore-scala td{border-top:1px solid var(--border);}
 <!-- ══ CONTEGGIO ORE ══ -->
 <div id="ore-screen" class="off">
   <div id="ore-velo" onclick="oreTrainerFoglio(false)"></div>
+  <nav id="ore-tabs" aria-label="Sezioni del conteggio ore">
+    <button type="button" data-p="p-segna" onclick="oreTab('p-segna')"><svg class="ic" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg><span class="nm">Segna</span></button>
+    <button type="button" data-p="p-recap" onclick="oreTab('p-recap')"><svg class="ic" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19h16"/><path d="M5 15l4-5 4 3 6-7"/></svg><span class="nm">Recap</span></button>
+    <button type="button" data-p="p-schede" onclick="oreTab('p-schede')"><svg class="ic" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17" rx="1.5"/><path d="M9 8h6M9 12h6M9 16h4"/></svg><span class="nm">Schede</span><b class="bdg" id="ore-tab-bdg"></b></button>
+    <button type="button" data-p="p-corr" onclick="oreTab('p-corr')"><svg class="ic" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h9"/></svg><span class="nm">Registro</span></button>
+  </nav>
   <div class="ore-wrap">
 
     <div class="ore-head">
@@ -10434,21 +10573,6 @@ tr.ore-scala td{border-top:1px solid var(--border);}
 
           <div class="ore-and-graf"><svg id="and-g"></svg>
             <div class="ore-and-pop" id="and-pop"></div></div>
-
-          <!-- La frase sta qui in mezzo perché è qui che serve: una cosa
-               veloce sopra e una lenta sotto, e senza dirlo uno le legge
-               come se fossero la stessa misura guardata due volte. -->
-          <div class="ore-and-dice">
-            <p>Sopra ci sono gli <b>ultimi 28 giorni</b>: si muove in fretta, una
-               settimana buona si vede subito. È lì che si guarda come sta
-               andando adesso.</p>
-            <p>Sotto c'è la stessa percentuale su <b>120 giorni</b>, e quanto
-               ognuno dista dalla media del gruppo. È la stessa cosa che dicono
-               le parole <b>sopra</b>, <b>in linea</b> e <b>sotto</b> nei numeri.</p>
-            <p>Si muove piano: la giornata di oggi la sposta di un
-               centoventesimo. Dice la posizione da tenere nel tempo, non cosa
-               fare stasera.</p>
-          </div>
 
           <div class="ore-and-sez">
             <div class="ore-and-eti">
@@ -16872,6 +16996,22 @@ function _sbSessSave(d){
   }catch(e){}
 }
 function sbAuthHasSession(){ return !!(_sbSess && _sbSess.refresh_token); }
+/* Più schede sullo stesso dispositivo condividono l'accesso: se un'altra
+   scheda l'ha già rinnovato, si prende il suo invece di rinnovarlo di nuovo
+   (il vecchio rinnovo non vale più e butterebbe fuori). */
+function _sbSessReload(){
+  try{
+    var d = JSON.parse(localStorage.getItem(_SB_SESS_KEY) || 'null');
+    if(d && d.refresh_token && (!_sbSess || d.expires_at > _sbSess.expires_at || d.refresh_token !== _sbSess.refresh_token)){
+      _sbSess = d; return true;
+    }
+  }catch(e){}
+  return false;
+}
+window.addEventListener('storage', function(ev){
+  if(ev.key !== _SB_SESS_KEY) return;
+  try{ _sbSess = JSON.parse(ev.newValue || 'null'); }catch(e){}
+});
 var _sbNativeFetch = window.fetch.bind(window);
 function _sbAuthCall(grant, body){
   return _sbNativeFetch(SB_URL+'/auth/v1/token?grant_type='+grant, {
@@ -16895,14 +17035,21 @@ function sbAuthLogin(pwd){
 var _sbRefreshing = null;
 /* Rinnova il permesso prima che scada. Ritorna 'ok' | 'expired' | 'network'. */
 function sbAuthEnsureFresh(force){
+  _sbSessReload();
   if(!sbAuthHasSession()) return Promise.resolve('expired');
   if(!force && _sbSess.access_token && _sbSess.expires_at - Date.now() > 120000)
     return Promise.resolve('ok');
   if(_sbRefreshing) return _sbRefreshing;
-  _sbRefreshing = _sbAuthCall('refresh_token', { refresh_token:_sbSess.refresh_token })
+  var _usato = _sbSess.refresh_token;
+  _sbRefreshing = _sbAuthCall('refresh_token', { refresh_token:_usato })
     .then(function(res){
       if(res.ok){ _sbSessSave(res.data); return 'ok'; }
-      if(res.status === 400 || res.status === 401){ _sbSessSave(null); sbAuthShowLogin(); return 'expired'; }
+      if(res.status === 400 || res.status === 401){
+        /* Un'altra scheda può averlo appena rinnovato: in quel caso si usa il suo. */
+        _sbSessReload();
+        if(_sbSess && _sbSess.refresh_token !== _usato) return 'ok';
+        _sbSessSave(null); sbAuthShowLogin(); return 'expired';
+      }
       return 'network';
     }).catch(function(){ return 'network'; })
     .then(function(v){ _sbRefreshing = null; return v; });
@@ -16933,7 +17080,7 @@ window.fetch = function(input, init){
   if(url.indexOf(SB_URL + '/rest/') !== 0 || !sbAuthHasSession()){
     return _sbNativeFetch(input, init);
   }
-  return sbAuthEnsureFresh(false).then(function(){
+  function _conAccesso(){
     var o = Object.assign({}, init || {});
     var h = o.headers;
     if(h && typeof Headers !== 'undefined' && h instanceof Headers){
@@ -16945,7 +17092,10 @@ window.fetch = function(input, init){
     }
     o.headers = h;
     return _sbNativeFetch(input, o);
-  });
+  }
+  /* Alla chiusura della pagina non c'è tempo per aspettare: si parte subito. */
+  if(init && init.keepalive){ _sbSessReload(); return _conAccesso(); }
+  return sbAuthEnsureFresh(false).then(_conAccesso);
 };
 /* Il telefono si risveglia, il PC riprende: si rinnova subito. */
 document.addEventListener('visibilitychange', function(){
@@ -32865,5 +33015,77 @@ document.addEventListener('visibilitychange', function(){
 })();
 </script>
 
+
+<script>
+/* ══ ORE SUL TELEFONO: IL MENÙ ══ */
+(function(){
+  var ORDINE = ['p-segna','p-recap','p-schede','p-corr'];
+  var attiva = 'p-segna';
+  var mq = window.matchMedia('(max-width:999px)');
+  function el(id){ return document.getElementById(id); }
+  function applica(dir){
+    var scr = el('ore-screen'); if(!scr) return;
+    var mobile = mq.matches;
+    scr.classList.toggle('ore-a-schede', mobile);
+    ORDINE.forEach(function(id){
+      var p = el(id); if(!p) return;
+      p.classList.remove('ore-da-dx','ore-da-sx');
+      p.classList.toggle('ore-attivo', id === attiva);
+    });
+    document.querySelectorAll('#ore-tabs button').forEach(function(b){
+      b.classList.toggle('on', b.getAttribute('data-p') === attiva);
+    });
+    if(mobile && dir){
+      var p = el(attiva);
+      if(p){ void p.offsetWidth; p.classList.add(dir > 0 ? 'ore-da-dx' : 'ore-da-sx'); }
+    }
+    /* il grafico si disegna solo quando ha una larghezza vera */
+    if(attiva === 'p-recap'){
+      setTimeout(function(){ try{ if(typeof andRidisegna === 'function') andRidisegna(); }catch(e){} }, 30);
+    }
+  }
+  window.oreTab = function(id){
+    if(ORDINE.indexOf(id) < 0) return;
+    var dir = ORDINE.indexOf(id) - ORDINE.indexOf(attiva);
+    attiva = id;
+    applica(dir);
+    var scr = el('ore-screen'); if(scr && mq.matches) scr.scrollTo(0, 0);
+  };
+  /* Il codice in due punti porta da solo a "Segna" (correggere una giornata,
+     aprire il proprio mese): sul telefono vuol dire cambiare voce. */
+  function aggancia(){
+    var seg = el('p-segna');
+    if(seg && !seg._oreTabAgganciato){
+      var orig = seg.scrollIntoView;
+      seg.scrollIntoView = function(o){
+        if(mq.matches){ window.oreTab('p-segna'); return; }
+        return orig.call(seg, o);
+      };
+      seg._oreTabAgganciato = true;
+    }
+    /* il numero delle schede aperte sul tasto del menù */
+    var conta = el('ore-sch-conta'), bdg = el('ore-tab-bdg');
+    if(conta && bdg && !conta._oreTabOss){
+      var copia = function(){
+        var n = parseInt((conta.textContent || '').replace(/[^0-9]/g,''), 10);
+        bdg.textContent = n > 0 ? String(n) : '';
+      };
+      copia();
+      new MutationObserver(copia).observe(conta, {childList:true, subtree:true, characterData:true});
+      conta._oreTabOss = true;
+    }
+  }
+  var apri = window.oreOpen;
+  if(typeof apri === 'function'){
+    window.oreOpen = function(){
+      var r = apri.apply(this, arguments);
+      aggancia(); applica(0);
+      return r;
+    };
+  }
+  var cambia = function(){ applica(0); };
+  if(mq.addEventListener) mq.addEventListener('change', cambia); else if(mq.addListener) mq.addListener(cambia);
+})();
+</script>
 </body>
 </html>

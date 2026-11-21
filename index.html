@@ -10254,7 +10254,8 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   #proto-tools > #riu-screen-btn{order:1;}
   #proto-tools > #ore-screen-btn{order:2;}
   #proto-tools > #timer-tool-btn{order:3;}
-  #proto-tools > #admin-btn{order:4;}
+  #proto-tools > #ese-screen-btn{order:4;}
+  #proto-tools > #admin-btn{order:5;}
 }
 @media (max-width:999px){
   #proto-select{
@@ -10516,6 +10517,38 @@ tr.ore-scala td{border-top:1px solid var(--border);}
     box-shadow:0 10px 30px rgba(0,0,0,0.7), 0 0 24px rgba(228,184,90,0.22);
   }
 }
+
+/* ══ ESERCIZI ══
+   Il database esercizi (esercizi.html), aperto dentro la Sandbox in una
+   finestra a tutto schermo. Per ora è scollegato da tutto: ha i suoi dati
+   e i suoi salvataggi, e non legge né scrive niente della Sandbox.
+   Sul telefono non c'è: lì si usano solo le ore. */
+#ese-screen-btn{
+  background:none;border:1px solid rgba(180,195,210,0.14);
+  border-radius:2px;cursor:pointer;
+  font-family:var(--font);font-size:8px;font-weight:600;
+  letter-spacing:2.5px;text-transform:uppercase;
+  color:rgba(180,195,210,0.86);padding:6px 14px;
+  transition:all 0.15s;
+}
+#ese-screen-btn:hover{border-color:rgba(200,175,90,0.76);color:rgba(200,175,90,0.85);}
+#ese-screen{
+  position:fixed;inset:0;z-index:9999;background:var(--bg);
+  display:flex;flex-direction:column;
+}
+#ese-screen.off{display:none;}
+#ese-bar{
+  flex:0 0 auto;display:flex;align-items:center;gap:16px;
+  padding:10px 20px;border-bottom:1px solid rgba(180,195,210,0.14);
+}
+#ese-bar .ese-titolo{
+  font-family:var(--font);font-size:10px;font-weight:600;
+  letter-spacing:3px;text-transform:uppercase;color:rgba(200,175,90,0.85);
+}
+#ese-frame{flex:1 1 auto;width:100%;border:0;background:var(--bg);}
+@media (max-width:999px){
+  #ese-screen-btn,#ese-screen{display:none !important;}
+}
 </style>
 </head>
 <body>
@@ -10632,6 +10665,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
     <button id="timer-tool-btn" onclick="tmrOpen()" title="Timer — intervalli a scalare">⬡ Timer</button>
     <button id="ore-screen-btn" onclick="oreOpen()" title="Conteggio ore — recap e consuntivo giornata">◷ Ore</button>
     <button id="riu-screen-btn" onclick="riuOpen()" title="Riunioni — la settimana e chi c'è">▦ Riunioni</button>
+    <button id="ese-screen-btn" onclick="eseOpen()" title="Database esercizi — per ora scollegato dal resto">Esercizi</button>
     <button id="admin-btn" onclick="adminPwOpen()">Admin</button>
     </div>
   </div>
@@ -10649,6 +10683,27 @@ tr.ore-scala td{border-top:1px solid var(--border);}
     <div style="position:relative;height:200px;"><canvas id="proto-chart"></canvas></div>
   </div>
 </div>
+
+<!-- ══ ESERCIZI ══ database esercizi, scollegato dal resto (vedi esercizi.html) -->
+<div id="ese-screen" class="off">
+  <div id="ese-bar">
+    <button class="proto-back" onclick="eseClose()">← esci</button>
+    <span class="ese-titolo">Esercizi</span>
+  </div>
+  <iframe id="ese-frame" title="Database esercizi"></iframe>
+</div>
+<script>
+/* Il file si carica solo la prima volta che si apre: è grosso, e chi non
+   lo usa non deve aspettarlo. */
+function eseOpen(){
+  var f = document.getElementById('ese-frame');
+  if (!f.getAttribute('src')) f.setAttribute('src', 'esercizi.html');
+  document.getElementById('ese-screen').classList.remove('off');
+}
+function eseClose(){
+  document.getElementById('ese-screen').classList.add('off');
+}
+</script>
 
 <!-- ══ CONTEGGIO ORE ══ -->
 <div id="ore-screen" class="off">

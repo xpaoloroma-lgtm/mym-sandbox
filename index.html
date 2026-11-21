@@ -10199,8 +10199,22 @@ tr.ore-scala td{border-top:1px solid var(--border);}
 .ing-carta:hover{border-color:#E4B85A;background:rgba(212,168,74,0.07);box-shadow:0 0 30px rgba(212,168,74,0.10);}
 .ing-carta b{font-size:30px;font-weight:300;letter-spacing:8px;text-transform:uppercase;color:#E4B85A;}
 .ing-carta i{font-style:normal;font-size:11px;font-weight:400;letter-spacing:2.5px;text-transform:uppercase;color:rgba(200,214,228,0.78);}
-.ing-carta.acceso{border-color:#E4B85A;box-shadow:0 0 26px rgba(212,168,74,0.18);}
-.ing-badge{position:absolute;left:16px;right:16px;bottom:14px;font-size:11px;font-weight:500;letter-spacing:0.5px;color:rgba(244,200,200,0.95);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+/* Il segnale di chi deve ancora rispondere: lo stesso del vecchio tasto
+   Riunioni. Bordo che pulsa, nomi nel riquadrino rosso, puntino che batte. */
+.ing-carta.acceso{border-color:rgba(212,168,74,0.85);animation:riuChiama 2.6s ease-in-out infinite;}
+.ing-badge{
+  position:absolute;left:50%;transform:translateX(-50%);bottom:18px;
+  max-width:calc(100% - 32px);box-sizing:border-box;padding:4px 10px;
+  border-radius:2px;background:rgba(226,140,140,0.18);border:1px solid rgba(226,140,140,0.55);
+  color:rgba(244,190,190,1);font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  animation:riuChiamaBadge 2.6s ease-in-out infinite;
+}
+.ing-badge::before{
+  content:'';display:inline-block;vertical-align:middle;
+  width:6px;height:6px;border-radius:50%;margin-right:8px;
+  background:rgba(244,190,190,1);animation:riuPunto 1.3s ease-in-out infinite;
+}
 .ing-badge:empty{display:none;}
 .ing-entra{
   background:none;border:1px solid rgba(180,195,210,0.30);border-radius:2px;cursor:pointer;
@@ -10281,7 +10295,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   .ing-carta{width:100%;height:auto;min-height:150px;padding:26px 16px;gap:10px;}
   .ing-carta b{font-size:28px;letter-spacing:7px;}
   .ing-carta i{font-size:11px;}
-  .ing-badge{position:static;white-space:normal;font-size:12px;line-height:1.4;margin-top:4px;}
+  .ing-badge{position:static;transform:none;max-width:100%;white-space:normal;font-size:11px;line-height:1.5;margin-top:6px;}
 }
 
 /* ══ ESERCIZI ══

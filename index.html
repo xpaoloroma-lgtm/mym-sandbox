@@ -10182,6 +10182,96 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   }
 }
 
+/* ══ DOPO L'ACCESSO: ORE E RIUNIONI ══ solo sul monitor */
+#ingresso{
+  position:fixed;inset:0;z-index:9998;background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:40px;
+}
+#ingresso.off{display:none;}
+.ing-logo{font-family:var(--font);font-size:22px;font-weight:200;letter-spacing:12px;text-transform:uppercase;color:rgba(212,168,74,0.9);}
+.ing-carte{display:flex;gap:16px;}
+.ing-carta{
+  position:relative;width:300px;height:200px;cursor:pointer;
+  background:var(--bg-card);border:1px solid rgba(212,168,74,0.55);border-radius:2px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  font-family:var(--font);transition:border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+.ing-carta:hover{border-color:#E4B85A;background:rgba(212,168,74,0.07);box-shadow:0 0 30px rgba(212,168,74,0.10);}
+.ing-carta b{font-size:30px;font-weight:300;letter-spacing:8px;text-transform:uppercase;color:#E4B85A;}
+.ing-carta i{font-style:normal;font-size:11px;font-weight:400;letter-spacing:2.5px;text-transform:uppercase;color:rgba(200,214,228,0.78);}
+.ing-carta.acceso{border-color:#E4B85A;box-shadow:0 0 26px rgba(212,168,74,0.18);}
+.ing-badge{position:absolute;left:16px;right:16px;bottom:14px;font-size:11px;font-weight:500;letter-spacing:0.5px;color:rgba(244,200,200,0.95);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ing-badge:empty{display:none;}
+.ing-entra{
+  background:none;border:1px solid rgba(180,195,210,0.30);border-radius:2px;cursor:pointer;
+  padding:12px 22px;font-family:var(--font);font-size:11px;font-weight:500;letter-spacing:4px;text-transform:uppercase;
+  color:rgba(216,226,236,0.92);transition:all 0.15s;
+}
+.ing-entra:hover{border-color:rgba(212,168,74,0.8);color:#E4B85A;}
+
+/* ══ LA MAPPA DEI PROTOCOLLI ══ solo sul monitor */
+#home-riga{display:contents;}
+#mappa{display:none;}
+#ing-torna{display:none;}
+@media (min-width:1000px){
+  #ing-torna{display:inline-block;}
+  #home-riga{display:flex;align-items:stretch;justify-content:center;gap:36px;}
+  #mappa{
+    display:grid;grid-template-columns:64px 660px;grid-template-rows:18px 1fr 22px;
+    column-gap:0;row-gap:8px;
+  }
+  .mp-t{grid-column:1 / 3;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:rgba(228,184,90,0.95);}
+  .mp-tx{grid-column:1 / 2;align-self:center;font-size:9px;letter-spacing:2px;}
+  .mp-y{display:grid;grid-template-rows:repeat(3,1fr);gap:8px;}
+  .mp-y span{display:flex;align-items:center;justify-content:flex-end;padding-right:14px;}
+  .mp-x{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;align-items:center;}
+  .mp-x span{text-align:center;}
+  .mp-y span,.mp-x span{font-family:var(--font);font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:rgba(200,214,228,0.85);}
+  .mp-g{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,116px);gap:8px;}
+  .mp-c{
+    box-sizing:border-box;border:1px solid rgba(180,195,210,0.10);border-radius:3px;
+    background:rgba(255,255,255,0.012);padding:0 22px;
+    display:flex;flex-direction:column;justify-content:center;gap:2px;
+  }
+  .mp-n1{border-color:rgba(212,168,74,0.30);background:rgba(212,168,74,0.04);}
+  .mp-n2{border-color:rgba(212,168,74,0.38);background:rgba(212,168,74,0.08);}
+  .mp-n3{border-color:rgba(212,168,74,0.48);background:rgba(212,168,74,0.13);}
+  .mp-p{
+    display:flex;align-items:baseline;gap:10px;height:32px;padding:0 0 0 12px;
+    background:none;border:0;border-left:3px solid var(--c);cursor:pointer;
+    font-family:var(--font);text-align:left;transition:background 0.15s;
+  }
+  .mp-p b{font-size:19px;font-weight:300;letter-spacing:5px;text-transform:uppercase;color:rgba(240,235,220,1);}
+  .mp-p i{font-style:normal;font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:rgba(190,204,218,0.72);}
+  .mp-p:hover:not(:disabled){background:rgba(255,255,255,0.05);}
+  .mp-p:disabled{cursor:default;}
+  .mp-p:disabled b{color:rgba(240,235,220,0.5);}
+  .mp-p.sel{background:rgba(212,168,74,0.16);}
+  .mp-p.sel b{color:#E4B85A;}
+
+  /* a destra della mappa: quello che sulla mappa non sta (Pace, Skip, Grid) */
+  #home-riga .proto-groups{flex-direction:column;align-items:stretch;justify-content:center;gap:8px;}
+  #home-riga .proto-group{gap:0;}
+  #home-riga .proto-group-header,#home-riga .proto-groups-divider{display:none;}
+  #home-riga .proto-group-cards{flex-direction:column;gap:8px;}
+  #home-riga .proto-card.in-mappa{display:none;}
+  #home-riga .proto-groups::before{
+    content:'Fuori dalla mappa';font-family:var(--font);font-size:10px;font-weight:700;
+    letter-spacing:3px;text-transform:uppercase;color:rgba(200,214,228,0.85);margin-bottom:2px;
+  }
+  #home-riga .proto-card{height:60px;gap:4px;}
+  #home-riga .proto-card .proto-card-name{font-size:20px;letter-spacing:6px;}
+  #home-riga .proto-card-skip{height:auto;min-height:0;}
+  #home-riga .proto-skip-label{font-size:20px;letter-spacing:6px;padding:12px 18px 8px;}
+  #home-riga .proto-skip-options{flex-direction:row;}
+  #home-riga .proto-skip-opt{flex:1;min-height:46px;padding:0 16px;border-bottom:none;border-right:1px solid var(--border);}
+  #home-riga .proto-skip-opt:last-child{border-right:none;}
+  #proto-select{gap:22px;}
+}
+@media (max-width:999px){
+  #ingresso,#ing-torna{display:none !important;}
+}
+
 /* ══ ESERCIZI ══
    Il database esercizi (esercizi.html), aperto dentro la Sandbox in una
    finestra a tutto schermo. Per ora è scollegato da tutto: ha i suoi dati
@@ -10259,6 +10349,29 @@ tr.ore-scala td{border-top:1px solid var(--border);}
       <div id="proto-cs-search-results"></div>
     </div>
   </div>
+  <!-- ══ LA MAPPA DEI PROTOCOLLI ══ (solo sul monitor; sul telefono restano le schede)
+       Nove caselle: difficoltà in verticale, autonomia in orizzontale.
+       In ogni casella i protocolli adatti; una casella con più nomi vuol dire
+       che lì vanno bene più protocolli. Chi sta in quale casella è una scelta
+       da confermare, non una misura. -->
+  <div id="home-riga">
+  <div id="mappa">
+    <div class="mp-t">Difficoltà</div>
+    <div class="mp-y"><span>alta</span><span>media</span><span>bassa</span></div>
+    <div class="mp-g">
+      <div class="mp-c mp-n1"><button type="button" class="mp-p" style="--c:#c88ad8" disabled title="Non esiste ancora"><b>Lift</b><i>in arrivo</i></button></div>
+      <div class="mp-c mp-n0"></div>
+      <div class="mp-c mp-n0"></div>
+      <div class="mp-c mp-n2"><button type="button" class="mp-p" style="--c:#c88ad8" disabled title="Non esiste ancora"><b>Lift</b><i>in arrivo</i></button><button type="button" class="mp-p" style="--c:#78a5e1" onclick="prototipoOpen('load.html','Load')" title="Prototipo con dati di esempio: non salva"><b>Load</b><i>prototipo</i></button></div>
+      <div class="mp-c mp-n3"><button type="button" class="mp-p" style="--c:#78a5e1" onclick="prototipoOpen('load.html','Load')" title="Prototipo con dati di esempio: non salva"><b>Load</b><i>prototipo</i></button><button type="button" class="mp-p" style="--c:#d4a84a" onclick="protoSelect('open')" data-p="open"><b>Open</b></button><button type="button" class="mp-p" style="--c:#e08a6a" onclick="prototipoOpen('self.html','Self')" title="Prototipo con dati di esempio: non salva"><b>Self</b><i>prototipo</i></button></div>
+      <div class="mp-c mp-n1"><button type="button" class="mp-p" style="--c:#e08a6a" onclick="prototipoOpen('self.html','Self')" title="Prototipo con dati di esempio: non salva"><b>Self</b><i>prototipo</i></button></div>
+      <div class="mp-c mp-n1"><button type="button" class="mp-p" style="--c:#78cd9b" disabled title="Non esiste ancora"><b>Move</b><i>in arrivo</i></button></div>
+      <div class="mp-c mp-n2"><button type="button" class="mp-p" style="--c:#d4a84a" onclick="protoSelect('open')" data-p="open"><b>Open</b></button><button type="button" class="mp-p" style="--c:#78cd9b" disabled title="Non esiste ancora"><b>Move</b><i>in arrivo</i></button></div>
+      <div class="mp-c mp-n0"></div>
+    </div>
+    <div class="mp-t mp-tx">Autonomia</div>
+    <div class="mp-x"><span>bassa</span><span>media</span><span>alta</span></div>
+  </div>
   <div class="proto-groups">
     <!-- ── SANDBOX ─────────────────────────────────────────────
          Open · Pace · Skip — i tre formati del sistema Sandbox.
@@ -10269,17 +10382,17 @@ tr.ore-scala td{border-top:1px solid var(--border);}
         <span class="proto-group-sub">esposizione esplorativa</span>
       </div>
       <div class="proto-group-cards">
-        <div class="proto-card" onclick="protoSelect('open')">
+        <div class="proto-card in-mappa" onclick="protoSelect('open')">
           <div class="proto-card-name">Open</div>
           <div class="proto-card-sub">progressione individuale</div>
         </div>
         <!-- LOAD e SELF: per ora sono i prototipi (load.html, self.html), con
              dati di esempio. Non sono collegati ai clienti e non salvano niente. -->
-        <div class="proto-card proto-card-proto" onclick="prototipoOpen('load.html','Load')" title="Load — prototipo con dati di esempio, non salva">
+        <div class="proto-card proto-card-proto in-mappa" onclick="prototipoOpen('load.html','Load')" title="Load — prototipo con dati di esempio, non salva">
           <div class="proto-card-name">Load</div>
           <div class="proto-card-sub">prototipo · dati di esempio</div>
         </div>
-        <div class="proto-card proto-card-proto" onclick="prototipoOpen('self.html','Self')" title="Self — prototipo con dati di esempio, non salva">
+        <div class="proto-card proto-card-proto in-mappa" onclick="prototipoOpen('self.html','Self')" title="Self — prototipo con dati di esempio, non salva">
           <div class="proto-card-name">Self</div>
           <div class="proto-card-sub">prototipo · dati di esempio</div>
         </div>
@@ -10346,8 +10459,10 @@ tr.ore-scala td{border-top:1px solid var(--border);}
       </div>
     </div>
   </div>
+  </div><!-- /home-riga -->
   <div id="proto-actions" style="display:flex;align-items:center;gap:20px;">
     <button class="proto-back" onclick="protoBack()">← esci</button>
+    <button class="proto-back" id="ing-torna" onclick="ingressoOpen()">← ore e riunioni</button>
     <button id="proto-enter-btn" onclick="protoEnter()" style="opacity:0;pointer-events:none;background:none;border:1px solid rgba(200,175,90,0.78);border-radius:2px;cursor:pointer;font-family:var(--font);font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:rgba(200,175,90,0.90);padding:8px 28px;transition:opacity 0.35s ease, transform 0.35s ease;transform:translateY(4px);">Entra →</button>
     <div id="proto-tools">
     <button id="ore-screen-btn" onclick="oreOpen()" title="Conteggio ore — recap e consuntivo giornata">◷ Ore</button>
@@ -10370,6 +10485,50 @@ tr.ore-scala td{border-top:1px solid var(--border);}
     <div style="position:relative;height:200px;"><canvas id="proto-chart"></canvas></div>
   </div>
 </div>
+
+<!-- ══ DOPO L'ACCESSO ══ (solo sul monitor)
+     Chi entra per segnare le ore o guardare le riunioni si ferma qui.
+     I protocolli stanno un passo più in là. -->
+<div id="ingresso" class="off">
+  <div class="ing-logo">Sandbox</div>
+  <div class="ing-carte">
+    <button type="button" class="ing-carta" onclick="oreOpen()"><b>Ore</b><i>conteggio ore</i></button>
+    <button type="button" class="ing-carta" id="ing-riu" onclick="riuOpen()"><b>Riunioni</b><i>la settimana e chi c'è</i><span class="ing-badge" id="ing-riu-badge"></span></button>
+  </div>
+  <button type="button" class="ing-entra" onclick="ingressoClose()">Protocolli →</button>
+  <button type="button" class="proto-back" onclick="protoBack()">← esci</button>
+</div>
+<script>
+function ingressoOpen(){ document.getElementById('ingresso').classList.remove('off'); }
+function ingressoClose(){ document.getElementById('ingresso').classList.add('off'); }
+window.addEventListener('load', function(){
+  /* dopo l'accesso si arriva qui; senza accesso resta la schermata della password */
+  if(typeof sbAuthHasSession === 'function' && sbAuthHasSession()) ingressoOpen();
+  /* il segnale sul tasto Riunioni (chi non ha ancora risposto) si copia anche qui */
+  var src = document.getElementById('riu-screen-btn'), dst = document.getElementById('ing-riu'), bd = document.getElementById('ing-riu-badge');
+  function copia(){
+    var v = src.querySelector('.riu-badge');
+    dst.classList.toggle('acceso', src.classList.contains('acceso'));
+    bd.textContent = v ? v.textContent : '';
+    bd.title = v ? v.title : '';
+  }
+  if(src && dst && window.MutationObserver){
+    new MutationObserver(copia).observe(src, {attributes:true, childList:true, subtree:true, characterData:true});
+    copia();
+  }
+  /* la mappa segue la scelta fatta: Open acceso quando è scelto, spento se si sceglie altro */
+  if(typeof protoSelect === 'function'){
+    var _ps = protoSelect;
+    protoSelect = function(proto){
+      _ps(proto);
+      var scelto = (typeof _currentProto !== 'undefined') ? _currentProto : null;
+      [].forEach.call(document.querySelectorAll('#mappa .mp-p[data-p]'), function(b){
+        b.classList.toggle('sel', b.getAttribute('data-p') === scelto);
+      });
+    };
+  }
+});
+</script>
 
 <!-- ══ PROTOTIPI ══ Load e Self, aperti a tutto schermo: dati di esempio, non salvano -->
 <div id="load-screen" class="off">
@@ -17331,6 +17490,7 @@ function protoBack(){
   /* Reset skip-group authorization quando si torna al login. */
   window._skipGroupAuthorized = false;
   document.getElementById('proto-select').classList.add('off');
+  var _ing = document.getElementById('ingresso'); if(_ing) _ing.classList.add('off');
   document.getElementById('login-splash').classList.remove('off');
   sbAuthLogout();
   setTimeout(function(){ document.getElementById('login-inp').focus(); }, 80);

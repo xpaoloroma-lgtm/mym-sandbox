@@ -10210,8 +10210,22 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   letter-spacing:3px;text-transform:uppercase;color:rgba(200,175,90,0.85);
 }
 #ese-frame{flex:1 1 auto;width:100%;border:0;background:var(--bg);}
+
+/* ══ PROTOTIPI (Load, Self) ══ stessa finestra di Esercizi. Sul telefono non ci sono. */
+#load-screen{
+  position:fixed;inset:0;z-index:9999;background:var(--bg);
+  display:flex;flex-direction:column;
+}
+#load-screen.off{display:none;}
+#load-bar{
+  flex:0 0 auto;display:flex;align-items:center;gap:16px;
+  padding:10px 20px;border-bottom:1px solid rgba(180,195,210,0.14);
+}
+#load-frame{flex:1 1 auto;width:100%;border:0;background:var(--bg);}
+.proto-card-proto{border-style:dashed;}
 @media (max-width:999px){
   #ese-screen-btn,#ese-screen{display:none !important;}
+  .proto-card-proto,#load-screen{display:none !important;}
 }
 </style>
 </head>
@@ -10258,6 +10272,16 @@ tr.ore-scala td{border-top:1px solid var(--border);}
         <div class="proto-card" onclick="protoSelect('open')">
           <div class="proto-card-name">Open</div>
           <div class="proto-card-sub">progressione individuale</div>
+        </div>
+        <!-- LOAD e SELF: per ora sono i prototipi (load.html, self.html), con
+             dati di esempio. Non sono collegati ai clienti e non salvano niente. -->
+        <div class="proto-card proto-card-proto" onclick="prototipoOpen('load.html','Load')" title="Load — prototipo con dati di esempio, non salva">
+          <div class="proto-card-name">Load</div>
+          <div class="proto-card-sub">prototipo · dati di esempio</div>
+        </div>
+        <div class="proto-card proto-card-proto" onclick="prototipoOpen('self.html','Self')" title="Self — prototipo con dati di esempio, non salva">
+          <div class="proto-card-name">Self</div>
+          <div class="proto-card-sub">prototipo · dati di esempio</div>
         </div>
         <div class="proto-card" onclick="protoSelect('pace')">
           <div class="proto-card-name">Pace</div>
@@ -10346,6 +10370,27 @@ tr.ore-scala td{border-top:1px solid var(--border);}
     <div style="position:relative;height:200px;"><canvas id="proto-chart"></canvas></div>
   </div>
 </div>
+
+<!-- ══ PROTOTIPI ══ Load e Self, aperti a tutto schermo: dati di esempio, non salvano -->
+<div id="load-screen" class="off">
+  <div id="load-bar">
+    <button class="proto-back" onclick="prototipoClose()">← esci</button>
+    <span class="ese-titolo" id="load-titolo"></span>
+  </div>
+  <iframe id="load-frame" title="Prototipo"></iframe>
+</div>
+<script>
+function prototipoOpen(file, nome){
+  /* ogni volta da capo: è un prototipo, non ha stato da tenere */
+  document.getElementById('load-frame').setAttribute('src', file);
+  document.getElementById('load-titolo').textContent = nome + ' · prototipo con dati di esempio · non salva';
+  document.getElementById('load-screen').classList.remove('off');
+}
+function prototipoClose(){
+  document.getElementById('load-screen').classList.add('off');
+  document.getElementById('load-frame').removeAttribute('src');
+}
+</script>
 
 <!-- ══ ESERCIZI ══ database esercizi, scollegato dal resto (vedi esercizi.html) -->
 <div id="ese-screen" class="off">

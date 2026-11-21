@@ -863,4 +863,73 @@ Array.prototype.forEach.call(document.querySelectorAll('.tab'), function(t){ t.o
 try{ if(localStorage.getItem('esercizi-flow-pagina')==='int') pagina('int'); }catch(e){}
 /* primo disegno della tabella con i segni del controllo */
 if(window.INT_SPORCA){ window.INT_SPORCA=false; draw(); }
-</script></body></html>
+</script>
+<script>
+/* ═══ SALVATAGGIO SU SUPABASE ═══
+   Quando il file è aperto dentro la Sandbox, ogni modifica va anche su
+   Supabase (tabella esercizi_stato, una riga sola: "principale"), con
+   l'accesso della Sandbox. All'apertura si legge la versione su Supabase:
+   se è più recente di quella di questo browser, si usa quella.
+   Aperto da solo, fuori dalla Sandbox, il file lavora come prima. */
+(function(){
+  var P=null;
+  try{ if(window.parent!==window && window.parent.SB_URL && window.parent.sbH && window.parent.fetch) P=window.parent; }catch(e){}
+  if(!P) return;
+  var URL_=P.SB_URL+'/rest/v1/esercizi_stato', RIGA='principale';
+  var attesa=null, inVolo=false, ancora=false;
+
+  function statoAttuale(){
+    try{ var s=JSON.parse(localStorage.getItem('esercizi-flow-stato')||'null'); if(s&&s.ts) return s; }catch(e){}
+    return JSON.parse(statoJSON(STATO.ts||Date.now(),NONSAL));
+  }
+  function segna(testo,classe){ var el=document.getElementById('sv'); if(el){ el.textContent=testo; el.className='sv '+classe; } }
+
+  function invia(){
+    if(inVolo){ ancora=true; return; }
+    inVolo=true;
+    var s=statoAttuale(), mandate=CAMBI.length;
+    P.fetch(URL_,{method:'POST',
+      headers:Object.assign({},P.sbH(),{'Prefer':'resolution=merge-duplicates,return=minimal'}),
+      body:JSON.stringify({id:RIGA,stato:s,updated_at:new Date().toISOString()})
+    }).then(function(r){
+      inVolo=false;
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      /* le modifiche arrivate mentre si salvava restano da mandare */
+      if(CAMBI.length===mandate){ CAMBI=[]; NONSAL=0;
+        try{ var d=JSON.parse(localStorage.getItem('esercizi-flow-stato')||'null'); if(d){ d.ns=0; d.cambi=[]; localStorage.setItem('esercizi-flow-stato',JSON.stringify(d)); } }catch(e){}
+        mostraStato(new Date());
+      }
+      if(ancora){ ancora=false; invia(); }
+    }).catch(function(){
+      inVolo=false;
+      segna('non salvato su Supabase — riprovo','warn');
+      clearTimeout(attesa); attesa=setTimeout(invia,5000);
+    });
+  }
+  function programma(){ clearTimeout(attesa); attesa=setTimeout(invia,800); }
+
+  /* ogni modifica, oltre al browser, va su Supabase */
+  var _auto=autoSalva;
+  autoSalva=function(k){ _auto(k); programma(); };
+
+  /* all'apertura: chi è più recente vince */
+  P.fetch(URL_+'?id=eq.'+RIGA+'&select=stato',{headers:P.sbH()})
+    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    .then(function(righe){
+      var remoto=righe&&righe[0]&&righe[0].stato, qui=statoAttuale();
+      if(remoto && remoto.ts>(qui.ts||0)){
+        remoto.ns=0; remoto.cambi=[];
+        try{ localStorage.setItem('esercizi-flow-stato',JSON.stringify(remoto)); }catch(e){}
+        /* un solo ricaricamento: se il browser non tiene la memoria, non si gira in tondo */
+        var gia=false; try{ gia=sessionStorage.getItem('esercizi-ricaricato')===String(remoto.ts); sessionStorage.setItem('esercizi-ricaricato',String(remoto.ts)); }catch(e){ gia=true; }
+        if(!gia) location.reload(); else segna('versione di Supabase non caricata: ricarica a mano','warn');
+      } else if(!remoto || (qui.ts||0)>remoto.ts || NONSAL>0){
+        invia();
+      } else {
+        mostraStato();
+      }
+    })
+    .catch(function(){ segna('Supabase non raggiungibile: salvo solo qui','warn'); });
+})();
+</script>
+</body></html>

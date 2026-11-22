@@ -10224,8 +10224,8 @@ tr.ore-scala td{border-top:1px solid var(--border);}
 .ing-entra:hover{border-color:rgba(212,168,74,0.8);color:#E4B85A;}
 
 /* ══ LA MAPPA DEI PROTOCOLLI ══ solo sul monitor */
-#home-riga{display:contents;}
-#mappa{display:none;}
+#home-riga,#home-lato{display:contents;}
+#mappa,#mp-leg{display:none;}
 #ing-torna{display:none;}
 @media (min-width:1000px){
   #ing-torna{display:inline-block;}
@@ -10262,23 +10262,53 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   .mp-p:disabled{cursor:default;color:rgba(240,235,220,0.42);}
   .mp-p.sel{color:#E4B85A;background:rgba(212,168,74,0.16);}
 
-  /* a destra della mappa: quello che sulla mappa non sta (Pace, Skip, Grid) */
-  #home-riga .proto-groups{flex-direction:column;align-items:stretch;justify-content:center;gap:8px;}
-  #home-riga .proto-group{gap:0;}
+  /* a destra della mappa: la legenda dei cinque protocolli con il loro stato,
+     poi Grid (scheda libera, tratteggiata perché non è un protocollo) e in
+     fondo, piccoli, Pace e Skip finché restano. */
+  #home-lato{display:flex;flex-direction:column;justify-content:center;gap:22px;width:264px;flex:none;}
+  #mp-leg{display:flex;flex-direction:column;}
+  .mp-r{
+    display:flex;align-items:center;gap:14px;height:46px;padding:0 10px 0 0;
+    background:none;border:0;border-bottom:1px solid rgba(180,195,210,0.10);cursor:pointer;
+    font-family:var(--font);text-align:left;transition:background 0.15s;
+  }
+  .mp-r:last-child{border-bottom:0;}
+  .mp-r > i{flex:none;width:3px;height:24px;background:var(--c);}
+  .mp-r > b{font-size:20px;font-weight:300;letter-spacing:6px;text-transform:uppercase;color:#f0ebdc;transition:color 0.15s;}
+  .mp-r > span{margin-left:auto;display:flex;align-items:baseline;gap:7px;font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:rgba(190,204,218,0.72);}
+  .mp-r > span em{font-style:normal;font-size:20px;font-weight:300;letter-spacing:0;color:#f0ebdc;}
+  .mp-r:hover:not(:disabled){background:rgba(255,255,255,0.04);}
+  .mp-r:disabled{cursor:default;}
+  .mp-r:disabled > b{color:rgba(240,235,220,0.42);}
+  .mp-r:disabled > i{opacity:0.55;}
+  .mp-r.sel{background:rgba(212,168,74,0.10);}
+  .mp-r.sel > b{color:#E4B85A;}
+
+  #home-riga .proto-groups{flex-direction:column;align-items:stretch;justify-content:flex-start;gap:8px;}
+  #home-riga .proto-group{gap:0;padding:0;margin:0;align-items:stretch;}
+  #home-riga .proto-group-cards{padding:0;margin:0;align-items:stretch;}
+  #home-riga .proto-group-libero{order:1;}
+  #home-riga .proto-group-sandbox{order:2;}
   #home-riga .proto-group-header,#home-riga .proto-groups-divider{display:none;}
   #home-riga .proto-group-cards{flex-direction:column;gap:8px;}
   #home-riga .proto-card.in-mappa{display:none;}
-  #home-riga .proto-groups::before{
-    content:'Fuori dalla mappa';font-family:var(--font);font-size:10px;font-weight:700;
-    letter-spacing:3px;text-transform:uppercase;color:rgba(200,214,228,0.85);margin-bottom:2px;
-  }
-  #home-riga .proto-card{height:60px;gap:4px;}
-  #home-riga .proto-card .proto-card-name{font-size:20px;letter-spacing:6px;}
-  #home-riga .proto-card-skip{height:auto;min-height:0;}
-  #home-riga .proto-skip-label{font-size:20px;letter-spacing:6px;padding:12px 18px 8px;}
+  #home-riga .proto-card,#home-riga .proto-card-skip{width:auto;}
+  #home-riga .proto-card-skip{height:auto;min-height:0;flex-direction:row;align-items:stretch;border-radius:4px;}
+  #home-riga .proto-skip-label{flex:none;width:78px;box-sizing:border-box;display:flex;align-items:center;font-size:14px;font-weight:400;letter-spacing:4px;padding:0 0 0 14px;border-bottom:0;color:rgba(190,204,218,0.85);}
   #home-riga .proto-skip-options{flex-direction:row;}
-  #home-riga .proto-skip-opt{flex:1;min-height:46px;padding:0 16px;border-bottom:none;border-right:1px solid var(--border);}
-  #home-riga .proto-skip-opt:last-child{border-right:none;}
+  #home-riga .proto-skip-opt{flex:1;min-height:40px;padding:0 10px;justify-content:center;border-bottom:none;border-left:1px solid var(--border);}
+  #home-riga .proto-skip-opt-sub{display:none;}
+  #home-riga .proto-card{height:40px;flex-direction:row;justify-content:flex-start;padding:0 0 0 14px;border-radius:4px;}
+  #home-riga .proto-card .proto-card-name{font-size:14px;font-weight:400;letter-spacing:4px;color:rgba(190,204,218,0.85);}
+  #home-riga .proto-card .proto-card-sub{display:none;}
+  /* Grid: tratteggiata, più in vista di Pace e Skip */
+  #home-riga .proto-card-grid{flex-wrap:wrap;background:none;border:1px dashed rgba(200,214,228,0.45);}
+  #home-riga .proto-card-grid::before{display:none;}
+  #home-riga .proto-card-grid .proto-skip-label{font-size:20px;font-weight:300;letter-spacing:5px;width:92px;color:#b4c3d2;}
+  #home-riga .proto-skip-opt-name{letter-spacing:2px;}
+  #home-riga .proto-card-grid .proto-skip-opt{min-height:52px;border-left:1px dashed rgba(200,214,228,0.25);}
+  #home-riga .proto-card-grid .proto-skip-options{flex:1 1 0;min-width:0;}
+  #home-riga .proto-card-grid-rifare{flex:0 0 100%;box-sizing:border-box;}
   #proto-select{gap:22px;}
 }
 /* Sul telefono questa è l'unica pagina, con Ore e Riunioni: i protocolli
@@ -10414,6 +10444,14 @@ tr.ore-scala td{border-top:1px solid var(--border);}
     <div class="mp-e mp-ex" style="left:412px;top:454px">Autoregolazione: muscolare, cardio, intensità</div>
     <div class="mp-e mp-ex" style="left:582px;top:454px">Esplorazione: prova, scopre, propone</div>
   </div>
+  <div id="home-lato">
+  <div id="mp-leg">
+    <button type="button" class="mp-r" style="--c:#c88ad8" disabled title="Non esiste ancora"><i></i><b>Lift</b><span>in arrivo</span></button>
+    <button type="button" class="mp-r" style="--c:#78a5e1" onclick="prototipoOpen('load.html','Load')" title="Prototipo con dati di esempio: non salva"><i></i><b>Load</b><span>prototipo</span></button>
+    <button type="button" class="mp-r" style="--c:#e08a6a" onclick="prototipoOpen('self.html','Self')" title="Prototipo con dati di esempio: non salva"><i></i><b>Self</b><span>prototipo</span></button>
+    <button type="button" class="mp-r" style="--c:#d4a84a" onclick="protoSelect('open')" data-p="open"><i></i><b>Open</b><span><em id="mp-n-open"></em>clienti</span></button>
+    <button type="button" class="mp-r" style="--c:#78cd9b" disabled title="Non esiste ancora"><i></i><b>Move</b><span>in arrivo</span></button>
+  </div>
   <div class="proto-groups">
     <!-- ── SANDBOX ─────────────────────────────────────────────
          Open · Pace · Skip — i tre formati del sistema Sandbox.
@@ -10501,6 +10539,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
       </div>
     </div>
   </div>
+  </div><!-- /home-lato -->
   </div><!-- /home-riga -->
   <div id="proto-actions" style="display:flex;align-items:center;gap:20px;">
     <button class="proto-back" onclick="protoBack()">← esci</button>
@@ -10558,13 +10597,27 @@ window.addEventListener('load', function(){
     new MutationObserver(copia).observe(src, {attributes:true, childList:true, subtree:true, characterData:true});
     copia();
   }
+  /* quanti clienti: per ora tutte le schede cliente che esistono (le stesse
+     della ricerca). Nei dati non c'è scritto in quale protocollo sta un
+     cliente, quindi questo numero è una scelta e va rivisto. */
+  function mpConta(){
+    var el = document.getElementById('mp-n-open');
+    if(!el) return;
+    var l = window._csList;
+    el.textContent = (Array.isArray(l) && l.length) ? l.length : '';
+  }
+  if(typeof gridRifareRender === 'function'){
+    var _gr = gridRifareRender;
+    gridRifareRender = function(){ _gr.apply(this, arguments); mpConta(); };
+  }
+  mpConta();
   /* la mappa segue la scelta fatta: Open acceso quando è scelto, spento se si sceglie altro */
   if(typeof protoSelect === 'function'){
     var _ps = protoSelect;
     protoSelect = function(proto){
       _ps(proto);
       var scelto = (typeof _currentProto !== 'undefined') ? _currentProto : null;
-      [].forEach.call(document.querySelectorAll('#mappa .mp-p[data-p]'), function(b){
+      [].forEach.call(document.querySelectorAll('#home-riga [data-p]'), function(b){
         b.classList.toggle('sel', b.getAttribute('data-p') === scelto);
       });
     };

@@ -10197,7 +10197,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   font-family:var(--font);transition:border-color 0.2s, background 0.2s, box-shadow 0.2s;
 }
 .ing-carta:hover{border-color:#E4B85A;background:rgba(212,168,74,0.07);box-shadow:0 0 30px rgba(212,168,74,0.10);}
-.ing-carta b{font-size:30px;font-weight:300;letter-spacing:8px;text-transform:uppercase;color:#E4B85A;}
+.ing-carta b{font-size:28px;font-weight:300;letter-spacing:6px;text-indent:6px;text-transform:uppercase;color:#E4B85A;}
 .ing-carta i{font-style:normal;font-size:11px;font-weight:400;letter-spacing:2.5px;text-transform:uppercase;color:rgba(200,214,228,0.78);}
 /* Il segnale di chi deve ancora rispondere: lo stesso del vecchio tasto
    Riunioni. Bordo che pulsa, nomi nel riquadrino rosso, puntino che batte. */
@@ -10216,12 +10216,6 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   background:rgba(244,190,190,1);animation:riuPunto 1.3s ease-in-out infinite;
 }
 .ing-badge:empty{display:none;}
-.ing-entra{
-  background:none;border:1px solid rgba(180,195,210,0.30);border-radius:2px;cursor:pointer;
-  padding:12px 22px;font-family:var(--font);font-size:11px;font-weight:500;letter-spacing:4px;text-transform:uppercase;
-  color:rgba(216,226,236,0.92);transition:all 0.15s;
-}
-.ing-entra:hover{border-color:rgba(212,168,74,0.8);color:#E4B85A;}
 
 /* ══ LA MAPPA DEI PROTOCOLLI ══ solo sul monitor */
 #home-riga,#home-lato{display:contents;}
@@ -10304,7 +10298,12 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   /* Grid: tratteggiata, più in vista di Pace e Skip */
   #home-riga .proto-card-grid{flex-wrap:wrap;background:none;border:1px dashed rgba(200,214,228,0.45);}
   #home-riga .proto-card-grid::before{display:none;}
-  #home-riga .proto-card-grid .proto-skip-label{font-size:20px;font-weight:300;letter-spacing:5px;width:92px;color:#b4c3d2;}
+  #home-riga .proto-card-grid .proto-skip-label{font-size:20px;font-weight:300;letter-spacing:6px;width:auto;flex:1;height:52px;cursor:pointer;color:#b4c3d2;}
+  #home-riga .proto-card-grid .proto-skip-label:hover{color:#f0ebdc;}
+  #home-riga .proto-group-sandbox{margin-top:26px;}
+  #home-riga .proto-card-grid.selected{border-color:rgba(228,184,90,0.9);}
+  #home-riga .proto-card-grid.selected .proto-skip-label{color:#E4B85A;}
+  #home-riga .proto-card.selected .proto-card-name{color:#E4B85A;}
   #home-riga .proto-skip-opt-name{letter-spacing:2px;}
   #home-riga .proto-card-grid .proto-skip-opt{min-height:52px;border-left:1px dashed rgba(200,214,228,0.25);}
   #home-riga .proto-card-grid .proto-skip-options{flex:1 1 0;min-width:0;}
@@ -10476,26 +10475,8 @@ tr.ore-scala td{border-top:1px solid var(--border);}
           <div class="proto-card-name">Self</div>
           <div class="proto-card-sub">prototipo · dati di esempio</div>
         </div>
-        <div class="proto-card" onclick="protoSelect('pace')">
-          <div class="proto-card-name">Pace</div>
-          <div class="proto-card-sub">clearance a scalare</div>
-        </div>
-        <div class="proto-card-skip">
-          <div class="proto-skip-label">Skip</div>
-          <div class="proto-skip-options">
-            <div class="proto-skip-opt" onclick="protoSelect('skip')">
-              <div>
-                <div class="proto-skip-opt-name">Gruppo</div>
-                <div class="proto-skip-opt-sub">fino a 5 persone</div>
-              </div>
-            </div>
-            <div class="proto-skip-opt" onclick="protoSelect('skip-single')">
-              <div>
-                <div class="proto-skip-opt-name">Singolo</div>
-                <div class="proto-skip-opt-sub">personal</div>
-              </div>
-            </div>
-          </div>
+<div class="proto-card" onclick="protoSelect('skip')">
+          <div class="proto-card-name">Skip gruppo</div>
         </div>
       </div>
     </div>
@@ -10513,21 +10494,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
       </div>
       <div class="proto-group-cards">
         <div class="proto-card-skip proto-card-grid">
-          <div class="proto-skip-label">Grid</div>
-          <div class="proto-skip-options">
-            <div class="proto-skip-opt" onclick="protoSelect('grid-group')">
-              <div>
-                <div class="proto-skip-opt-name">Gruppo</div>
-                <div class="proto-skip-opt-sub">fino a 5 persone</div>
-              </div>
-            </div>
-            <div class="proto-skip-opt" onclick="protoSelect('grid')">
-              <div>
-                <div class="proto-skip-opt-name">Singolo</div>
-                <div class="proto-skip-opt-sub">personal</div>
-              </div>
-            </div>
-          </div>
+          <div class="proto-skip-label" onclick="protoSelect('grid')">Grid</div>
           <div class="proto-card-grid-rifare" id="proto-grid-rifare" style="display:none" onclick="event.stopPropagation();gridRifareToggle()">
             <div class="rifare-header">
               <span class="rifare-title">Schede da rifare</span>
@@ -10574,9 +10541,9 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   <div class="ing-logo">Sandbox</div>
   <div class="ing-carte">
     <button type="button" class="ing-carta" onclick="oreOpen()"><b>Ore</b></button>
+    <button type="button" class="ing-carta ing-entra" onclick="ingressoClose()"><b>Protocolli</b></button>
     <button type="button" class="ing-carta" id="ing-riu" onclick="riuOpen()"><b>Riunioni</b><span class="ing-badge" id="ing-riu-badge"></span></button>
   </div>
-  <button type="button" class="ing-entra" onclick="ingressoClose()">Protocolli →</button>
   <button type="button" class="proto-back" onclick="protoBack()">← esci</button>
 </div>
 <script>
@@ -10617,6 +10584,8 @@ window.addEventListener('load', function(){
     protoSelect = function(proto){
       _ps(proto);
       var scelto = (typeof _currentProto !== 'undefined') ? _currentProto : null;
+      var sk = document.querySelector('#home-riga .proto-card[onclick*="skip"]');
+      if(sk) sk.classList.toggle('selected', scelto === 'skip');
       [].forEach.call(document.querySelectorAll('#home-riga [data-p]'), function(b){
         b.classList.toggle('sel', b.getAttribute('data-p') === scelto);
       });

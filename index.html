@@ -10564,6 +10564,46 @@ window.addEventListener('load', function(){
     new MutationObserver(copia).observe(src, {attributes:true, childList:true, subtree:true, characterData:true});
     copia();
   }
+  /* ── Il tasto Indietro del browser ──
+     La pagina è una sola: senza questo, Indietro la lascia e torna a quella
+     aperta prima. Qui Indietro fa un passo indietro DENTRO: chiude la
+     finestra aperta (Ore, Riunioni, Esercizi, prototipo), dal cliente torna
+     all'elenco, dall'elenco ai protocolli, dai protocolli ai tre riquadri.
+     Dai tre riquadri (o dalla password) Indietro esce davvero. */
+  function vis(id){ var e = document.getElementById(id); return !!e && !e.classList.contains('off'); }
+  function passoIndietro(){
+    var fin = [['load-screen', window.prototipoClose], ['ese-screen', window.eseClose],
+               ['ore-screen', window.oreClose], ['riu-screen', window.riuClose]];
+    for(var i=0;i<fin.length;i++){
+      if(vis(fin[i][0]) && typeof fin[i][1] === 'function'){ fin[i][1](); return true; }
+    }
+    if(vis('login-splash') || vis('ingresso')) return false;
+    if(vis('proto-select')){ ingressoOpen(); return true; }
+    var gg = document.getElementById('grid-group-layout');
+    if(gg && gg.classList.contains('on') && typeof ggExit === 'function'){ ggExit(); return true; }
+    if(vis('cs')){ csOpen(); return true; }
+    var p = (typeof _currentProto !== 'undefined') ? _currentProto : null;
+    if(window._csId && (p === 'open' || p === 'grid') && typeof bcGoClient === 'function') bcGoClient();
+    else csOpen();
+    return true;
+  }
+  if(window.history && history.pushState){
+    history.pushState({mym:1}, '');
+    window.addEventListener('popstate', function(){
+      var mosso = false;
+      try{ mosso = passoIndietro(); }catch(e){ mosso = false; }
+      if(mosso) history.pushState({mym:1}, '');
+    });
+  }
+  /* quando si torna ai protocolli senza una scelta fatta, niente resta acceso */
+  var _psel = document.getElementById('proto-select');
+  if(_psel && window.MutationObserver){
+    new MutationObserver(function(){
+      if(_psel.classList.contains('off')) return;
+      if(typeof _currentProto !== 'undefined' && _currentProto) return;
+      [].forEach.call(document.querySelectorAll('#home-riga .sel'), function(b){ b.classList.remove('sel'); });
+    }).observe(_psel, {attributes:true, attributeFilter:['class']});
+  }
   /* quanti clienti: per ora tutte le schede cliente che esistono (le stesse
      della ricerca). Nei dati non c'è scritto in quale protocollo sta un
      cliente, quindi questo numero è una scelta e va rivisto. */
@@ -10605,13 +10645,14 @@ window.addEventListener('load', function(){
 <script>
 function prototipoOpen(file, nome){
   /* ogni volta da capo: è un prototipo, non ha stato da tenere */
-  document.getElementById('load-frame').setAttribute('src', file);
+  /* replace: così il prototipo non aggiunge passi al tasto Indietro */
+  document.getElementById('load-frame').contentWindow.location.replace(file);
   document.getElementById('load-titolo').textContent = nome + ' · prototipo con dati di esempio · non salva';
   document.getElementById('load-screen').classList.remove('off');
 }
 function prototipoClose(){
   document.getElementById('load-screen').classList.add('off');
-  document.getElementById('load-frame').removeAttribute('src');
+  document.getElementById('load-frame').contentWindow.location.replace('about:blank');
 }
 </script>
 
@@ -10628,7 +10669,7 @@ function prototipoClose(){
    lo usa non deve aspettarlo. */
 function eseOpen(){
   var f = document.getElementById('ese-frame');
-  if (!f.getAttribute('src')) f.setAttribute('src', 'esercizi.html');
+  if (!f.getAttribute('data-aperto')){ f.setAttribute('data-aperto','1'); f.contentWindow.location.replace('esercizi.html'); }
   document.getElementById('ese-screen').classList.remove('off');
 }
 function eseClose(){

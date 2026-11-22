@@ -10189,7 +10189,16 @@ tr.ore-scala td{border-top:1px solid var(--border);}
 }
 #ingresso.off{display:none;}
 .ing-logo{font-family:var(--font);font-size:22px;font-weight:200;letter-spacing:12px;text-transform:uppercase;color:rgba(212,168,74,0.9);}
-.ing-carte{display:flex;gap:16px;}
+.ing-carte{display:flex;align-items:stretch;gap:64px;}
+/* Ore e Riunioni attaccate: sono la stessa cosa, la parte organizzativa.
+   La parte operativa sta staccata, da sola. */
+.ing-org{display:flex;}
+.ing-org .ing-carta + .ing-carta{margin-left:-1px;}
+.ing-org .ing-carta:hover,.ing-org .ing-carta.acceso{z-index:1;}
+.ing-org .ing-carta{border-color:rgba(180,195,210,0.34);}
+.ing-org .ing-carta b{color:#f0ebdc;}
+.ing-org .ing-carta:hover{border-color:rgba(212,168,74,0.8);}
+.ing-carta.ing-entra{background:rgba(212,168,74,0.08);border-color:rgba(212,168,74,0.9);}
 .ing-carta{
   position:relative;width:300px;height:200px;cursor:pointer;
   background:var(--bg-card);border:1px solid rgba(212,168,74,0.55);border-radius:2px;
@@ -10320,6 +10329,8 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   }
   .ing-logo{font-size:18px;letter-spacing:10px;}
   .ing-carte{flex-direction:column;width:100%;max-width:520px;gap:12px;}
+  .ing-org{flex-direction:column;gap:12px;width:100%;}
+  .ing-org .ing-carta + .ing-carta{margin-left:0;}
   .ing-carta{width:100%;height:auto;min-height:150px;padding:26px 16px;gap:10px;}
   .ing-carta b{font-size:28px;letter-spacing:7px;}
   .ing-carta i{font-size:11px;}
@@ -10561,9 +10572,13 @@ body:not(.nv-dentro) .header-right > :not(.nv-sempre){display:none !important;}
 <div id="ingresso" class="off">
   <div class="ing-logo">Sandbox</div>
   <div class="ing-carte">
-    <button type="button" class="ing-carta" onclick="oreOpen()"><b>Ore</b></button>
+    <!-- la parte organizzativa: Ore e Riunioni, un blocco solo -->
+    <div class="ing-org">
+      <button type="button" class="ing-carta" onclick="oreOpen()"><b>Ore</b></button>
+      <button type="button" class="ing-carta" id="ing-riu" onclick="riuOpen()"><b>Riunioni</b><span class="ing-badge" id="ing-riu-badge"></span></button>
+    </div>
+    <!-- la parte operativa: da qui si va a lavorare (solo sul monitor) -->
     <button type="button" class="ing-carta ing-entra" onclick="ingressoClose()"><b>Protocolli</b></button>
-    <button type="button" class="ing-carta" id="ing-riu" onclick="riuOpen()"><b>Riunioni</b><span class="ing-badge" id="ing-riu-badge"></span></button>
   </div>
   <button type="button" class="proto-back" onclick="protoBack()">← esci</button>
 </div>

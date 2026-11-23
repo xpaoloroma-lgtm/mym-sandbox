@@ -10672,13 +10672,12 @@ body:not(.nv-dentro) .header-right > :not(.nv-sempre){display:none !important;}
 #cd-screen{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;font-family:var(--font);}
 #cd-corpo{padding:0 8px;}
 #cd-screen.off{display:none;}
-/* la bozza ha già il nome del cliente: qui restano solo i due tasti, in alto a destra */
-.cd-testa{position:absolute;right:40px;top:28px;z-index:2;}
-.cd-nome{display:none;}
 .cd-tasti{display:flex;gap:8px;}
 #cd-corpo{flex:1;min-height:0;display:flex;flex-direction:column;}
 #cd-corpo > #admin-client-detail-body{flex:1;min-height:0;overflow-y:auto;}
-.cd-prima{padding:24px 32px 40px;max-width:1500px;}
+.cd-prima{padding:24px 32px 40px;display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:0 40px;align-items:start;}
+.cd-dx{border-left:1px solid rgba(180,195,210,0.10);padding-left:40px;}
+#cd-rf-carte .rf-card{margin-bottom:6px;}
 .cd-tit{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(200,175,90,0.80);margin-bottom:12px;}
 .cd-niente{font-size:13px;color:rgba(190,204,218,0.6);}
 .cd-rf{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;}
@@ -10690,7 +10689,7 @@ body:not(.nv-dentro) .header-right > :not(.nv-sempre){display:none !important;}
 .cd-rf-dal{margin-top:5px;font-size:11px;letter-spacing:1px;color:rgba(200,214,228,0.8);}
 .cd-rf-nota{margin-top:9px;font-size:13px;line-height:1.45;color:#f0ebdc;}
 .cd-rf-fai{margin-top:7px;font-size:12px;line-height:1.45;color:#e8c878;}
-.cd-match{max-width:640px;margin-top:14px;}
+.cd-match{max-width:640px;margin:0;}
 .cd-tl{border:1px solid rgba(180,195,210,0.12);border-radius:3px;background:rgba(0,0,0,0.18);padding:16px 20px 14px;}
 @media (max-width:999px){ #cd-screen{display:none !important;} }
 @media (min-width:1000px){ body #cd-screen{top:57px;} }
@@ -10788,13 +10787,6 @@ body:not(.nv-dentro) .header-right > :not(.nv-sempre){display:none !important;}
 }
 </style>
 <div id="cd-screen" class="off">
-  <div class="cd-testa">
-    <div class="cd-nome" id="cd-nome"></div>
-    <div class="cd-tasti">
-      <button type="button" class="hdr-btn" onclick="rfOpen(_cdCliente)">Red Flags</button>
-      <button type="button" class="hdr-btn" onclick="csHistoryOpen(_cdCliente)">scheda cliente</button>
-    </div>
-  </div>
   <div id="cd-corpo"></div>
 </div>
 <div id="rfp-screen" class="off">
@@ -11571,8 +11563,24 @@ function cdOpen(clientId){
   }
   corpo.appendChild(bozza);
   _adminDetailClient = clientId; _adminDetailProto = 'timeline';
-  adminDetailRender();
-  document.getElementById('cd-nome').textContent = clientId;
+  /* i red flag di questo cliente si modificano qui, con le stesse schede e le
+     stesse regole della finestra: si carica il suo stato e si disegnano */
+  window.RF_CURRENT_CLIENT = clientId;
+  rfLoadForClient(clientId);
+  if(!window._cdRfAgganciato){
+    window._cdRfAgganciato = true;
+    var _rr = rfRender;
+    rfRender = function(){
+      _rr.apply(this, arguments);
+      /* dopo ogni modifica la pagina del cliente si ridisegna: schede, luci e riquadri */
+      if(_cdCliente && _adminDetailProto === 'timeline'){
+        var sc = document.getElementById('admin-client-detail-body'), su = sc ? sc.scrollTop : 0;
+        adminDetailRender();
+        if(sc) sc.scrollTop = su;
+      }
+    };
+  }
+  rfRender();
   document.getElementById('cd-screen').classList.remove('off');
 }
 function cdGiorno(t){
@@ -11580,7 +11588,10 @@ function cdGiorno(t){
   var d = new Date(t);
   return d.getDate() + ' ' + CL_MESI[d.getMonth()] + ' ' + d.getFullYear();
 }
-/* Il contenuto della prima linguetta: i red flag, poi la timeline. */
+/* Il contenuto della prima linguetta, in due colonne.
+   A sinistra quello che c'è da sapere: i red flag accesi, dove può stare, la
+   timeline. A destra dove si cambia: tutte le schede red flag, le stesse
+   della finestra, con interruttore, nota e spiegazioni. */
 function cdPrima(c){
   var st = c.state || {}, rf = st.redFlags || {}, h = '';
   var attivi = [];
@@ -11591,7 +11602,7 @@ function cdPrima(c){
   if(rf.custom && rf.custom.attivo) attivi.push({nome:rf.custom.nome || 'Custom', colore:'#e8c878', dal:rf.custom.dal, nota:rf.custom.descrizione || '', fai:rf.custom.cosaFare || '', custom:true});
   h += '<div class="cd-tit">Red Flags</div>';
   if(!attivi.length){
-    h += '<div class="cd-niente">Nessun red flag.</div>';
+    h += '<div class="cd-niente">Nessun red flag acceso.</div>';
   } else {
     h += '<div class="cd-rf">' + attivi.map(function(a){
       return '<div class="cd-rf-uno' + (a.custom ? ' custom' : '') + '" style="--rf-color:' + a.colore + '">'
@@ -11601,26 +11612,31 @@ function cdPrima(c){
            + (a.fai ? '<div class="cd-rf-fai">' + clEsc(a.fai) + '</div>' : '')
            + '</div>';
     }).join('') + '</div>';
-    if(typeof rfpCodiceCliente === 'function'){
-      var cod = rfpCodiceCliente(c);
-      h += '<div class="rfp-match cd-match">' + cod.split('').map(function(k, i){
-        return '<div class="rfp-sem-' + k + '"><b>' + RFP_PROTO[i] + '</b><span>' + RFP_PAROLA[k] + '</span></div>';
-      }).join('') + '</div>';
-    }
+  }
+  if(typeof rfpCodiceCliente === 'function'){
+    var cod = rfpCodiceCliente(c);
+    h += '<div class="cd-tit" style="margin-top:26px">Dove può stare</div>'
+       + '<div class="rfp-match cd-match">' + cod.split('').map(function(k, i){
+      return '<div class="rfp-sem-' + k + '"><b>' + RFP_PROTO[i] + '</b><span>' + RFP_PAROLA[k] + '</span></div>';
+    }).join('') + '</div>';
   }
   /* la timeline, su tutta la storia del cliente */
   var sedute = clSedute(c), primo = sedute.length ? clData(sedute[0].date) : null;
   if(primo){ primo = new Date(primo); primo.setDate(primo.getDate() - 20); }
-  h += '<div class="cd-tit" style="margin-top:34px">Timeline</div>'
+  h += '<div class="cd-tit" style="margin-top:26px">Timeline</div>'
      + '<div class="cd-tl">' + clTimeline(c, primo)
      + '<div class="cl-piede"><div class="cl-legenda"><span><b>★</b>progressione finita</span><span><b>✕</b>interrotta</span></div></div></div>';
-  return '<div class="cd-prima">' + h + '</div>';
+  /* a destra: le schede vere, prese dalla finestra Red Flags. Gli interruttori
+     passano dalla password, come là. */
+  var schede = document.getElementById('rf-cards-wrap');
+  var d = '<div class="cd-tit">Modifica red flag</div><div id="cd-rf-carte">' + (schede ? schede.innerHTML : '') + '</div>';
+  return '<div class="cd-prima"><div class="cd-sx">' + h + '</div><div class="cd-dx">' + d + '</div></div>';
 }
 function cdClose(){
   var bozza = document.getElementById('admin-client-detail-body');
   if(bozza && _cdCasa) _cdCasa.appendChild(bozza);
   window._adminLastClients = _cdElencoPrima;
-  _adminDetailClient = null; _cdCliente = null;
+  _adminDetailClient = null; _cdCliente = null; window.RF_CURRENT_CLIENT = null;
   document.getElementById('cd-screen').classList.add('off');
 }
 function rfpOpen(){ _rfpSel = null; rfpDisegna(); document.getElementById('rfp-screen').classList.remove('off'); }

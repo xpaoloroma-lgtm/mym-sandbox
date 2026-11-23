@@ -10723,6 +10723,8 @@ body:not(.nv-dentro) .header-right > :not(.nv-sempre){display:none !important;}
 .rfp-cli-luci i{display:flex;justify-content:center;}
 .rfp-cli-luci i::before{content:'';width:9px;height:9px;border-radius:50%;background:var(--sc);box-shadow:0 0 6px var(--sc);}
 .rfp-chips.sx{justify-content:flex-start;}
+/* la richiesta di password deve stare sopra la finestra Red Flags */
+#admin-pw-modal{z-index:100010 !important;}
 @media (max-width:999px){ #rfp-btn,#rfp-screen{display:none !important;} }
 @media (min-width:1000px){
   body #rfp-screen{top:57px;}
@@ -11087,7 +11089,7 @@ function rfpDisegna(){
     e.addEventListener('click', function(){ if(typeof rfOpen === 'function') rfOpen(e.getAttribute('data-apri')); });
   });
   [].forEach.call(b.querySelectorAll('[data-togli]'), function(e){
-    e.addEventListener('click', function(){ rfpMetti(e.getAttribute('data-togli'), _rfpSel, false); });
+    e.addEventListener('click', function(){ var chi = e.getAttribute('data-togli'), quale = _rfpSel; rfChiedi(false, function(){ rfpMetti(chi, quale, false); }); });
   });
   [].forEach.call(b.querySelectorAll('[data-nota]'), function(e){
     e.addEventListener('change', function(){ rfpScriviNota(e.getAttribute('data-nota'), _rfpSel, e.value); });
@@ -11110,9 +11112,19 @@ function rfpCerca(){
       var id = e.getAttribute('data-agg');
       /* il Custom ha bisogno di un nome: si scrive nella finestra del cliente */
       if(sel === '__custom'){ if(typeof rfOpen === 'function') rfOpen(id); }
-      else rfpMetti(id, sel, true);
+      else rfChiedi(true, function(){ rfpMetti(id, sel, true); });
     });
   });
+}
+/* ── Un red flag non si accende e non si toglie per sbaglio ──
+   Per ACCENDERLO si rimette la password di accesso.
+   Per TOGLIERLO serve la password admin.
+   Le note si scrivono liberamente. Vale nella finestra del cliente e nella
+   pagina Red Flags. È un freno contro gli errori, non una cassaforte. */
+function rfChiedi(accendi, poi){
+  adminPwOpen(accendi
+    ? {type:'rf-accesso', label:'Accendere un red flag · password di accesso', conferma:'Conferma', ok:poi}
+    : {type:'rf-admin',   label:'Togliere un red flag · password admin', conferma:'Conferma', ok:poi});
 }
 function rfpOpen(){ _rfpSel = null; rfpDisegna(); document.getElementById('rfp-screen').classList.remove('off'); }
 function rfpClose(){ document.getElementById('rfp-screen').classList.add('off'); }
@@ -11126,6 +11138,14 @@ window.addEventListener('load', function(){
     if(!document.body.contains(e.target)) return;   /* elemento appena ridisegnato */
     _rfpSel = null; rfpDisegna();
   });
+  /* nella finestra del cliente: l'interruttore passa dalla password */
+  if(typeof rfToggleActive === 'function'){
+    var _ta = rfToggleActive;
+    rfToggleActive = function(id){
+      var acceso = !!(window.RF_STATE[id] && window.RF_STATE[id].attivo);
+      rfChiedi(!acceso, function(){ _ta(id); });
+    };
+  }
   if(typeof rfClose === 'function'){
     var _rc = rfClose;
     rfClose = function(){
@@ -20927,6 +20947,8 @@ function adminPwOpen(intent){
       titleEl.textContent = 'Accesso admin';
     }
   }
+  var confBtn = document.querySelector('#admin-pw-modal .admin-pw-confirm');
+  if(confBtn) confBtn.textContent = (intent && intent.conferma) || 'Entra';
   document.getElementById('admin-pw-modal').classList.add('open');
   setTimeout(function(){ if(inp) inp.focus(); }, 80);
 }
@@ -20940,6 +20962,27 @@ function adminPwConfirm(){
   var inp = document.getElementById('admin-pw-inp');
   var err = document.getElementById('admin-pw-err');
   if(!inp) return;
+  /* Red flag da ACCENDERE: qui non si chiede la password admin ma quella di
+     accesso, e la controlla il server rifacendo l'accesso. */
+  var _in0 = window._adminPwIntent || null;
+  if(_in0 && _in0.type === 'rf-accesso'){
+    if(!inp.value) return;
+    var _pw = inp.value;
+    inp.disabled = true;
+    sbAuthLogin(_pw).then(function(esito){
+      inp.disabled = false;
+      if(esito === 'ok'){
+        var f0 = _in0.ok;
+        adminPwClose();
+        if(typeof f0 === 'function'){ try{ f0(); }catch(e){} }
+        return;
+      }
+      if(err){ err.textContent = (esito === 'wrong') ? 'Password errata.' : 'Rete assente, riprova.'; err.style.display = 'block'; }
+      inp.value = ''; inp.focus();
+    });
+    return;
+  }
+  if(err){ err.textContent = 'Password errata.'; }
   if(inp.value !== _ADMIN_PWD){
     if(err){ err.style.display='block'; }
     inp.value='';
@@ -20952,6 +20995,11 @@ function adminPwConfirm(){
   adminPwClose();
   if(!intent){
     adminOpen();
+    return;
+  }
+  if(intent.type === 'rf-admin'){
+    /* Red flag da TOGLIERE: password admin giusta, si procede. */
+    if(typeof intent.ok === 'function'){ try{ intent.ok(); }catch(e){} }
     return;
   }
   if(intent.type === 'ore-admin'){

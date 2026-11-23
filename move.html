@@ -116,13 +116,28 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
 .e-filtri{flex:none;display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px;border-bottom:1px solid var(--line);}
 .e-f{height:26px;padding:0 10px;background:none;border:1px solid var(--line);border-radius:2px;color:var(--text-lo);font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
 .e-f.on{border-color:var(--gold-soft);color:var(--gold-txt);background:rgba(212,168,74,0.08);}
-.e-r{display:flex;align-items:center;gap:10px;padding:8px 10px;border-bottom:1px solid var(--line-soft);font-size:13px;color:var(--text-mid);cursor:pointer;}
+/* elenco a tabella: quanti blocchi · esercizio · Prot. Fil · in quali blocchi */
+.e-testa,.e-r{display:grid;grid-template-columns:84px minmax(220px,2fr) 150px minmax(0,3fr);align-items:center;column-gap:18px;padding:0 16px;}
+.e-testa{flex:none;height:34px;border-bottom:1px solid rgba(212,168,74,0.35);background:rgba(0,0,0,0.25);}
+.e-th{all:unset;font-size:9px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--text-xlo);cursor:pointer;white-space:nowrap;}
+.e-th:hover{color:var(--text-hi);}
+.e-th.on{color:var(--gold-txt);}
+.e-th.fisso{cursor:default;}
+.e-th.fisso:hover{color:var(--text-xlo);}
+.e-th i{font-style:normal;margin-left:6px;}
+.e-th[data-ord="n"]{text-align:center;}
+.e-r{min-height:38px;border-bottom:1px solid var(--line-soft);font-size:13px;color:var(--text-mid);cursor:pointer;}
 .e-r:hover{background:rgba(212,168,74,0.07);color:var(--text-hi);}
 .e-r.usato{opacity:.35;cursor:default;}
-.e-n{flex:none;min-width:20px;height:20px;padding:0 6px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;background:rgba(120,205,155,0.16);border:1px solid rgba(120,205,155,0.55);color:var(--move);font-size:11px;font-weight:600;margin-left:8px;}
-.e-dove{text-decoration:none;font-size:12px;color:var(--text-lo);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.e-r{white-space:nowrap;}
-.e-r span{flex:none;padding-left:12px;margin-left:auto;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-xlo);white-space:nowrap;}
+.e-c{min-width:0;}
+.e-n{text-align:center;font-size:13px;color:var(--text-xlo);}
+.e-n.si{justify-self:center;min-width:26px;height:22px;line-height:22px;border-radius:11px;background:rgba(120,205,155,0.16);border:1px solid rgba(120,205,155,0.55);color:var(--move);font-weight:600;}
+.e-nm{display:flex;align-items:center;gap:8px;}
+.e-nm span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.e-nm .srt{flex:none;}
+.e-pos{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-xlo);white-space:nowrap;}
+.e-dove{display:flex;gap:6px;overflow:hidden;white-space:nowrap;}
+.e-dove i{font-style:normal;flex:none;font-size:11px;padding:2px 8px;border:1px solid var(--line);border-left:2px solid var(--move);border-radius:2px;color:var(--text-lo);}
 .nota{font-size:11px;color:var(--text-xlo);line-height:1.5;}
 
 /* ═══ STORICO — importato da Open così com'è ═══ */
@@ -184,6 +199,7 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
     <div class="col" id="c-ese">
       <div class="col-hd"><span class="lbl" id="e-titolo">Esercizi</span><input id="e-cerca" placeholder="Cerca esercizio" spellcheck="false" autocomplete="off"><button type="button" class="btn" id="e-vai" title="Apri la pagina Esercizi per aggiungere o segnare un esercizio">Esercizi →</button></div>
       <div class="e-filtri" id="e-filtri"></div>
+      <div class="e-testa" id="e-testa"></div>
       <div class="col-bd" id="e-lista" style="padding:0"></div>
     </div>
     </div>
@@ -209,6 +225,7 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
   var blocchi = [];
   try{ blocchi = JSON.parse(localStorage.getItem(CHIAVE) || '[]') || []; }catch(e){ blocchi = []; }
   var bozza = nuova(), posto = 0, filtro = '', caricati = false, errore = '';
+  var ord = 'nome', verso = 1;     /* ordinamento dell'elenco esercizi */
   function nuova(){ return {id:null, nome:'', e:['',''], cardio:''}; }
   function $(i){ return document.getElementById(i); }
   function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
@@ -279,6 +296,7 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
     $('e-filtri').innerHTML = [''].concat(VOCI).map(function(v){
       return '<button type="button" class="e-f' + ((cardio ? v === 'Cardio' : filtro === v) ? ' on' : '') + '" data-f="' + esc(v) + '">' + (v ? esc(v) : 'Tutti') + (SRT[v] ? ' · SRT' : '') + '</button>';
     }).join('');
+    $('e-testa').innerHTML = '';
     if(!caricati){ $('e-lista').innerHTML = '<div class="vuoto" style="padding:14px">Carico gli esercizi…</div>'; return; }
     if(errore){ $('e-lista').innerHTML = '<div class="vuoto" style="padding:14px">' + esc(errore) + '</div>'; return; }
     var q = $('e-cerca').value.trim().toLowerCase();
@@ -296,11 +314,24 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
     /* in quali blocchi sta già ogni esercizio */
     var dove = {};
     blocchi.forEach(function(b){ [b.e[0], b.e[1], b.cardio].forEach(function(n){ if(n) (dove[n] = dove[n] || []).push(b.nome); }); });
+    function quanti(r){ return dove[r.nome] ? dove[r.nome].length : 0; }
+    function perNome(x, y){ return x.label.localeCompare(y.label, 'it', {sensitivity:'base'}); }
+    L.sort(function(x, y){
+      var d = 0;
+      if(ord === 'n') d = quanti(y) - quanti(x);                              /* i più usati in alto */
+      else if(ord === 'pos') d = VOCI.indexOf(x.pos) - VOCI.indexOf(y.pos);   /* nell'ordine dei filtri */
+      else d = perNome(x, y);
+      return (d * verso) || perNome(x, y);
+    });
+    function testa(k, t){ return '<button type="button" class="e-th' + (ord === k ? ' on' : '') + '" data-ord="' + k + '">' + t + (ord === k ? '<i>' + (verso > 0 ? '▾' : '▴') + '</i>' : '') + '</button>'; }
+    $('e-testa').innerHTML = testa('n', 'Blocchi') + testa('nome', 'Esercizio') + testa('pos', 'Prot. Fil') + '<span class="e-th fisso">In quali blocchi</span>';
     $('e-lista').innerHTML = L.map(function(r){
-      return '<div class="e-r' + (r.nome === altro ? ' usato' : '') + '" data-e="' + esc(r.nome) + '">' + esc(r.label)
-        + (SRT[r.pos] ? '<em class="srt">SRT</em>' : '')
-        + (dove[r.nome] ? '<b class="e-n">' + dove[r.nome].length + '</b><u class="e-dove">' + dove[r.nome].map(esc).join(' · ') + '</u>' : '')
-        + '<span>' + esc(r.pos) + '</span></div>';
+      var n = quanti(r);
+      return '<div class="e-r' + (r.nome === altro ? ' usato' : '') + '" data-e="' + esc(r.nome) + '">'
+        + '<div class="e-c e-n' + (n ? ' si' : '') + '">' + (n || '') + '</div>'
+        + '<div class="e-c e-nm"><span title="' + esc(r.label) + '">' + esc(r.label) + '</span>' + (SRT[r.pos] ? '<em class="srt">SRT</em>' : '') + '</div>'
+        + '<div class="e-c e-pos">' + esc(r.pos) + '</div>'
+        + '<div class="e-c e-dove">' + (n ? dove[r.nome].map(function(x){ return '<i>' + esc(x) + '</i>'; }).join('') : '') + '</div></div>';
     }).join('');
   }
   function disegna(){ disegnaBlocchi(); disegnaBozza(); disegnaEsercizi(); }
@@ -325,6 +356,12 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
     if(v === 'Cardio'){ posto = 2; }
     else { filtro = v; if(posto === 2) posto = bozza.e[0] ? 1 : 0; }
     disegna(); });
+  $('e-testa').addEventListener('click', function(ev){
+    var t = ev.target.closest('[data-ord]'); if(!t) return;
+    var k = t.getAttribute('data-ord');
+    if(k === ord) verso = -verso; else { ord = k; verso = 1; }
+    disegnaEsercizi(); $('e-lista').scrollTop = 0;
+  });
   $('e-lista').addEventListener('click', function(ev){
     var r = ev.target.closest('.e-r'); if(!r || r.classList.contains('usato')) return;
     var n = r.getAttribute('data-e');

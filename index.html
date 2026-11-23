@@ -10636,6 +10636,30 @@ body:not(.nv-dentro) .header-right > :not(.nv-sempre){display:none !important;}
   padding:8px 12px;text-align:left;font-family:var(--font);font-size:12px;letter-spacing:1px;color:rgba(218,228,238,0.86);
 }
 .rfp-agg-ris button:hover{background:rgba(212,168,74,0.08);color:#E4B85A;}
+/* il semaforo: per ogni red flag, cosa succede in ogni protocollo */
+.rfp-sem-v{--sc:#6fc48e;} .rfp-sem-g{--sc:#e6c75a;} .rfp-sem-a{--sc:#ec9a4c;} .rfp-sem-r{--sc:#e56464;}
+.rfp-luci{display:flex;gap:5px;align-items:center;}
+.rfp-luci i{width:9px;height:9px;border-radius:50%;background:var(--sc);box-shadow:0 0 6px var(--sc);opacity:0.92;}
+#rfp-carte .rf-card-head{grid-template-columns:42px 1fr auto 96px;}
+#rfp-carte .rf-card-head .rfp-n{justify-content:flex-end;}
+.rfp-match{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:14px 0 6px;}
+.rfp-match > div{
+  border:1px solid rgba(180,195,210,0.12);border-top:3px solid var(--sc);border-radius:0 0 3px 3px;
+  background:rgba(0,0,0,0.22);padding:10px 6px 9px;text-align:center;
+}
+.rfp-match b{display:block;font-size:13px;font-weight:400;letter-spacing:4px;text-indent:4px;text-transform:uppercase;color:#f0ebdc;}
+.rfp-match span{display:block;margin-top:5px;font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--sc);}
+.rfp-match-nota{margin:14px 0 6px;padding:11px 14px;border-left:3px solid rgba(200,150,80,0.85);background:rgba(0,0,0,0.22);font-size:12px;line-height:1.5;color:rgba(218,228,238,0.9);}
+.rfp-legenda{display:flex;gap:18px;margin:0 0 16px;font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(190,204,218,0.72);}
+.rfp-legenda span{display:flex;align-items:center;gap:6px;}
+.rfp-legenda i{width:8px;height:8px;border-radius:50%;background:var(--sc);}
+.rfp-colonne{display:flex;justify-content:flex-end;gap:0;margin-top:18px;font-size:8px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:rgba(190,204,218,0.6);}
+.rfp-colonne span,.rfp-cli-luci i{width:38px;text-align:center;}
+.rfp-colonne + .rfp-lista{margin-top:6px;}
+.rfp-cli-luci{flex:none;display:flex;}
+.rfp-cli-luci i{display:flex;justify-content:center;}
+.rfp-cli-luci i::before{content:'';width:9px;height:9px;border-radius:50%;background:var(--sc);box-shadow:0 0 6px var(--sc);}
+.rfp-chips.sx{justify-content:flex-start;}
 @media (max-width:999px){ #rfp-btn,#rfp-screen{display:none !important;} }
 @media (min-width:1000px){
   body #rfp-screen{top:57px;}
@@ -10648,6 +10672,7 @@ body:not(.nv-dentro) .header-right > :not(.nv-sempre){display:none !important;}
     <div class="rfp-a">
       <div class="rfp-tit">Red Flags</div>
       <div class="rfp-sub">Le 7 condizioni che il certificato medico non filtra.</div>
+      <div class="rfp-legenda"><span class="rfp-sem-v"><i></i>sì</span><span class="rfp-sem-g"><i></i>attenzione</span><span class="rfp-sem-a"><i></i>molta attenzione</span><span class="rfp-sem-r"><i></i>no</span></div>
       <button type="button" class="rfp-tutti" id="rfp-tutti" onclick="rfpScegli(null)"><span>Tutti</span><span class="rfp-n" id="rfp-tutti-n"></span></button>
       <div id="rfp-carte"></div>
     </div>
@@ -10658,6 +10683,35 @@ body:not(.nv-dentro) .header-right > :not(.nv-sempre){display:none !important;}
 /* ── Pagina Red Flags ──
    Legge e scrive gli stessi dati della finestra Red Flags del cliente
    (state.redFlags dentro la scheda del cliente) e salva allo stesso modo. */
+/* Il match tra red flag e protocolli. v = sì, g = attenzione, a = molta
+   attenzione, r = no. Sono scelte di Paolo (23 nov 2026), non misure.
+   Post-malattia non ha semaforo: il cliente resta nel suo protocollo e si sta
+   attenti ai carichi per due settimane dal rientro. Custom è da fare a parte. */
+var RFP_PROTO = ['Lift','Load','Self','Open','Move'];
+var RFP_MATCH = {
+  'beta-bloccanti': 'vvvvv',
+  'statine':        'raggv',
+  'diabete':        'aaggv',
+  'ipertensione':   'rraav',
+  'osteoporosi':    'ggggv',
+  'asma':           'vvggv'
+};
+var RFP_PAROLA = {v:'sì', g:'attenzione', a:'molta attenzione', r:'no'};
+var RFP_PEGGIO = {v:0, g:1, a:2, r:3};
+function rfpLuci(codice){
+  return '<span class="rfp-luci">' + codice.split('').map(function(k, i){
+    return '<i class="rfp-sem-'+k+'" title="'+RFP_PROTO[i]+': '+RFP_PAROLA[k]+'"></i>';
+  }).join('') + '</span>';
+}
+/* per un cliente: in ogni protocollo vale il colore peggiore tra i suoi red flag */
+function rfpCodiceCliente(c){
+  var out = ['v','v','v','v','v'];
+  Object.keys(RFP_MATCH).forEach(function(id){
+    if(!rfpHa(c, id)) return;
+    RFP_MATCH[id].split('').forEach(function(k, i){ if(RFP_PEGGIO[k] > RFP_PEGGIO[out[i]]) out[i] = k; });
+  });
+  return out.join('');
+}
 var _rfpSel = null;      /* id del red flag scelto, null = tutti */
 function rfpEsc(t){ return String(t == null ? '' : t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function rfpClienti(){ return (typeof _csList !== 'undefined' && Array.isArray(_csList)) ? _csList.filter(function(c){ return c && c.id; }) : []; }
@@ -10725,10 +10779,19 @@ function rfpDisegna(){
        +   '<div class="rf-card-head" onclick="rfpScegli(\''+f.id+'\')">'
        +     '<span class="rf-card-num">'+f.num+'</span>'
        +     '<div class="rf-card-name-wrap"><span class="rf-card-name">'+f.name+'</span><span class="rf-card-slug">'+f.slug+'</span></div>'
+       +     (RFP_MATCH[f.id] ? rfpLuci(RFP_MATCH[f.id]) : '<span></span>')
        +     '<span class="rfp-n'+(n?'':' zero')+'"><em>'+n+'</em>clienti</span>'
        +   '</div>';
     if(f.id !== '__custom'){
-      h += '<div class="rf-card-body">'
+      var m = RFP_MATCH[f.id], mh = '';
+      if(m){
+        mh = '<div class="rfp-match">' + m.split('').map(function(k, i){
+          return '<div class="rfp-sem-'+k+'"><b>'+RFP_PROTO[i]+'</b><span>'+RFP_PAROLA[k]+'</span></div>';
+        }).join('') + '</div>';
+      } else if(f.id === 'post-malattia'){
+        mh = '<div class="rfp-match-nota">Resta nel suo protocollo. Attenzione ai carichi per due settimane dal rientro.</div>';
+      }
+      h += '<div class="rf-card-body">' + mh
          +   '<div class="rf-detail"><div class="rf-detail-label">Come lo riconosci</div><div class="rf-detail-text">'+f.trigger+'</div></div>'
          +   '<div class="rf-detail"><div class="rf-detail-label">Perché ti riguarda</div><div class="rf-detail-text">'+f.whyMatters+'</div></div>'
          +   '<div class="rf-detail cosafai"><div class="rf-detail-label">Cosa fai</div><div class="rf-detail-text">'+f.whatYouDo+'</div></div>'
@@ -10742,14 +10805,18 @@ function rfpDisegna(){
   /* il riquadro a destra: chi ce l'ha */
   var r = '';
   if(_rfpSel === null){
-    r += '<div class="rfp-b-tit">Tutti</div><div class="rfp-lista">';
+    r += '<div class="rfp-b-tit">Tutti</div>';
+    if(conUno.length) r += '<div class="rfp-colonne">'+RFP_PROTO.map(function(p){ return '<span>'+p+'</span>'; }).join('')+'</div>';
+    r += '<div class="rfp-lista">';
     if(!conUno.length) r += '<div class="rfp-vuoto">Nessun cliente con un red flag acceso.</div>';
     conUno.sort(rfpPerNome).forEach(function(c){
       var chips = '';
       tutte.forEach(function(f){
         if(rfpHa(c, f.id)) chips += '<span class="rfp-chip" style="--rfc:'+f.color+'">'+rfpEsc(f.id==='__custom' ? (rfpNota(c,f.id)||'Custom') : f.name)+'</span>';
       });
-      r += '<div class="rfp-cli"><button type="button" class="rfp-cli-nome" data-apri="'+rfpEsc(c.id)+'">'+rfpEsc(c.id)+'</button><div class="rfp-chips">'+chips+'</div></div>';
+      var cod = rfpCodiceCliente(c);
+      var luci = '<span class="rfp-cli-luci">' + cod.split('').map(function(k, i){ return '<i class="rfp-sem-'+k+'" title="'+RFP_PROTO[i]+': '+RFP_PAROLA[k]+'"></i>'; }).join('') + '</span>';
+      r += '<div class="rfp-cli"><button type="button" class="rfp-cli-nome" data-apri="'+rfpEsc(c.id)+'">'+rfpEsc(c.id)+'</button><div class="rfp-chips sx">'+chips+'</div>'+luci+'</div>';
     });
     r += '</div>';
   } else {

@@ -11106,6 +11106,12 @@ window.addEventListener('load', function(){
     var _g = gridRifareRender;
     gridRifareRender = function(){ _g.apply(this, arguments); clDisegna(); };
   }
+  /* l'elenco dei clienti arriva dopo l'accesso: appena arriva si ridisegna da solo,
+     senza dover scrivere una lettera nella ricerca */
+  if(typeof sbSync === 'function'){
+    var _s = sbSync;
+    sbSync = function(cb){ return _s.call(this, function(){ if(cb) cb.apply(this, arguments); try{ clDisegna(); }catch(e){} }); };
+  }
   if(window.MutationObserver){
     new MutationObserver(function(){ if(!ps.classList.contains('off')){ clDisegna(); prMisura(); } }).observe(ps, {attributes:true, attributeFilter:['class']});
   }

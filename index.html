@@ -10677,6 +10677,20 @@ body:not(.nv-dentro) .header-right > :not(.nv-sempre){display:none !important;}
 .cd-tasti{display:flex;gap:8px;}
 #cd-corpo{flex:1;min-height:0;display:flex;flex-direction:column;}
 #cd-corpo > #admin-client-detail-body{flex:1;min-height:0;overflow-y:auto;}
+.cd-prima{padding:24px 32px 40px;max-width:1500px;}
+.cd-tit{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(200,175,90,0.80);margin-bottom:12px;}
+.cd-niente{font-size:13px;color:rgba(190,204,218,0.6);}
+.cd-rf{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;}
+.cd-rf-uno{border:1px solid rgba(200,120,120,0.22);border-left:3px solid var(--rf-color);border-radius:0 3px 3px 0;background:rgba(200,120,120,0.04);padding:14px 18px 15px;}
+.cd-rf-uno.custom{border-style:dashed;border-left-style:solid;background:rgba(232,200,120,0.05);border-color:rgba(232,200,120,0.4);border-left-color:var(--rf-color);}
+.cd-rf-su{display:flex;align-items:baseline;gap:10px;}
+.cd-rf-nome{font-size:15px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--rf-color);}
+.cd-rf-tipo{font-size:8.5px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:2px 6px;border:1px solid rgba(232,200,120,0.6);border-radius:2px;color:#e8c878;}
+.cd-rf-dal{margin-top:5px;font-size:11px;letter-spacing:1px;color:rgba(200,214,228,0.8);}
+.cd-rf-nota{margin-top:9px;font-size:13px;line-height:1.45;color:#f0ebdc;}
+.cd-rf-fai{margin-top:7px;font-size:12px;line-height:1.45;color:#e8c878;}
+.cd-match{max-width:640px;margin-top:14px;}
+.cd-tl{border:1px solid rgba(180,195,210,0.12);border-radius:3px;background:rgba(0,0,0,0.18);padding:16px 20px 14px;}
 @media (max-width:999px){ #cd-screen{display:none !important;} }
 @media (min-width:1000px){ body #cd-screen{top:57px;} }
 #rfp-screen{position:fixed;inset:0;z-index:9999;background:var(--bg);overflow-y:auto;font-family:var(--font);}
@@ -10911,9 +10925,23 @@ function clSegni(c){
   return segni;
 }
 function clGiu(c, proto){
-  /* un anno indietro e un mese avanti: il futuro resta vuoto, serve a far
-     vedere dov'è oggi. Oggi cade nello stesso punto in tutte le righe. */
+  var h = clTimeline(c, null);
+  /* in fondo: i due simboli, poi chi sei e "Entra" */
+  var ptScelto = clPt();
+  var pts = (typeof PT_LIST !== 'undefined' && Array.isArray(PT_LIST)) ? PT_LIST : [];
+  h += '<div class="cl-piede"><div class="cl-legenda"><span><b>★</b>progressione finita</span><span><b>✕</b>interrotta</span></div>'
+     + '<div class="cl-azioni"><div class="cl-pts">'
+     + pts.map(function(p){ return '<button type="button" class="cl-pt' + (p === ptScelto ? ' sel' : '') + '" data-pt="' + clEsc(p) + '">' + clEsc(p) + '</button>'; }).join('')
+     + '</div><button type="button" class="cl-entra" data-dettagli="' + clEsc(c.id) + '">Dettagli</button>'
+     + '<button type="button" class="cl-entra" data-entra="' + clEsc(c.id) + '"' + (ptScelto ? '' : ' disabled title="Seleziona prima chi sei"') + '>Entra →</button></div></div>';
+  return '<div class="cl-giu">' + h + '</div>';
+}
+/* La timeline di un cliente. Con dalGiorno = null va da un anno fa a un mese
+   avanti (uguale per tutti, così oggi cade nello stesso punto); con una data
+   parte da lì: serve alla pagina del cliente, dove si vede tutta la storia. */
+function clTimeline(c, dalGiorno){
   var oggi = clOggi(), inizio = new Date(oggi); inizio.setFullYear(inizio.getFullYear() - 1);
+  if(dalGiorno && dalGiorno < inizio) inizio = new Date(dalGiorno);
   var fine = new Date(oggi); fine.setMonth(fine.getMonth() + 1);
   var durata = fine - inizio, ETI = 86, RH = 17, TOP = 22;
   var tratti = c.state ? clTratti(c) : [], segni = c.state ? clSegni(c) : [];
@@ -10925,7 +10953,9 @@ function clGiu(c, proto){
   /* i mesi */
   var m = new Date(inizio.getFullYear(), inizio.getMonth() + 1, 1, 12);
   while(m < fine){
-    h += '<div class="cl-tl-mese' + (m > oggi ? ' dopo' : '') + '" style="left:' + x(m) + '%;height:' + (TOP + corsie.length * RH + 4) + 'px">' + CL_MESI[m.getMonth()] + '</div>';
+    var lungo = durata > 500 * 86400000, eti = CL_MESI[m.getMonth()];
+    if(lungo){ eti = m.getMonth() === 0 ? String(m.getFullYear()) : (m.getMonth() % 3 === 0 ? eti : ''); }
+    h += '<div class="cl-tl-mese' + (m > oggi ? ' dopo' : '') + '" style="left:' + x(m) + '%;height:' + (TOP + corsie.length * RH + 4) + 'px">' + eti + '</div>';
     m = new Date(m.getFullYear(), m.getMonth() + 1, 1, 12);
   }
   corsie.forEach(function(p){ h += '<div class="cl-tl-riga" style="left:0;right:0;top:' + yy(p) + 'px"></div>'; });
@@ -10953,15 +10983,7 @@ function clGiu(c, proto){
     h += '<div class="cl-tl-nome' + cls + '" style="--lc:' + (CL_COLORE[p] || '#8f9aa5') + ';top:' + (TOP + corsie.indexOf(p) * RH) + 'px;height:' + RH + 'px"><i></i>' + CL_NOME[p] + '</div>';
   });
   h += '</div>';
-  /* in fondo: i due simboli, poi chi sei e "Entra" */
-  var ptScelto = clPt();
-  var pts = (typeof PT_LIST !== 'undefined' && Array.isArray(PT_LIST)) ? PT_LIST : [];
-  h += '<div class="cl-piede"><div class="cl-legenda"><span><b>★</b>progressione finita</span><span><b>✕</b>interrotta</span></div>'
-     + '<div class="cl-azioni"><div class="cl-pts">'
-     + pts.map(function(p){ return '<button type="button" class="cl-pt' + (p === ptScelto ? ' sel' : '') + '" data-pt="' + clEsc(p) + '">' + clEsc(p) + '</button>'; }).join('')
-     + '</div><button type="button" class="cl-entra" data-dettagli="' + clEsc(c.id) + '">Dettagli</button>'
-     + '<button type="button" class="cl-entra" data-entra="' + clEsc(c.id) + '"' + (ptScelto ? '' : ' disabled title="Seleziona prima chi sei"') + '>Entra →</button></div></div>';
-  return '<div class="cl-giu">' + h + '</div>';
+  return h;
 }
 function clEntra(clientId){
   var pt = clPt();
@@ -11235,8 +11257,9 @@ function demoGenera(){
     st.open = {pt:st.pt, type:st.type, current:st.current, levels:st.levels, scheda:st.scheda, log:st.log,
                notes:st.notes, calibration:st.calibration, startDate:st.startDate, completedAt:st.completedAt};
     var flags = {};
-    Object.keys(RF[nome] || {}).forEach(function(k){ flags[k] = {attivo:true, note:RF[nome][k]}; });
-    if(RF[nome] || CUSTOM[nome]) st.redFlags = {flags:flags, custom:CUSTOM[nome] || null, ultimoAggiornamento:giorno(tra(5, 60)).getTime()};
+    Object.keys(RF[nome] || {}).forEach(function(k){ flags[k] = {attivo:true, note:RF[nome][k], dal:giorno(k === 'post-malattia' ? tra(2, 6) : tra(20, 240)).getTime()}; });
+    var cust = CUSTOM[nome] ? Object.assign({dal:giorno(tra(30, 200)).getTime()}, CUSTOM[nome]) : null;
+    if(RF[nome] || cust) st.redFlags = {flags:flags, custom:cust, ultimoAggiornamento:giorno(tra(1, 15)).getTime()};
     var date = st.journal.map(function(e){ return e.ts; });
     return {id:nome, state:st, updated_at: date.length ? date[date.length - 1] : st.startDate, _volte:volte};
   });
@@ -11327,6 +11350,8 @@ function rfpMetti(clientId, id, attivo){
   if(!c.state.redFlags) c.state.redFlags = {flags:{}, custom:null};
   if(!c.state.redFlags.flags) c.state.redFlags.flags = {};
   var f = c.state.redFlags.flags[id] || {attivo:false, note:''};
+  if(attivo && !f.attivo) f.dal = Date.now();      /* il giorno in cui è stato acceso */
+  if(!attivo) delete f.dal;
   f.attivo = !!attivo;
   if(f.attivo || (f.note && f.note.trim())) c.state.redFlags.flags[id] = f;
   else delete c.state.redFlags.flags[id];
@@ -11471,12 +11496,62 @@ function cdOpen(clientId){
   _cdCliente = clientId;
   _cdElencoPrima = window._adminLastClients;
   window._adminLastClients = (typeof _csList !== 'undefined' && Array.isArray(_csList)) ? _csList.filter(function(c){ return c && c.id && c.state; }) : [];
-  if(!_cdCasa){ _cdCasa = bozza.parentNode; }
+  if(!_cdCasa){
+    _cdCasa = bozza.parentNode;
+    /* nella pagina del cliente la prima linguetta non è più la timeline vecchia */
+    var _vecchia = adminDetailRenderTimeline;
+    adminDetailRenderTimeline = function(st){
+      if(!_cdCliente) return _vecchia.apply(this, arguments);
+      var cc = (_csList || []).find(function(z){ return z.id === _cdCliente; });
+      return cc ? cdPrima(cc) : _vecchia.apply(this, arguments);
+    };
+  }
   corpo.appendChild(bozza);
   _adminDetailClient = clientId; _adminDetailProto = 'timeline';
   adminDetailRender();
   document.getElementById('cd-nome').textContent = clientId;
   document.getElementById('cd-screen').classList.remove('off');
+}
+function cdGiorno(t){
+  if(!t) return '';
+  var d = new Date(t);
+  return d.getDate() + ' ' + CL_MESI[d.getMonth()] + ' ' + d.getFullYear();
+}
+/* Il contenuto della prima linguetta: i red flag, poi la timeline. */
+function cdPrima(c){
+  var st = c.state || {}, rf = st.redFlags || {}, h = '';
+  var attivi = [];
+  (window.RF_DATA || []).forEach(function(f){
+    var x = rf.flags && rf.flags[f.id];
+    if(x && x.attivo) attivi.push({nome:f.name, colore:f.color, dal:x.dal, nota:x.note || '', fai:f.id === 'post-malattia' ? 'Resta nel suo protocollo. Attenzione ai carichi per due settimane dal rientro.' : f.shortDo});
+  });
+  if(rf.custom && rf.custom.attivo) attivi.push({nome:rf.custom.nome || 'Custom', colore:'#e8c878', dal:rf.custom.dal, nota:rf.custom.descrizione || '', fai:rf.custom.cosaFare || '', custom:true});
+  h += '<div class="cd-tit">Red Flags</div>';
+  if(!attivi.length){
+    h += '<div class="cd-niente">Nessun red flag.</div>';
+  } else {
+    h += '<div class="cd-rf">' + attivi.map(function(a){
+      return '<div class="cd-rf-uno' + (a.custom ? ' custom' : '') + '" style="--rf-color:' + a.colore + '">'
+           + '<div class="cd-rf-su"><span class="cd-rf-nome">' + clEsc(a.nome) + '</span>' + (a.custom ? '<span class="cd-rf-tipo">custom</span>' : '') + '</div>'
+           + '<div class="cd-rf-dal">' + (a.dal ? 'dal ' + cdGiorno(a.dal) : 'data non registrata') + '</div>'
+           + (a.nota ? '<div class="cd-rf-nota">' + clEsc(a.nota) + '</div>' : '')
+           + (a.fai ? '<div class="cd-rf-fai">' + clEsc(a.fai) + '</div>' : '')
+           + '</div>';
+    }).join('') + '</div>';
+    if(typeof rfpCodiceCliente === 'function'){
+      var cod = rfpCodiceCliente(c);
+      h += '<div class="rfp-match cd-match">' + cod.split('').map(function(k, i){
+        return '<div class="rfp-sem-' + k + '"><b>' + RFP_PROTO[i] + '</b><span>' + RFP_PAROLA[k] + '</span></div>';
+      }).join('') + '</div>';
+    }
+  }
+  /* la timeline, su tutta la storia del cliente */
+  var sedute = clSedute(c), primo = sedute.length ? clData(sedute[0].date) : null;
+  if(primo){ primo = new Date(primo); primo.setDate(primo.getDate() - 20); }
+  h += '<div class="cd-tit" style="margin-top:34px">Timeline</div>'
+     + '<div class="cd-tl">' + clTimeline(c, primo)
+     + '<div class="cl-piede"><div class="cl-legenda"><span><b>★</b>progressione finita</span><span><b>✕</b>interrotta</span></div></div></div>';
+  return '<div class="cd-prima">' + h + '</div>';
 }
 function cdClose(){
   var bozza = document.getElementById('admin-client-detail-body');
@@ -25648,6 +25723,8 @@ function rfRender(){
 function rfToggleActive(id){
   if(!window.RF_STATE[id]) window.RF_STATE[id] = {};
   window.RF_STATE[id].attivo = !window.RF_STATE[id].attivo;
+  // quando si accende si segna il giorno: serve a sapere da quando c'è
+  window.RF_STATE[id].dal = window.RF_STATE[id].attivo ? Date.now() : null;
   // se attivata e non espansa, la apriamo per invitare a scrivere la nota
   if(window.RF_STATE[id].attivo && !window.RF_STATE[id].expanded){
     window.RF_STATE[id].expanded = true;
@@ -25690,6 +25767,7 @@ function rfLoadForClient(clientId){
     Object.keys(rf.flags).forEach(function(k){
       window.RF_STATE[k] = {
         attivo: !!rf.flags[k].attivo,
+        dal: rf.flags[k].dal || null,
         note: rf.flags[k].note || '',
         expanded: false
       };
@@ -25701,6 +25779,7 @@ function rfLoadForClient(clientId){
       descrizione: rf.custom.descrizione || '',
       cosaFare: rf.custom.cosaFare || '',
       attivo: !!rf.custom.attivo,
+      dal: rf.custom.dal || null,
       expanded: false
     };
   }
@@ -25721,6 +25800,7 @@ function rfPersist(){
     var s = window.RF_STATE[f.id];
     if(s && (s.attivo || (s.note && s.note.trim()))){
       flags[f.id] = { attivo: !!s.attivo, note: s.note || '' };
+      if(s.dal) flags[f.id].dal = s.dal;
     }
   });
   var custom = null;
@@ -25732,6 +25812,7 @@ function rfPersist(){
       cosaFare: cs.cosaFare || '',
       attivo: !!cs.attivo
     };
+    if(cs.dal) custom.dal = cs.dal;
   }
   c.state.redFlags = {
     flags: flags,

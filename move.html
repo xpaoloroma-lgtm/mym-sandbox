@@ -24,6 +24,7 @@
   --f-upper:#e2dc5a; --f-lower:#d4566c; --f-buffer:#8e63d6; --f-core:#3f88e0; --f-tempo:#95b547;
   --f-buffer-txt:#ad8fe6;
   --red:#e08a8a;
+  --move:#78cd9b;
   --font:'Exo 2',sans-serif;
   --lane:100px;
   --grana:0.10; --grana-fondo:0.05;
@@ -68,6 +69,54 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
 #main{position:relative;z-index:1;flex:1;display:flex;min-height:0;}
 #work{flex:1;min-width:0;padding:14px 18px 16px;display:flex;flex-direction:column;gap:14px;}
 
+/* ═══ MOVE — costruzione dei blocchi ═══
+   Un blocco è sempre: 2 esercizi + 1 attività cardio. */
+.btn{height:34px;padding:0 14px;border-radius:2px;background:transparent;border:1px solid rgba(180,195,210,0.25);color:var(--text-hi);
+  font-size:10px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;}
+.btn:hover{border-color:rgba(200,175,90,0.66);}
+.btn.gold{border-color:var(--gold-soft);color:var(--gold-txt);background:rgba(200,175,90,0.05);}
+.btn:disabled{opacity:.3;cursor:default;}
+#work{flex-direction:row;gap:18px;padding:18px 22px;min-height:0;}
+.col{display:flex;flex-direction:column;min-height:0;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:2px;}
+.col-hd{flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line);}
+.col-bd{flex:1;min-height:0;overflow-y:auto;padding:12px;scrollbar-width:thin;scrollbar-color:rgba(212,168,74,0.6) transparent;}
+#c-blocchi{flex:0 0 330px;}
+#c-blocco{flex:0 0 400px;}
+#c-ese{flex:1 1 0;}
+.vuoto{padding:14px 6px;font-size:12px;color:var(--text-xlo);line-height:1.6;}
+/* un blocco fatto */
+.bk{border:1px solid var(--line);border-left:3px solid var(--move);border-radius:2px;padding:10px 12px;margin-bottom:10px;cursor:pointer;background:rgba(26,24,21,0.5);}
+.bk:hover{border-color:rgba(120,205,155,0.55);}
+.bk.sel{background:rgba(120,205,155,0.07);border-color:rgba(120,205,155,0.7);}
+.bk-n{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--text-hi);letter-spacing:.5px;margin-bottom:6px;}
+.bk-r{font-size:12px;color:var(--text-lo);line-height:1.6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bk-r i{font-style:normal;display:inline-block;width:52px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-xlo);}
+.srt{font-style:normal;font-size:9px;font-weight:700;letter-spacing:1.5px;padding:1px 5px;border-radius:2px;border:1px solid rgba(224,138,138,0.55);color:var(--red);}
+/* il blocco che si sta facendo */
+#b-nome{width:100%;height:42px;padding:0 12px;background:rgba(0,0,0,0.25);border:1px solid var(--line);border-radius:2px;color:var(--text-hi);font-size:15px;letter-spacing:.5px;outline:none;}
+#b-nome:focus{border-color:var(--gold-soft);}
+.posto{margin-top:12px;border:1px dashed rgba(180,195,210,0.28);border-radius:2px;padding:10px 12px;cursor:pointer;min-height:66px;}
+.posto.att{border-style:solid;border-color:var(--gold-soft);background:rgba(212,168,74,0.06);}
+.posto.pieno{border-style:solid;}
+.posto-t{display:flex;justify-content:space-between;align-items:center;font-size:9px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--text-xlo);}
+.posto-t b{font-weight:600;color:var(--text-lo);letter-spacing:1.5px;}
+.posto-e{margin-top:6px;font-size:14px;color:var(--text-hi);display:flex;align-items:center;gap:8px;}
+.posto-e.no{color:var(--text-xlo);font-size:12px;}
+.posto-x{margin-left:auto;background:none;border:0;color:var(--text-xlo);cursor:pointer;font-size:14px;padding:2px 6px;}
+.posto-x:hover{color:var(--red);}
+.b-tasti{display:flex;gap:8px;margin-top:16px;}
+.b-tasti .btn.via{margin-left:auto;border-color:rgba(224,138,138,0.4);color:var(--red);}
+/* l'elenco degli esercizi */
+#e-cerca{flex:1;height:34px;padding:0 10px;background:rgba(0,0,0,0.25);border:1px solid var(--line);border-radius:2px;color:var(--text-hi);font-size:13px;outline:none;min-width:0;}
+.e-filtri{flex:none;display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px;border-bottom:1px solid var(--line);}
+.e-f{height:26px;padding:0 10px;background:none;border:1px solid var(--line);border-radius:2px;color:var(--text-lo);font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
+.e-f.on{border-color:var(--gold-soft);color:var(--gold-txt);background:rgba(212,168,74,0.08);}
+.e-r{display:flex;align-items:center;gap:10px;padding:8px 10px;border-bottom:1px solid var(--line-soft);font-size:13px;color:var(--text-mid);cursor:pointer;}
+.e-r:hover{background:rgba(212,168,74,0.07);color:var(--text-hi);}
+.e-r.usato{opacity:.35;cursor:default;}
+.e-r span{margin-left:auto;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-xlo);white-space:nowrap;}
+.nota{font-size:11px;color:var(--text-xlo);line-height:1.5;}
+
 /* ═══ STORICO — importato da Open così com'è ═══ */
 #tl-panel{
   --border:rgba(180,195,210,0.16);--bg-panel:#0d0c0a;--bg-card:#161512;
@@ -102,8 +151,32 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
 </header>
 
 <div id="main">
-  <!-- la pagina di Move: per ora vuota, è da pensare -->
-  <section id="work"></section>
+  <!-- Move, per ora: la zona dove si costruiscono i blocchi.
+       Un blocco è sempre 2 esercizi + 1 attività cardio. La seduta (i blocchi
+       trascinati al loro posto) viene dopo. -->
+  <section id="work">
+    <div class="col" id="c-blocchi">
+      <div class="col-hd"><span class="lbl">Blocchi <span id="bk-n"></span></span><button type="button" class="btn gold" id="bk-nuovo">+ Nuovo blocco</button></div>
+      <div class="col-bd" id="bk-lista"></div>
+    </div>
+    <div class="col" id="c-blocco">
+      <div class="col-hd"><span class="lbl" id="b-titolo">Nuovo blocco</span></div>
+      <div class="col-bd">
+        <input id="b-nome" placeholder="Nome del blocco" spellcheck="false" autocomplete="off">
+        <div id="b-posti"></div>
+        <div class="b-tasti">
+          <button type="button" class="btn gold" id="b-salva">Salva blocco</button>
+          <button type="button" class="btn via" id="b-via">Elimina</button>
+        </div>
+        <p class="nota" id="b-nota" style="margin-top:14px"></p>
+      </div>
+    </div>
+    <div class="col" id="c-ese">
+      <div class="col-hd"><span class="lbl" id="e-titolo">Esercizi</span><input id="e-cerca" placeholder="Cerca esercizio" spellcheck="false" autocomplete="off"></div>
+      <div class="e-filtri" id="e-filtri"></div>
+      <div class="col-bd" id="e-lista" style="padding:0"></div>
+    </div>
+  </section>
 
   <!-- lo storico, uguale agli altri protocolli: esce da destra -->
   <section id="tl-panel">
@@ -111,6 +184,154 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
     <div id="tl-content"><div class="tl-empty">Nessuna sessione ancora.</div></div>
   </section>
 </div>
+
+<script>
+/* ═══ MOVE — costruzione dei blocchi (prototipo) ═══
+   - Gli esercizi sono quelli che nella pagina Esercizi hanno una voce in "Prot. Fil".
+   - Le voci Prono/Sup. e Quadrupedia chiedono l'SRT: un blocco che ne contiene una chiede l'SRT.
+   - Il cardio è la voce "Cardio" di Prot. Fil.
+   - 50 movimenti per esercizio è lo standard di adesso; la durata del cardio è ancora da decidere.
+   - I blocchi si salvano solo in questo browser: è un prototipo, non tocca i clienti. */
+(function(){
+  var SRT = {'Prono/Sup.':1, 'Quadrupedia':1};
+  var VOCI = ['In piedi','Seduto','Prono/Sup.','Quadrupedia'];
+  var MOVIMENTI = 50;
+  var CHIAVE = 'move-blocchi';
+  var ESE = [];                    /* {nome, label, pos} */
+  var blocchi = [];
+  try{ blocchi = JSON.parse(localStorage.getItem(CHIAVE) || '[]') || []; }catch(e){ blocchi = []; }
+  var bozza = nuova(), posto = 0, filtro = '', caricati = false, errore = '';
+  function nuova(){ return {id:null, nome:'', e:['',''], cardio:''}; }
+  function $(i){ return document.getElementById(i); }
+  function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+  function pulisci(n){
+    return String(n).replace(/\s*-\.\s*/g,' · ').replace(/\s+-\s+/g,' · ').replace(/\s+–\s+/g,' · ')
+      .replace(/\(\s+/g,'(').replace(/\s+\)/g,')').replace(/\s{2,}/g,' ').trim();
+  }
+  function trova(nome){ for(var i=0;i<ESE.length;i++) if(ESE[i].nome === nome) return ESE[i]; return null; }
+  function etichetta(nome){ var e = trova(nome); return e ? e.label : pulisci(nome); }
+  function chiedeSrt(b){ return b.e.some(function(n){ var e = trova(n); return e && SRT[e.pos]; }); }
+  function salvaTutto(){ try{ localStorage.setItem(CHIAVE, JSON.stringify(blocchi)); }catch(e){} }
+
+  /* gli esercizi si leggono dalla pagina Esercizi, con le sue modifiche */
+  function carica(){
+    fetch('esercizi.html').then(function(r){ return r.text(); }).then(function(t){
+      var a = t.indexOf('var R0 = '), f = t.indexOf('\n', a);
+      var riga = t.slice(a + 9, f).trim().replace(/;$/, '');
+      var R0 = JSON.parse(riga);
+      var salv = {ts:0, MOD:{}, ADD:[]};
+      var m = t.match(/<script type="application\/json" id="salvati">([\s\S]*?)<\/script>/);
+      if(m){ try{ salv = JSON.parse(m[1]); }catch(e){} }
+      var loc = null; try{ loc = JSON.parse(localStorage.getItem('esercizi-flow-stato') || 'null'); }catch(e){}
+      var st = (loc && loc.ts > salv.ts) ? loc : salv, MOD = st.MOD || {};
+      (st.ADD || []).forEach(function(x){ R0.push({nome:x.nome, pos:''}); });
+      ESE = R0.map(function(r){
+        var pos = r.pos || ''; if(MOD[r.nome] && ('pos' in MOD[r.nome])) pos = MOD[r.nome].pos;
+        return {nome:r.nome, label:pulisci(r.nome), pos:pos};
+      }).filter(function(r){ return r.pos; })
+        .sort(function(x, y){ return x.label.localeCompare(y.label, 'it', {sensitivity:'base'}); });
+      caricati = true; disegna();
+    }).catch(function(){ errore = 'Non riesco a leggere la pagina Esercizi.'; caricati = true; disegna(); });
+  }
+
+  function disegnaBlocchi(){
+    $('bk-n').textContent = blocchi.length ? '· ' + blocchi.length : '';
+    $('bk-lista').innerHTML = blocchi.length ? blocchi.map(function(b){
+      return '<div class="bk' + (b.id === bozza.id ? ' sel' : '') + '" data-id="' + esc(b.id) + '">'
+        + '<div class="bk-n">' + esc(b.nome) + (chiedeSrt(b) ? '<em class="srt" title="Chiede l\'SRT">SRT</em>' : '') + '</div>'
+        + '<div class="bk-r"><i>1</i>' + esc(etichetta(b.e[0])) + '</div>'
+        + '<div class="bk-r"><i>2</i>' + esc(etichetta(b.e[1])) + '</div>'
+        + '<div class="bk-r"><i>Cardio</i>' + esc(etichetta(b.cardio)) + '</div></div>';
+    }).join('') : '<div class="vuoto">Nessun blocco ancora.</div>';
+  }
+  function disegnaBozza(){
+    $('b-titolo').textContent = bozza.id ? 'Modifica blocco' : 'Nuovo blocco';
+    if($('b-nome').value !== bozza.nome) $('b-nome').value = bozza.nome;
+    var P = [
+      {t:'Esercizio 1', d:MOVIMENTI + ' movimenti', v:bozza.e[0]},
+      {t:'Esercizio 2', d:MOVIMENTI + ' movimenti', v:bozza.e[1]},
+      {t:'Cardio',      d:'durata da decidere',     v:bozza.cardio}
+    ];
+    $('b-posti').innerHTML = P.map(function(p, i){
+      var e = p.v ? trova(p.v) : null;
+      return '<div class="posto' + (i === posto ? ' att' : '') + (p.v ? ' pieno' : '') + '" data-posto="' + i + '">'
+        + '<div class="posto-t"><span>' + p.t + '</span><b>' + p.d + '</b></div>'
+        + (p.v ? '<div class="posto-e">' + esc(etichetta(p.v)) + (e && SRT[e.pos] ? '<em class="srt">SRT</em>' : '') + '<button type="button" class="posto-x" data-togli="' + i + '" title="Togli">✕</button></div>'
+               : '<div class="posto-e no">' + (i === posto ? 'scegli dall\'elenco a destra' : 'vuoto') + '</div>')
+        + '</div>';
+    }).join('');
+    var pronto = bozza.nome.trim() && bozza.e[0] && bozza.e[1] && bozza.cardio;
+    $('b-salva').disabled = !pronto;
+    $('b-via').style.display = bozza.id ? '' : 'none';
+    $('b-nota').textContent = pronto ? (chiedeSrt(bozza) ? 'Questo blocco chiede l\'SRT: va bene solo per chi sa andare a terra e rialzarsi.' : '')
+                                     : 'Un blocco è fatto da un nome, 2 esercizi e 1 cardio.';
+  }
+  function disegnaEsercizi(){
+    var cardio = (posto === 2);
+    $('e-titolo').textContent = cardio ? 'Cardio' : 'Esercizi';
+    $('e-filtri').style.display = cardio ? 'none' : '';
+    $('e-filtri').innerHTML = [''].concat(VOCI).map(function(v){
+      return '<button type="button" class="e-f' + (filtro === v ? ' on' : '') + '" data-f="' + esc(v) + '">' + (v ? esc(v) : 'Tutti') + (SRT[v] ? ' · SRT' : '') + '</button>';
+    }).join('');
+    if(!caricati){ $('e-lista').innerHTML = '<div class="vuoto" style="padding:14px">Carico gli esercizi…</div>'; return; }
+    if(errore){ $('e-lista').innerHTML = '<div class="vuoto" style="padding:14px">' + esc(errore) + '</div>'; return; }
+    var q = $('e-cerca').value.trim().toLowerCase();
+    var L = ESE.filter(function(r){
+      if(cardio ? r.pos !== 'Cardio' : (r.pos === 'Cardio' || (filtro && r.pos !== filtro))) return false;
+      return !q || (r.label + ' ' + r.nome).toLowerCase().indexOf(q) >= 0;
+    });
+    if(!L.length){
+      $('e-lista').innerHTML = '<div class="vuoto" style="padding:14px">' + (cardio && !q
+        ? 'Nessun esercizio è segnato "Cardio" in Prot. Fil. Si segnano nella pagina Esercizi.'
+        : 'Nessun esercizio trovato.') + '</div>';
+      return;
+    }
+    var altro = cardio ? '' : bozza.e[posto === 0 ? 1 : 0];
+    $('e-lista').innerHTML = L.map(function(r){
+      return '<div class="e-r' + (r.nome === altro ? ' usato' : '') + '" data-e="' + esc(r.nome) + '">' + esc(r.label)
+        + (SRT[r.pos] ? '<em class="srt">SRT</em>' : '') + '<span>' + esc(r.pos) + '</span></div>';
+    }).join('');
+  }
+  function disegna(){ disegnaBlocchi(); disegnaBozza(); disegnaEsercizi(); }
+
+  $('b-nome').addEventListener('input', function(){ bozza.nome = this.value; disegnaBozza(); });
+  $('e-cerca').addEventListener('input', disegnaEsercizi);
+  $('bk-nuovo').addEventListener('click', function(){ bozza = nuova(); posto = 0; disegna(); $('b-nome').focus(); });
+  $('bk-lista').addEventListener('click', function(ev){
+    var k = ev.target.closest('.bk'); if(!k) return;
+    var b = blocchi.filter(function(x){ return x.id === k.getAttribute('data-id'); })[0]; if(!b) return;
+    bozza = {id:b.id, nome:b.nome, e:b.e.slice(), cardio:b.cardio}; posto = 0; disegna();
+  });
+  $('b-posti').addEventListener('click', function(ev){
+    var x = ev.target.closest('[data-togli]');
+    if(x){ var i = +x.getAttribute('data-togli'); if(i === 2) bozza.cardio = ''; else bozza.e[i] = ''; posto = i; disegna(); return; }
+    var p = ev.target.closest('.posto'); if(!p) return;
+    posto = +p.getAttribute('data-posto'); disegna();
+  });
+  $('e-filtri').addEventListener('click', function(ev){ var f = ev.target.closest('[data-f]'); if(!f) return; filtro = f.getAttribute('data-f'); disegnaEsercizi(); });
+  $('e-lista').addEventListener('click', function(ev){
+    var r = ev.target.closest('.e-r'); if(!r || r.classList.contains('usato')) return;
+    var n = r.getAttribute('data-e');
+    if(posto === 2) bozza.cardio = n; else bozza.e[posto] = n;
+    /* si passa da solo al prossimo posto vuoto */
+    var vuoti = [bozza.e[0], bozza.e[1], bozza.cardio].map(function(v, i){ return v ? -1 : i; }).filter(function(i){ return i >= 0; });
+    if(vuoti.length) posto = vuoti[0];
+    disegna();
+  });
+  $('b-salva').addEventListener('click', function(){
+    var b = {id:bozza.id || ('b' + Date.now()), nome:bozza.nome.trim(), e:bozza.e.slice(), cardio:bozza.cardio};
+    var i = blocchi.map(function(x){ return x.id; }).indexOf(b.id);
+    if(i >= 0) blocchi[i] = b; else blocchi.push(b);
+    salvaTutto(); bozza = nuova(); posto = 0; disegna();
+  });
+  $('b-via').addEventListener('click', function(){
+    if(!bozza.id) return;
+    blocchi = blocchi.filter(function(x){ return x.id !== bozza.id; });
+    salvaTutto(); bozza = nuova(); posto = 0; disegna();
+  });
+  disegna(); carica();
+})();
+</script>
 
 <script id="sbx-storico-js">
 /* Lo storico a scomparsa segue il mouse con una regola sola, senza scatti:

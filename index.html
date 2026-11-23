@@ -10232,8 +10232,8 @@ tr.ore-scala td{border-top:1px solid var(--border);}
 #ing-torna{display:none;}
 @media (min-width:1000px){
   #ing-torna{display:inline-block;}
-  #home-riga{display:flex;align-items:stretch;justify-content:center;gap:36px;}
-  #mappa{display:block;position:relative;flex:none;width:852px;height:502px;font-family:var(--font);}
+  #home-riga{display:flex;flex-direction:column;align-items:stretch;gap:14px;}
+  #mappa{display:block;position:relative;flex:none;width:520px;height:362px;font-family:var(--font);}
   .mp-l{position:absolute;width:0;height:0;}
   .mp-lv{border-left:1px dashed rgba(200,214,228,0.20);}
   .mp-lh{border-top:1px dashed rgba(200,214,228,0.20);}
@@ -10247,7 +10247,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   .mp-ey{left:0;width:136px;height:48px;display:flex;align-items:center;justify-content:flex-end;text-align:right;}
   .mp-ex{width:156px;text-align:center;}
   .mp-k{
-    position:absolute;width:160px;height:74px;box-sizing:border-box;overflow:hidden;
+    position:absolute;width:114px;height:54px;box-sizing:border-box;overflow:hidden;
     border:1px solid rgba(180,195,210,0.18);border-radius:4px;
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
   }
@@ -10257,8 +10257,8 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   .mp-s{position:absolute;left:0;top:0;right:0;height:3px;display:flex;gap:2px;}
   .mp-s i{flex:1;}
   .mp-p{
-    height:20px;padding:0 8px;background:none;border:0;border-radius:2px;cursor:pointer;
-    font-family:var(--font);font-size:13px;font-weight:400;letter-spacing:5px;text-indent:5px;
+    height:16px;padding:0 6px;background:none;border:0;border-radius:2px;cursor:pointer;
+    font-family:var(--font);font-size:11px;font-weight:400;letter-spacing:3.5px;text-indent:3.5px;
     text-transform:uppercase;color:#f0ebdc;transition:background 0.15s,color 0.15s;
   }
   .mp-p:hover:not(:disabled){background:rgba(255,255,255,0.07);}
@@ -10268,18 +10268,22 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   /* a destra della mappa: la legenda dei cinque protocolli con il loro stato,
      poi Grid (scheda libera, tratteggiata perché non è un protocollo) e in
      fondo, piccoli, Pace e Skip finché restano. */
-  #home-lato{display:flex;flex-direction:column;justify-content:center;gap:22px;width:264px;flex:none;}
+  #home-lato{display:flex;flex-direction:column;gap:6px;width:520px;max-width:100%;flex:none;}
   #mp-leg{display:flex;flex-direction:column;}
   .mp-r{
-    display:flex;align-items:center;gap:14px;height:46px;padding:0 10px 0 0;
+    display:flex;align-items:center;gap:12px;height:30px;padding:0 10px 0 0;
     background:none;border:0;border-bottom:1px solid rgba(180,195,210,0.10);cursor:pointer;
     font-family:var(--font);text-align:left;transition:background 0.15s;
   }
   .mp-r:last-child{border-bottom:0;}
-  .mp-r > i{flex:none;width:3px;height:24px;background:var(--c);}
-  .mp-r > b{font-size:20px;font-weight:300;letter-spacing:6px;text-transform:uppercase;color:#f0ebdc;transition:color 0.15s;}
+  .mp-r > i{flex:none;width:3px;height:16px;background:var(--c);}
+  .mp-r.mp-grid > i{background:none;border-left:3px dashed rgba(200,214,228,0.7);}
+  .mp-r.mp-grid > b{color:#b4c3d2;}
+  .mp-r.mp-skip > i{background:rgba(180,195,210,0.25);}
+  .mp-r.mp-skip > b{color:rgba(190,204,218,0.7);}
+  .mp-r > b{font-size:13px;font-weight:400;letter-spacing:4px;text-transform:uppercase;color:#f0ebdc;transition:color 0.15s;}
   .mp-r > span{margin-left:auto;display:flex;align-items:baseline;gap:7px;font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:rgba(190,204,218,0.72);}
-  .mp-r > span em{font-style:normal;font-size:20px;font-weight:300;letter-spacing:0;color:#f0ebdc;}
+  .mp-r > span em{font-style:normal;font-size:14px;font-weight:300;letter-spacing:0;color:#f0ebdc;}
   .mp-r:hover:not(:disabled){background:rgba(255,255,255,0.04);}
   .mp-r:disabled{cursor:default;}
   .mp-r:disabled > b{color:rgba(240,235,220,0.42);}
@@ -10476,6 +10480,13 @@ tr.ore-scala td{border-top:1px solid var(--border);}
 </div>
 
 <div id="proto-select" class="off">
+  <!-- ══ I CLIENTI ══ (solo sul monitor) Si cerca scrivendo; l'elenco è sempre
+       aperto. Un clic su un cliente allarga la sua riga con la timeline. -->
+  <div id="cl-zona">
+    <input id="cl-cerca" type="text" placeholder="cerca cliente" autocomplete="off" spellcheck="false">
+    <div id="cl-testa"><span class="a">cliente</span><span class="b">ultimi tre allenamenti</span><span class="c">ultimo</span></div>
+    <div id="cl-lista"></div>
+  </div>
   <div id="proto-pt-strip" style="display:flex;gap:8px;align-items:center;justify-content:flex-end;">
     <div id="proto-cs-search-wrap">
       <input id="proto-cs-search" type="text" placeholder="Cerca cliente…" autocomplete="off">
@@ -10489,38 +10500,31 @@ tr.ore-scala td{border-top:1px solid var(--border);}
        i colori dei protocolli sono scelte, non misure. -->
   <div id="home-riga">
   <div id="mappa">
-    <div class="mp-l mp-lv" style="left:320px;top:24px;height:420px"></div>
-    <div class="mp-l mp-lv" style="left:490px;top:24px;height:420px"></div>
-    <div class="mp-l mp-lv" style="left:660px;top:24px;height:420px"></div>
-    <div class="mp-l mp-lh" style="left:150px;top:108px;width:680px"></div>
-    <div class="mp-l mp-lh" style="left:150px;top:192px;width:680px"></div>
-    <div class="mp-l mp-lh" style="left:150px;top:276px;width:680px"></div>
-    <div class="mp-l mp-lh" style="left:150px;top:360px;width:680px"></div>
-    <div class="mp-k mp-n1" style="left:155px;top:29px"><div class="mp-s"><i style="background:#c88ad8"></i></div><button type="button" class="mp-p" disabled title="Non esiste ancora">Lift</button></div>
-    <div class="mp-k mp-n1" style="left:325px;top:29px"><div class="mp-s"><i style="background:#c88ad8"></i></div><button type="button" class="mp-p" disabled title="Non esiste ancora">Lift</button></div>
-    <div class="mp-k mp-n1" style="left:155px;top:113px"><div class="mp-s"><i style="background:#c88ad8"></i></div><button type="button" class="mp-p" disabled title="Non esiste ancora">Lift</button></div>
-    <div class="mp-k mp-n2" style="left:325px;top:113px"><div class="mp-s"><i style="background:#c88ad8"></i><i style="background:#78a5e1"></i></div><button type="button" class="mp-p" disabled title="Non esiste ancora">Lift</button><button type="button" class="mp-p" onclick="prototipoOpen('load.html','Load')" title="Prototipo con dati di esempio: non salva">Load</button></div>
-    <div class="mp-k mp-n1" style="left:495px;top:113px"><div class="mp-s"><i style="background:#78a5e1"></i></div><button type="button" class="mp-p" onclick="prototipoOpen('load.html','Load')" title="Prototipo con dati di esempio: non salva">Load</button></div>
-    <div class="mp-k mp-n2" style="left:325px;top:197px"><div class="mp-s"><i style="background:#78a5e1"></i><i style="background:#d4a84a"></i></div><button type="button" class="mp-p" onclick="prototipoOpen('load.html','Load')" title="Prototipo con dati di esempio: non salva">Load</button><button type="button" class="mp-p" onclick="protoSelect('open')" data-p="open">Open</button></div>
-    <div class="mp-k mp-n3" style="left:495px;top:197px"><div class="mp-s"><i style="background:#78a5e1"></i><i style="background:#d4a84a"></i><i style="background:#e08a6a"></i></div><button type="button" class="mp-p" onclick="prototipoOpen('load.html','Load')" title="Prototipo con dati di esempio: non salva">Load</button><button type="button" class="mp-p" onclick="protoSelect('open')" data-p="open">Open</button><button type="button" class="mp-p" onclick="prototipoOpen('self.html','Self')" title="Prototipo con dati di esempio: non salva">Self</button></div>
-    <div class="mp-k mp-n1" style="left:665px;top:197px"><div class="mp-s"><i style="background:#e08a6a"></i></div><button type="button" class="mp-p" onclick="prototipoOpen('self.html','Self')" title="Prototipo con dati di esempio: non salva">Self</button></div>
-    <div class="mp-k mp-n1" style="left:155px;top:281px"><div class="mp-s"><i style="background:#78cd9b"></i></div><button type="button" class="mp-p" disabled title="Non esiste ancora">Move</button></div>
-    <div class="mp-k mp-n2" style="left:325px;top:281px"><div class="mp-s"><i style="background:#78cd9b"></i><i style="background:#d4a84a"></i></div><button type="button" class="mp-p" disabled title="Non esiste ancora">Move</button><button type="button" class="mp-p" onclick="protoSelect('open')" data-p="open">Open</button></div>
-    <div class="mp-k mp-n2" style="left:495px;top:281px"><div class="mp-s"><i style="background:#d4a84a"></i><i style="background:#e08a6a"></i></div><button type="button" class="mp-p" onclick="protoSelect('open')" data-p="open">Open</button><button type="button" class="mp-p" onclick="prototipoOpen('self.html','Self')" title="Prototipo con dati di esempio: non salva">Self</button></div>
-    <div class="mp-k mp-n1" style="left:665px;top:281px"><div class="mp-s"><i style="background:#e08a6a"></i></div><button type="button" class="mp-p" onclick="prototipoOpen('self.html','Self')" title="Prototipo con dati di esempio: non salva">Self</button></div>
-    <div class="mp-k mp-n1" style="left:155px;top:365px"><div class="mp-s"><i style="background:#78cd9b"></i></div><button type="button" class="mp-p" disabled title="Non esiste ancora">Move</button></div>
-    <div class="mp-k mp-n1" style="left:325px;top:365px"><div class="mp-s"><i style="background:#78cd9b"></i></div><button type="button" class="mp-p" disabled title="Non esiste ancora">Move</button></div>
-    <div class="mp-ay" style="left:150px;top:2px;height:442px"></div>
-    <div class="mp-ax" style="left:150px;top:444px;width:702px"></div>
-    <div class="mp-t" style="left:164px;top:0px">Difficoltà</div>
-    <div class="mp-t" style="right:14px;top:422px">Autonomia</div>
-    <div class="mp-e mp-ey" style="top:336px">SRT</div>
-    <div class="mp-e mp-ey" style="top:252px">Basi: aerobica, mobilità, schemi di movimento</div>
-    <div class="mp-e mp-ey" style="top:168px">2/week</div>
-    <div class="mp-e mp-ey" style="top:84px">3/week</div>
-    <div class="mp-e mp-ex" style="left:242px;top:454px">Ricorda da solo 5-6 esercizi</div>
-    <div class="mp-e mp-ex" style="left:412px;top:454px">Autoregolazione: muscolare, cardio, intensità</div>
-    <div class="mp-e mp-ex" style="left:582px;top:454px">Esplorazione: prova, scopre, propone</div>
+    <div class="mp-l mp-lv" style="left:136px;top:26px;height:310px"></div>
+    <div class="mp-l mp-lv" style="left:258px;top:26px;height:310px"></div>
+    <div class="mp-l mp-lv" style="left:380px;top:26px;height:310px"></div>
+    <div class="mp-l mp-lh" style="left:14px;top:88px;width:488px"></div>
+    <div class="mp-l mp-lh" style="left:14px;top:150px;width:488px"></div>
+    <div class="mp-l mp-lh" style="left:14px;top:212px;width:488px"></div>
+    <div class="mp-l mp-lh" style="left:14px;top:274px;width:488px"></div>
+    <div class="mp-k mp-n1" style="left:18px;top:30px"><div class="mp-s"><i style="background:#c88ad8"></i></div><button type="button" class="mp-p" disabled title="Non esiste ancora">Lift</button></div>
+    <div class="mp-k mp-n1" style="left:140px;top:30px"><div class="mp-s"><i style="background:#c88ad8"></i></div><button type="button" class="mp-p" disabled title="Non esiste ancora">Lift</button></div>
+    <div class="mp-k mp-n1" style="left:18px;top:92px"><div class="mp-s"><i style="background:#c88ad8"></i></div><button type="button" class="mp-p" disabled title="Non esiste ancora">Lift</button></div>
+    <div class="mp-k mp-n2" style="left:140px;top:92px"><div class="mp-s"><i style="background:#c88ad8"></i><i style="background:#78a5e1"></i></div><button type="button" class="mp-p" disabled title="Non esiste ancora">Lift</button><button type="button" class="mp-p" onclick="prototipoOpen('load.html','Load')" title="Prototipo con dati di esempio: non salva">Load</button></div>
+    <div class="mp-k mp-n1" style="left:262px;top:92px"><div class="mp-s"><i style="background:#78a5e1"></i></div><button type="button" class="mp-p" onclick="prototipoOpen('load.html','Load')" title="Prototipo con dati di esempio: non salva">Load</button></div>
+    <div class="mp-k mp-n2" style="left:140px;top:154px"><div class="mp-s"><i style="background:#78a5e1"></i><i style="background:#d4a84a"></i></div><button type="button" class="mp-p" onclick="prototipoOpen('load.html','Load')" title="Prototipo con dati di esempio: non salva">Load</button><button type="button" class="mp-p" onclick="protoSelect('open')" data-p="open">Open</button></div>
+    <div class="mp-k mp-n3" style="left:262px;top:154px"><div class="mp-s"><i style="background:#78a5e1"></i><i style="background:#d4a84a"></i><i style="background:#e08a6a"></i></div><button type="button" class="mp-p" onclick="prototipoOpen('load.html','Load')" title="Prototipo con dati di esempio: non salva">Load</button><button type="button" class="mp-p" onclick="protoSelect('open')" data-p="open">Open</button><button type="button" class="mp-p" onclick="prototipoOpen('self.html','Self')" title="Prototipo con dati di esempio: non salva">Self</button></div>
+    <div class="mp-k mp-n1" style="left:384px;top:154px"><div class="mp-s"><i style="background:#e08a6a"></i></div><button type="button" class="mp-p" onclick="prototipoOpen('self.html','Self')" title="Prototipo con dati di esempio: non salva">Self</button></div>
+    <div class="mp-k mp-n1" style="left:18px;top:216px"><div class="mp-s"><i style="background:#78cd9b"></i></div><button type="button" class="mp-p" disabled title="Non esiste ancora">Move</button></div>
+    <div class="mp-k mp-n2" style="left:140px;top:216px"><div class="mp-s"><i style="background:#78cd9b"></i><i style="background:#d4a84a"></i></div><button type="button" class="mp-p" disabled title="Non esiste ancora">Move</button><button type="button" class="mp-p" onclick="protoSelect('open')" data-p="open">Open</button></div>
+    <div class="mp-k mp-n2" style="left:262px;top:216px"><div class="mp-s"><i style="background:#d4a84a"></i><i style="background:#e08a6a"></i></div><button type="button" class="mp-p" onclick="protoSelect('open')" data-p="open">Open</button><button type="button" class="mp-p" onclick="prototipoOpen('self.html','Self')" title="Prototipo con dati di esempio: non salva">Self</button></div>
+    <div class="mp-k mp-n1" style="left:384px;top:216px"><div class="mp-s"><i style="background:#e08a6a"></i></div><button type="button" class="mp-p" onclick="prototipoOpen('self.html','Self')" title="Prototipo con dati di esempio: non salva">Self</button></div>
+    <div class="mp-k mp-n1" style="left:18px;top:278px"><div class="mp-s"><i style="background:#78cd9b"></i></div><button type="button" class="mp-p" disabled title="Non esiste ancora">Move</button></div>
+    <div class="mp-k mp-n1" style="left:140px;top:278px"><div class="mp-s"><i style="background:#78cd9b"></i></div><button type="button" class="mp-p" disabled title="Non esiste ancora">Move</button></div>
+    <div class="mp-ay" style="left:14px;top:6px;height:330px"></div>
+    <div class="mp-ax" style="left:14px;top:336px;width:506px"></div>
+    <div class="mp-t" style="left:26px;top:2px">Difficoltà</div>
+    <div class="mp-t" style="right:14px;top:344px">Autonomia</div>
   </div>
   <div id="home-lato">
   <div id="mp-leg">
@@ -10529,6 +10533,8 @@ tr.ore-scala td{border-top:1px solid var(--border);}
     <button type="button" class="mp-r" style="--c:#e08a6a" onclick="prototipoOpen('self.html','Self')" title="Prototipo con dati di esempio: non salva"><i></i><b>Self</b><span>prototipo</span></button>
     <button type="button" class="mp-r" style="--c:#d4a84a" onclick="protoSelect('open')" data-p="open"><i></i><b>Open</b><span><em id="mp-n-open"></em>clienti</span></button>
     <button type="button" class="mp-r" style="--c:#78cd9b" disabled title="Non esiste ancora"><i></i><b>Move</b><span>in arrivo</span></button>
+    <button type="button" class="mp-r mp-x mp-grid" onclick="protoSelect('grid')"><i></i><b>Grid</b><span><em id="mp-n-grid"></em>clienti</span></button>
+    <button type="button" class="mp-r mp-x mp-skip" onclick="protoSelect('skip')"><i></i><b>Skip gruppo</b><span></span></button>
   </div>
   <div class="proto-groups">
     <!-- ── SANDBOX ─────────────────────────────────────────────
@@ -10755,6 +10761,229 @@ body:not(.nv-dentro) .header-right > :not(.nv-sempre){display:none !important;}
     <div class="rfp-b" id="rfp-b"></div>
   </div>
 </div>
+<script id="cl-script">
+/* ── La selezione del cliente ──
+   L'elenco a sinistra nella pagina dei protocolli. Per ogni cliente: nome,
+   protocollo, red flag, gli ultimi tre allenamenti e da quanto non viene.
+   Un clic allarga la riga: la timeline dell'ultimo anno e, da lì, "Entra". */
+var _clAperto = null;
+var CL_COLORE = {open:'#d4a84a', load:'#78a5e1', self:'#e08a6a', lift:'#c88ad8', move:'#78cd9b', grid:'#b4c3d2', skip:'#8f9aa5', pace:'#8f9aa5'};
+var CL_NOME   = {open:'Open', load:'Load', self:'Self', lift:'Lift', move:'Move', grid:'Grid', skip:'Skip', pace:'Pace'};
+var CL_GIORNI = ['dom','lun','mar','mer','gio','ven','sab'];
+var CL_MESI   = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+function clEsc(t){ return String(t == null ? '' : t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function clData(isoGiorno){ var p = String(isoGiorno).slice(0,10).split('-'); return new Date(+p[0], +p[1]-1, +p[2], 12); }
+function clOggi(){ var d = new Date(); d.setHours(12,0,0,0); return d; }
+function clGiorniDa(d){ return Math.round((clOggi() - d) / 86400000); }
+function clPt(){ try{ return sessionStorage.getItem('mym_pt') || ''; }catch(e){ return ''; } }
+/* cosa è successo quel giorno in Open: un livello salito o un esercizio cambiato */
+function clCosa(c, giorno){
+  var log = (c.state && c.state.open && c.state.open.log) || [];
+  for(var i = 0; i < log.length; i++){
+    var e = log[i];
+    if(!e || e.date !== giorno) continue;
+    if(e.type === 'step') return e.label || ((typeof FAM_LABEL !== 'undefined' && FAM_LABEL[e.fam]) || e.fam) + ' → L' + e.to;
+    if(e.type === 'variation' && e.from && e.to) return 'cambio: ' + e.from + ' → ' + e.to;
+  }
+  return '';
+}
+/* Tutte le sedute del cliente, dalla più vecchia: quelle nei registri dei
+   protocolli più quelle nel diario. Il registro di Open si svuota a ogni
+   nuova progressione, il diario no: per questo servono tutti e due. */
+function clSedute(c){
+  var st = c.state || {}, visti = {}, sedute = [];
+  csUnifiedHistory(c).forEach(function(e){ var k = e.proto + ' ' + e.date; if(!visti[k]){ visti[k] = true; sedute.push({proto:e.proto, date:e.date, pt:e.pt || ''}); } });
+  (Array.isArray(st.journal) ? st.journal : []).forEach(function(j){
+    if(!j || j.kind !== 'session' || !j.proto || !j.ts) return;
+    var g = String(j.ts).slice(0, 10), k = j.proto + ' ' + g;
+    if(!visti[k]){ visti[k] = true; sedute.push({proto:j.proto, date:g, pt:j.pt || ''}); }
+  });
+  sedute.sort(function(x, y){ return x.date < y.date ? -1 : x.date > y.date ? 1 : 0; });
+  return sedute;
+}
+function clRiga(c){
+  if(c.state && typeof migrateStateShape === 'function') migrateStateShape(c.state);
+  var storia = c.state ? clSedute(c).reverse() : [];
+  var proto = (c.state && csCurrentProto(c)) || null;
+  var pc = CL_COLORE[proto] || 'rgba(180,195,210,0.35)';
+  var rf = (typeof rfActiveFlagsForClient === 'function') ? rfActiveFlagsForClient(c.id) : [];
+  var chips = rf.length ? '<span class="cl-rf">' + clEsc(rf[0].name) + '</span>' + (rf.length > 1 ? '<span class="cl-rf">+' + (rf.length - 1) + '</span>' : '') : '';
+  var tre = storia.slice(0, 3).reverse(), celle = '';
+  for(var i = 0; i < 3; i++){
+    var e = tre[i - (3 - tre.length)];
+    if(!e){ celle += '<div></div>'; continue; }
+    var d = clData(e.date);
+    celle += '<div><div class="cl-quando"><span>' + CL_GIORNI[d.getDay()] + ' ' + d.getDate() + ' ' + CL_MESI[d.getMonth()] + '</span><span>' + clEsc(e.pt || '') + '</span></div>'
+           + '<div class="cl-cosa">' + clEsc(e.proto === 'open' ? clCosa(c, e.date) : '') + '</div></div>';
+  }
+  var n = storia.length ? clGiorniDa(clData(storia[0].date)) : null;
+  var ult = n === null ? '<b>—</b><span>mai allenato</span>'
+          : n <= 0 ? '<b>oggi</b><span>&nbsp;</span>'
+          : '<b>' + n + '</b><span>' + (n === 1 ? 'giorno fa' : 'giorni fa') + '</span>';
+  /* "fermo" = nessuna seduta da più di 30 giorni: la stessa soglia che Sandbox
+     usa già per dire se un cliente è attivo. È una scelta, non una misura. */
+  var fermo = n !== null && n > 30, aperta = (_clAperto === c.id);
+  return '<div class="cl-r' + (fermo ? ' fermo' : '') + (aperta ? ' aperta' : '') + '" style="--pc:' + pc + '">'
+       + '<button type="button" class="cl-capo" data-cl="' + clEsc(c.id) + '">'
+       +   '<div class="cl-chi"><div class="cl-nome">' + clEsc(c.id) + '</div><div class="cl-sotto"><span class="cl-proto">' + (proto ? CL_NOME[proto] : 'nuovo') + '</span>' + chips + '</div></div>'
+       +   '<div class="cl-tre">' + celle + '</div>'
+       +   '<div class="cl-ultimo">' + ult + '</div>'
+       + '</button>'
+       + (aperta ? clGiu(c, proto) : '')
+       + '</div>';
+}
+/* I tratti della timeline: per ogni periodo, in che protocollo stava.
+   Si ricavano dalle sedute (Open, Grid, Skip, Pace). Load, Self, Lift e Move
+   non salvano ancora niente: per loro vale solo, nei clienti finti, l'elenco
+   state.demoPercorso. Un tratto dura fino all'inizio del successivo. */
+function clTratti(c){
+  var st = c.state || {}, tratti = [];
+  var sedute = clSedute(c);
+  sedute.forEach(function(e){
+    var ult = tratti[tratti.length - 1];
+    if(ult && ult.proto === e.proto) ult.a = clData(e.date);
+    else tratti.push({proto:e.proto, da:clData(e.date), a:clData(e.date)});
+  });
+  (Array.isArray(st.demoPercorso) ? st.demoPercorso : []).forEach(function(p){
+    tratti.push({proto:p.proto, da:clData(p.da), a:clData(p.a), finto:true});
+  });
+  tratti.sort(function(x, y){ return x.da - y.da; });
+  /* un tratto finto spezza quello vero in cui cade */
+  var out = [];
+  tratti.forEach(function(t){
+    var prima = out[out.length - 1];
+    if(prima && t.finto && prima.a > t.a){ out.push(t); out.push({proto:prima.proto, da:t.a, a:prima.a}); prima.a = t.da; }
+    else out.push(t);
+  });
+  for(var i = 0; i < out.length - 1; i++) out[i].a = out[i + 1].da;
+  return out;
+}
+/* dove una progressione Open è finita (★) o è stata interrotta (✕) */
+function clSegni(c){
+  var st = c.state || {}, segni = [], visti = {};
+  function metti(quando, simb){
+    if(!quando) return;
+    var k = String(quando).slice(0, 10);
+    if(visti[k]) return; visti[k] = true;
+    segni.push({d:clData(k), simb:simb});
+  }
+  (Array.isArray(st.openArchive) ? st.openArchive : []).forEach(function(a){ metti(a.endDate, a.esito === 'completata' ? '★' : '✕'); });
+  var compl = (st.open && st.open.completedAt) || st.completedAt;
+  metti(compl, '★');
+  (Array.isArray(st.journal) ? st.journal : []).forEach(function(j){
+    if(!j || j.proto !== 'open') return;
+    if(j.kind === 'progression_complete') metti(j.ts, '★');
+    if(j.kind === 'progression_reset') metti(j.ts, '✕');
+  });
+  return segni;
+}
+function clGiu(c, proto){
+  var oggi = clOggi(), inizio = new Date(oggi); inizio.setFullYear(inizio.getFullYear() - 1);
+  var durata = oggi - inizio, ETI = 86, RH = 17, TOP = 22;
+  var tratti = c.state ? clTratti(c) : [], segni = c.state ? clSegni(c) : [];
+  var corsie = ['lift','load','self','open','move','grid'];
+  tratti.forEach(function(t){ if(corsie.indexOf(t.proto) === -1 && t.a > inizio) corsie.push(t.proto); });
+  function x(d){ return Math.max(0, Math.min(100, (d - inizio) / durata * 100)); }
+  function yy(p){ return TOP + corsie.indexOf(p) * RH + Math.floor(RH / 2); }
+  var h = '<div class="cl-tl" style="height:' + (TOP + corsie.length * RH + 4) + 'px"><div style="position:absolute;left:' + ETI + 'px;right:0;top:0;bottom:0">';
+  /* i mesi */
+  var m = new Date(inizio.getFullYear(), inizio.getMonth() + 1, 1, 12);
+  while(m < oggi){
+    h += '<div class="cl-tl-mese" style="left:' + x(m) + '%;height:' + (TOP + corsie.length * RH + 4) + 'px">' + CL_MESI[m.getMonth()] + '</div>';
+    m = new Date(m.getFullYear(), m.getMonth() + 1, 1, 12);
+  }
+  corsie.forEach(function(p){ h += '<div class="cl-tl-riga" style="left:0;right:0;top:' + yy(p) + 'px"></div>'; });
+  var prec = null;
+  tratti.forEach(function(t){
+    if(t.a <= inizio){ prec = t; return; }
+    var xa = x(t.da), xb = x(t.a), col = CL_COLORE[t.proto] || '#8f9aa5';
+    if(xb - xa > 0) h += '<div class="cl-tl-linea" style="--lc:' + col + ';left:' + xa + '%;width:' + (xb - xa) + '%;top:' + (yy(t.proto) - 1) + 'px"></div>';
+    if(prec && prec.proto !== t.proto && t.da > inizio){
+      var y0 = Math.min(yy(prec.proto), yy(t.proto)), y1 = Math.max(yy(prec.proto), yy(t.proto));
+      h += '<div class="cl-tl-salto" style="left:' + xa + '%;top:' + y0 + 'px;height:' + (y1 - y0) + 'px"></div>';
+    }
+    prec = t;
+  });
+  segni.forEach(function(s){
+    if(s.d <= inizio) return;
+    var px = x(s.d), cy = yy('open');
+    h += '<div class="cl-tl-taglio" style="left:calc(' + px + '% - 1px);top:' + (cy - 4) + 'px"></div>'
+       + '<div class="cl-tl-segno" style="left:calc(' + px + '% - 7px);top:' + (cy - 15) + 'px">' + s.simb + '</div>';
+  });
+  h += '</div>';
+  corsie.forEach(function(p){
+    var cls = p === 'grid' ? ' tratt' : ((p === 'skip' || p === 'pace') ? ' spento' : '');
+    h += '<div class="cl-tl-nome' + cls + '" style="--lc:' + (CL_COLORE[p] || '#8f9aa5') + ';top:' + (TOP + corsie.indexOf(p) * RH) + 'px;height:' + RH + 'px"><i></i>' + CL_NOME[p] + '</div>';
+  });
+  h += '</div>';
+  /* in fondo: i due simboli, poi chi sei e "Entra" */
+  var ptScelto = clPt();
+  var pts = (typeof PT_LIST !== 'undefined' && Array.isArray(PT_LIST)) ? PT_LIST : [];
+  h += '<div class="cl-piede"><div class="cl-legenda"><span><b>★</b>progressione finita</span><span><b>✕</b>interrotta</span></div>'
+     + '<div class="cl-azioni"><button type="button" class="cl-scheda" data-scheda="' + clEsc(c.id) + '">scheda cliente</button>'
+     + pts.map(function(p){ return '<button type="button" class="cl-pt' + (p === ptScelto ? ' sel' : '') + '" data-pt="' + clEsc(p) + '">' + clEsc(p) + '</button>'; }).join('')
+     + '<button type="button" class="cl-entra" data-entra="' + clEsc(c.id) + '"' + (ptScelto ? '' : ' disabled title="Seleziona prima chi sei"') + '>Entra →</button></div></div>';
+  return '<div class="cl-giu">' + h + '</div>';
+}
+function clEntra(clientId){
+  var pt = clPt();
+  var c = (_csList || []).find(function(z){ return z.id === clientId; });
+  if(!pt || !c) return;
+  var proto = (c.state && csCurrentProto(c)) || 'open';
+  _currentPT = pt;
+  if(proto === 'skip'){
+    _currentProto = 'skip';
+    var sl = c.state && c.state.skip && c.state.skip.log;
+    _skipMode = (Array.isArray(sl) && sl.length && sl[0].mode) || 'group';
+  } else {
+    _currentProto = proto;
+  }
+  _clAperto = null;
+  document.getElementById('proto-select').classList.add('off');
+  csGoTo(clientId);
+}
+function clDisegna(){
+  var lista = document.getElementById('cl-lista'), inp = document.getElementById('cl-cerca');
+  if(!lista || !inp) return;
+  var q = (inp.value || '').trim().toLowerCase();
+  var tutti = (typeof _csList !== 'undefined' && Array.isArray(_csList)) ? _csList.filter(function(c){ return c && c.id; }) : [];
+  var visti = tutti.filter(function(c){ return !q || c.id.toLowerCase().indexOf(q) !== -1; })
+                   .sort(function(a, b){ return a.id.localeCompare(b.id, 'it', {sensitivity:'base'}); });
+  var h = visti.map(clRiga).join('');
+  if(!visti.length) h = q ? '<div class="cl-vuoto">Nessun cliente trovato.</div><button type="button" class="cl-nuovo" data-nuovo="' + clEsc(inp.value.trim()) + '">+ aggiungi <b>' + clEsc(inp.value.trim()) + '</b> come nuovo cliente</button>'
+                          : '<div class="cl-vuoto">Nessun cliente.</div>';
+  lista.innerHTML = h;
+}
+window.addEventListener('load', function(){
+  var lista = document.getElementById('cl-lista'), inp = document.getElementById('cl-cerca'), ps = document.getElementById('proto-select');
+  if(!lista || !inp || !ps) return;
+  /* la colonna di destra: mappa, elenco, grafico e tasti in un contenitore solo */
+  var z = document.createElement('div'); z.id = 'pr-zona';
+  var hr = document.getElementById('home-riga');
+  if(hr){
+    ps.insertBefore(z, hr);
+    ['home-riga','proto-actions','proto-chart-wrap'].forEach(function(i){ var e = document.getElementById(i); if(e) z.appendChild(e); });
+  }
+  inp.addEventListener('input', function(){ _clAperto = null; clDisegna(); });
+  lista.addEventListener('click', function(ev){
+    var t = ev.target, e;
+    if((e = t.closest('[data-pt]'))){ try{ sessionStorage.setItem('mym_pt', e.getAttribute('data-pt')); }catch(x){} clDisegna(); return; }
+    if((e = t.closest('[data-entra]'))){ clEntra(e.getAttribute('data-entra')); return; }
+    if((e = t.closest('[data-scheda]'))){ if(typeof csHistoryOpen === 'function') csHistoryOpen(e.getAttribute('data-scheda')); return; }
+    if((e = t.closest('[data-nuovo]'))){ var n = e.getAttribute('data-nuovo'); inp.value = ''; if(typeof csSearchAddNew === 'function') csSearchAddNew(n); clDisegna(); return; }
+    if((e = t.closest('[data-cl]'))){ var id = e.getAttribute('data-cl'); _clAperto = (_clAperto === id) ? null : id; clDisegna(); }
+  });
+  /* si ridisegna quando arriva l'elenco dei clienti e ogni volta che si torna qui */
+  if(typeof gridRifareRender === 'function'){
+    var _g = gridRifareRender;
+    gridRifareRender = function(){ _g.apply(this, arguments); clDisegna(); };
+  }
+  if(window.MutationObserver){
+    new MutationObserver(function(){ if(!ps.classList.contains('off')) clDisegna(); }).observe(ps, {attributes:true, attributeFilter:['class']});
+  }
+  clDisegna();
+});
+</script>
 <script id="demo-clienti">
 /* I clienti finti della demo. Stessi nomi e stessi percorsi a ogni apertura
    (i numeri a caso partono sempre dallo stesso seme), ma le date sono contate
@@ -10828,7 +11057,11 @@ function demoGenera(){
         st.levels[o.fam] = o.to; st.current++;
         st.log.push({type:'step', date:iso(g), fam:o.fam, from_lvl:daLiv, to:o.to, label:FAM_LABEL[o.fam] + ' → L' + o.to, pt:pt});
         conta = 0; prossimo = passo + tra(-1, 2);
-        if(st.current >= steps.length){ st.completedAt = ts(g, ora); return false; }
+        if(st.current >= steps.length){
+          st.completedAt = ts(g, ora);
+          st.journal.push({ts:st.completedAt, kind:'progression_complete', proto:'open', pt:pt, detail:SEQUENCES[st.type].label});
+          return false;
+        }
       }
     });
   }
@@ -10898,6 +11131,7 @@ function demoGenera(){
   var VOLTE = [1,2,1,1,2,1,3,2,1,1, 2,1,2,2,1,2,1,3,1,2, 1,2,1,1,2,1,2,3,1,2, 1,2,1,1,2,1,3,2];
   var ANNULLI = [0.07, 0.11, 0.15, 0.19, 0.23, 0.27, 0.31];
   var GIORNI = [[1],[2],[3],[4],[5],[6],[1,4],[2,5],[1,3],[3,6],[2,4],[1,3,5],[2,4,6]];
+  var ALTROVE = ['load','self','load','move','self','lift'], nAltrove = 0;
 
   var out = NOMI.map(function(nome, i){
     var st = {journal:[], openArchive:[], _sessionConsistencyDone:true};
@@ -10919,7 +11153,11 @@ function demoGenera(){
       var da2 = tra(200, 300), stop = tra(90, 140);
       apri(st, tipo, da2, pt); ultima = sedute(st, da2, stop, cli, passo + 1);
       chiudi(st, 'interrotta', ultima);
-      apri(st, altroTipo(tipo), ultima - tra(5, 20), pt); ultima = sedute(st, ultima - 8, 0, cli, passo);
+      /* lascia Open e sta un periodo in un altro protocollo, poi torna. Load,
+         Self, Lift e Move non salvano: il periodo è scritto solo qui. */
+      var altrove = ALTROVE[nAltrove++ % ALTROVE.length], rientroOpen = Math.max(12, ultima - tra(35, 75));
+      st.demoPercorso = [{proto:altrove, da:iso(ultima - 2), a:iso(rientroOpen)}];
+      apri(st, altroTipo(tipo), rientroOpen, pt); ultima = sedute(st, rientroOpen, 0, cli, passo);
     } else if(p === 'torna'){
       var da3 = tra(180, 260), buco = tra(40, 75), rientro = tra(14, 28);
       apri(st, tipo, da3, pt); sedute(st, da3, rientro + buco, cli, passo);
@@ -11202,6 +11440,88 @@ window.addEventListener('load', function(){
   }
 });
 </script>
+<style>
+/* ══ PROTOCOLLI E CLIENTI ══ (solo monitor) A sinistra i clienti, 60; a
+   destra i protocolli, 40. Sul telefono resta tutto com'era. */
+#cl-zona{display:none;}
+#pr-zona{display:contents;}   /* sul telefono è come se non ci fosse */
+@media (min-width:1000px){
+  body #proto-select{
+    display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);grid-template-rows:minmax(0,1fr);
+    gap:0 40px;padding:24px 40px 20px;box-sizing:border-box;align-items:stretch;justify-content:stretch;
+  }
+  body #proto-select.off{display:none;}
+  #proto-pt-strip{display:none !important;}
+  #cl-zona{display:flex;flex-direction:column;min-height:0;font-family:var(--font);}
+  #pr-zona{display:flex;flex-direction:column;gap:16px;min-height:0;overflow-y:auto;overflow-x:hidden;padding-right:4px;}
+  #pr-zona > #proto-chart-wrap{order:2;width:auto;margin:0;padding:0;}
+  #pr-zona > #proto-actions{order:3;margin-top:auto;justify-content:flex-end;}
+  #proto-chart-wrap > div[style*="height:200px"]{height:84px !important;}
+  #proto-chart-title{font-size:9px;letter-spacing:3px;color:rgba(190,204,218,0.5);}
+  /* i vecchi riquadri di Grid e Skip: restano solo le schede da rifare */
+  #home-riga .proto-group-sandbox{display:none !important;}
+  #home-riga .proto-card-grid{border:0 !important;background:none !important;}
+  #home-riga .proto-card-grid > .proto-skip-label{display:none !important;}
+
+  #cl-cerca{
+    flex:none;height:52px;box-sizing:border-box;padding:0 20px;outline:none;
+    background:rgba(0,0,0,0.25);border:1px solid rgba(212,168,74,0.45);border-radius:3px;
+    font-family:var(--font);font-size:17px;font-weight:300;letter-spacing:2px;color:#f0ebdc;
+  }
+  #cl-cerca:focus{border-color:rgba(228,184,90,0.9);}
+  #cl-cerca::placeholder{color:rgba(190,204,218,0.5);}
+  #cl-testa{flex:none;display:flex;align-items:center;margin:16px 0 8px;font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(190,204,218,0.6);}
+  #cl-testa .a{width:250px;padding-left:20px;box-sizing:border-box;}
+  #cl-testa .b{flex:1;text-align:center;}
+  #cl-testa .c{width:128px;text-align:center;}
+  #cl-lista{flex:1;min-height:0;overflow-y:auto;padding-right:4px;}
+  .cl-r{margin-bottom:8px;border:1px solid rgba(180,195,210,0.14);border-left:3px solid var(--pc);border-radius:0 3px 3px 0;background:rgba(0,0,0,0.18);}
+  .cl-r.aperta{border-color:rgba(212,168,74,0.55);border-left-color:var(--pc);background:rgba(212,168,74,0.04);}
+  .cl-capo{display:flex;align-items:center;width:100%;height:68px;padding:0;background:none;border:0;cursor:pointer;text-align:left;font-family:var(--font);color:inherit;}
+  .cl-capo:hover{background:rgba(255,255,255,0.025);}
+  .cl-chi{width:250px;box-sizing:border-box;padding:0 12px 0 18px;min-width:0;}
+  .cl-nome{font-size:16px;font-weight:400;letter-spacing:1px;color:#f0ebdc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .cl-sotto{margin-top:7px;display:flex;align-items:center;gap:8px;white-space:nowrap;}
+  .cl-proto{font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--pc);}
+  .cl-rf{font-size:8.5px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:2px 6px;border:1px solid rgba(229,100,100,0.7);border-radius:2px;color:#f0aaaa;}
+  .cl-tre{flex:1;min-width:0;display:flex;align-items:center;}
+  .cl-tre > div{flex:1;min-width:0;height:50px;box-sizing:border-box;padding:8px 12px 0;border-left:1px solid rgba(180,195,210,0.10);}
+  .cl-quando{display:flex;justify-content:space-between;gap:6px;font-size:11px;letter-spacing:1px;color:rgba(218,228,238,0.78);white-space:nowrap;}
+  .cl-quando span:last-child{color:rgba(190,204,218,0.6);}
+  .cl-cosa{margin-top:5px;font-size:11px;font-weight:500;letter-spacing:0.5px;color:#e8c878;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .cl-ultimo{width:128px;height:68px;box-sizing:border-box;border-left:1px solid rgba(180,195,210,0.14);background:rgba(240,235,220,0.035);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;}
+  .cl-ultimo b{font-size:24px;font-weight:300;line-height:1;color:#f0ebdc;}
+  .cl-ultimo span{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(190,204,218,0.72);}
+  .cl-r.fermo .cl-ultimo{background:rgba(229,100,100,0.10);}
+  .cl-r.fermo .cl-ultimo b{color:#f08a8a;}
+  .cl-r.fermo .cl-ultimo span{color:rgba(240,138,138,0.9);}
+  .cl-giu{position:relative;border-top:1px solid rgba(212,168,74,0.30);padding:14px 18px 14px 18px;}
+  .cl-tl{position:relative;}
+  .cl-tl-mese{position:absolute;top:0;font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:rgba(190,204,218,0.5);padding-left:4px;border-left:1px solid rgba(180,195,210,0.07);box-sizing:border-box;}
+  .cl-tl-nome{position:absolute;left:0;display:flex;align-items:center;gap:9px;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#f0ebdc;white-space:nowrap;}
+  .cl-tl-nome i{width:3px;height:11px;background:var(--lc);}
+  .cl-tl-nome.tratt i{background:none;border-left:3px dashed rgba(200,214,228,0.7);box-sizing:border-box;}
+  .cl-tl-nome.tratt,.cl-tl-nome.spento{color:#b4c3d2;}
+  .cl-tl-riga{position:absolute;height:0;border-top:1px dotted rgba(180,195,210,0.12);}
+  .cl-tl-linea{position:absolute;height:3px;border-radius:2px;background:var(--lc);box-shadow:0 0 8px var(--lc), 0 0 2px var(--lc);}
+  .cl-tl-salto{position:absolute;width:1px;background:rgba(240,235,220,0.45);}
+  .cl-tl-taglio{position:absolute;width:2px;height:9px;background:#0c0b0a;}
+  .cl-tl-segno{position:absolute;width:14px;text-align:center;font-size:10px;line-height:10px;color:#f0ebdc;}
+  .cl-piede{display:flex;align-items:center;gap:12px;margin-top:12px;white-space:nowrap;}
+  .cl-piede button{flex:none;white-space:nowrap;}
+  .cl-legenda{display:flex;gap:14px;flex:none;font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:rgba(190,204,218,0.6);}
+  .cl-legenda b{font-weight:400;color:#f0ebdc;letter-spacing:0;margin-right:6px;}
+  .cl-azioni{margin-left:auto;display:flex;align-items:center;gap:6px;}
+  .cl-pt{height:28px;min-width:30px;padding:0 6px;background:none;border:1px solid rgba(180,195,210,0.20);border-radius:2px;cursor:pointer;font-family:var(--font);font-size:10px;font-weight:600;letter-spacing:1.5px;color:rgba(200,214,228,0.8);}
+  .cl-pt.sel{border-color:rgba(228,184,90,0.9);color:#E4B85A;background:rgba(212,168,74,0.12);}
+  .cl-scheda{height:28px;padding:0 6px;margin-right:8px;background:none;border:0;cursor:pointer;font-family:var(--font);font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(190,204,218,0.6);}
+  .cl-scheda:hover{color:#E4B85A;}
+  .cl-entra{height:34px;padding:0 18px;margin-left:8px;background:none;border:1px solid rgba(200,175,90,0.78);border-radius:2px;cursor:pointer;font-family:var(--font);font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#E4B85A;}
+  .cl-entra:disabled{opacity:0.35;cursor:default;}
+  .cl-vuoto{padding:18px 20px;font-size:12px;color:rgba(190,204,218,0.6);}
+  .cl-nuovo{display:block;width:100%;padding:14px 20px;text-align:left;background:none;border:1px dashed rgba(212,168,74,0.5);border-radius:3px;cursor:pointer;font-family:var(--font);font-size:13px;letter-spacing:1px;color:#E4B85A;}
+}
+</style>
 <div id="ingresso" class="off">
   <div class="ing-logo">Sandbox</div>
   <div class="ing-carte">
@@ -11398,20 +11718,24 @@ window.addEventListener('load', function(){
       var trovata = null;
       [].forEach.call(leg.querySelectorAll('.mp-r'), function(r){
         var q = r.getBoundingClientRect();
+        if(r.classList.contains('mp-x')) return;
         if(e.clientY >= q.top && e.clientY < q.bottom && e.clientX >= q.left && e.clientX <= q.right) trovata = r;
       });
       accendi(trovata);
     });
     leg.addEventListener('mouseleave', function(){ accendi(null); });
   })();
-  /* quanti clienti: per ora tutte le schede cliente che esistono (le stesse
-     della ricerca). Nei dati non c'è scritto in quale protocollo sta un
-     cliente, quindi questo numero è una scelta e va rivisto. */
+  /* quanti clienti: quelli il cui protocollo attuale è quello (cioè l'ultimo
+     in cui hanno fatto una seduta). Nei dati non c'è scritto in quale
+     protocollo sta un cliente: si ricava, ed è una scelta. */
   function mpConta(){
-    var el = document.getElementById('mp-n-open');
-    if(!el) return;
-    var l = window._csList;
-    el.textContent = (Array.isArray(l) && l.length) ? l.length : '';
+    var l = (Array.isArray(window._csList) ? window._csList : []).filter(function(c){ return c && c.id && c.state; });
+    ['open','grid'].forEach(function(p){
+      var el = document.getElementById('mp-n-' + p);
+      if(!el) return;
+      var n = l.filter(function(c){ try{ return csCurrentProto(c) === p; }catch(e){ return false; } }).length;
+      el.textContent = l.length ? n : '';
+    });
   }
   if(typeof gridRifareRender === 'function'){
     var _gr = gridRifareRender;

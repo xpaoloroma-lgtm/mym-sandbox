@@ -11802,6 +11802,18 @@ window.addEventListener('load', function(){
   #grid-tl-panel .grid-tl-tab, #grid-tl-panel .grid-tl-collapse{display:none !important;}
 }
 </style>
+<style>
+/* L'avviso "modalità consultazione" stava fisso sopra la striscia dei red
+   flag e la copriva. Ora è una riga sua, subito sotto la striscia. */
+#view-only-banner{position:static !important;flex-shrink:0;backdrop-filter:none !important;}
+body.view-only #main-layout, body.view-only #grid-layout{margin-top:0 !important;}
+</style>
+<script>
+window.addEventListener('DOMContentLoaded', function(){
+  var b = document.getElementById('view-only-banner'), s = document.getElementById('rf-alert-strip');
+  if(b && s && s.parentNode) s.parentNode.insertBefore(b, s.nextSibling);
+});
+</script>
 <script id="sbx-storico-js">
 /* Lo storico a scomparsa segue il mouse con una regola sola, senza scatti:
    si apre quando il mouse arriva contro il bordo destro (anche sopra la

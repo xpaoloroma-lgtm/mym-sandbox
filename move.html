@@ -77,6 +77,7 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
 .btn.gold{border-color:var(--gold-soft);color:var(--gold-txt);background:rgba(200,175,90,0.05);}
 .btn:disabled{opacity:.3;cursor:default;}
 #work{flex-direction:row;gap:18px;padding:18px 22px;min-height:0;}
+#main{padding-right:0 !important;}
 .col{display:flex;flex-direction:column;min-height:0;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:2px;}
 .col-hd{flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line);}
 .col-bd{flex:1;min-height:0;overflow-y:auto;padding:12px;scrollbar-width:thin;scrollbar-color:rgba(212,168,74,0.6) transparent;}
@@ -104,8 +105,6 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
 .posto-e.no{color:var(--text-xlo);font-size:12px;}
 .posto-x{margin-left:auto;background:none;border:0;color:var(--text-xlo);cursor:pointer;font-size:14px;padding:2px 6px;}
 .posto-x:hover{color:var(--red);}
-.tot{margin-top:8px;padding:8px 12px;border-left:2px solid var(--move);font-size:12px;line-height:1.5;color:var(--text-lo);}
-.tot b{color:var(--text-hi);font-weight:500;}
 .b-tasti{display:flex;gap:8px;margin-top:16px;}
 .b-tasti .btn.via{margin-left:auto;border-color:rgba(224,138,138,0.4);color:var(--red);}
 /* l'elenco degli esercizi */
@@ -170,21 +169,16 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
           <button type="button" class="btn gold" id="b-salva">Salva blocco</button>
           <button type="button" class="btn via" id="b-via">Elimina</button>
         </div>
-        <p class="nota" id="b-nota" style="margin-top:14px"></p>
       </div>
     </div>
     <div class="col" id="c-ese">
-      <div class="col-hd"><span class="lbl" id="e-titolo">Esercizi</span><input id="e-cerca" placeholder="Cerca esercizio" spellcheck="false" autocomplete="off"></div>
+      <div class="col-hd"><span class="lbl" id="e-titolo">Esercizi</span><input id="e-cerca" placeholder="Cerca esercizio" spellcheck="false" autocomplete="off"><button type="button" class="btn" id="e-vai" title="Apri la pagina Esercizi per aggiungere o segnare un esercizio">Esercizi →</button></div>
       <div class="e-filtri" id="e-filtri"></div>
       <div class="col-bd" id="e-lista" style="padding:0"></div>
     </div>
   </section>
 
-  <!-- lo storico, uguale agli altri protocolli: esce da destra -->
-  <section id="tl-panel">
-    <div class="tl-panel-header">Storico</div>
-    <div id="tl-content"><div class="tl-empty">Nessuna sessione ancora.</div></div>
-  </section>
+  <!-- qui niente storico: nell'edit dei blocchi non ha senso. Tornerà nella seduta con il cliente. -->
 </div>
 
 <script>
@@ -217,8 +211,9 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
   function salvaTutto(){ try{ localStorage.setItem(CHIAVE, JSON.stringify(blocchi)); }catch(e){} }
 
   /* gli esercizi si leggono dalla pagina Esercizi, con le sue modifiche */
+  var _testo = null;
   function carica(){
-    fetch('esercizi.html').then(function(r){ return r.text(); }).then(function(t){
+    (_testo ? Promise.resolve(_testo) : fetch('esercizi.html').then(function(r){ return r.text(); }).then(function(t){ _testo = t; return t; })).then(function(t){
       var a = t.indexOf('var R0 = '), f = t.indexOf('\n', a);
       var riga = t.slice(a + 9, f).trim().replace(/;$/, '');
       var R0 = JSON.parse(riga);
@@ -253,22 +248,19 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
     var P = [
       {t:'Esercizio 1', d:'', v:bozza.e[0]},
       {t:'Esercizio 2', d:'', v:bozza.e[1]},
-      {t:'Cardio',      d:'durata da decidere',     v:bozza.cardio}
+      {t:'Cardio',      d:'', v:bozza.cardio}
     ];
-    var totale = '<div class="tot"><b>' + MOVIMENTI + ' movimenti in tutto</b> tra i due esercizi: come dividerli lo decide il cliente. Poi il cardio.</div>';
     $('b-posti').innerHTML = P.map(function(p, i){
       var e = p.v ? trova(p.v) : null;
       return '<div class="posto' + (i === posto ? ' att' : '') + (p.v ? ' pieno' : '') + '" data-posto="' + i + '">'
         + '<div class="posto-t"><span>' + p.t + '</span><b>' + p.d + '</b></div>'
         + (p.v ? '<div class="posto-e">' + esc(etichetta(p.v)) + (e && SRT[e.pos] ? '<em class="srt">SRT</em>' : '') + '<button type="button" class="posto-x" data-togli="' + i + '" title="Togli">✕</button></div>'
-               : '<div class="posto-e no">' + (i === posto ? 'scegli dall\'elenco a destra' : 'vuoto') + '</div>')
-        + '</div>' + (i === 1 ? totale : '');
+               : '<div class="posto-e no">—</div>')
+        + '</div>';
     }).join('');
     var pronto = bozza.nome.trim() && bozza.e[0] && bozza.e[1] && bozza.cardio;
     $('b-salva').disabled = !pronto;
     $('b-via').style.display = bozza.id ? '' : 'none';
-    $('b-nota').textContent = pronto ? (chiedeSrt(bozza) ? 'Questo blocco chiede l\'SRT: va bene solo per chi sa andare a terra e rialzarsi.' : '')
-                                     : 'Un blocco è fatto da un nome, 2 esercizi e 1 cardio.';
   }
   function disegnaEsercizi(){
     var cardio = (posto === 2);
@@ -333,6 +325,14 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
     blocchi = blocchi.filter(function(x){ return x.id !== bozza.id; });
     salvaTutto(); bozza = nuova(); posto = 0; disegna();
   });
+  /* alla pagina Esercizi: dentro Sandbox si apre sopra questa e chiudendola si torna qui;
+     da sola si apre in un'altra scheda. Quello che si cambia di là arriva qui da solo. */
+  $('e-vai').addEventListener('click', function(){
+    var su = null; try{ su = (window.parent !== window && typeof window.parent.eseOpen === 'function') ? window.parent : null; }catch(e){ su = null; }
+    if(su) su.eseOpen(); else window.open('esercizi.html', 'esercizi');
+  });
+  window.addEventListener('storage', function(ev){ if(ev.key === 'esercizi-flow-stato') carica(); });
+  window.addEventListener('focus', carica);
   disegna(); carica();
 })();
 </script>

@@ -11909,10 +11909,10 @@ window.addEventListener('load', function(){
   var _navProtoNome = '';
   function navDove(){
     if(vis('login-splash')) return 'login';
+    if(vis('ese-screen')) return 'ese';   /* Esercizi può aprirsi sopra un prototipo (da Move): vince lui */
     if(vis('load-screen')) return 'load';
     if(vis('rfp-screen')) return 'rfp';
     if(vis('cd-screen')) return 'cd';
-    if(vis('ese-screen')) return 'ese';
     if(vis('ore-screen')) return 'ore';
     if(vis('riu-screen')) return 'riu';
     if(vis('ingresso')) return 'sandbox';
@@ -11926,7 +11926,10 @@ window.addEventListener('load', function(){
     if(d === 'ore') l1 = 'Ore';
     else if(d === 'riu') l1 = 'Riunioni';
     else if(d !== 'sandbox' && d !== 'login') l1 = 'Protocolli';
+    /* Esercizi aperto da dentro un prototipo (da Move): il prototipo resta nel percorso, e ci si torna */
+    var sopra = (d === 'ese' && vis('load-screen')), l3 = '';
     if(d === 'ese') l2 = 'Esercizi';
+    if(sopra){ l2 = _navProtoNome; l3 = 'Esercizi'; }
     if(d === 'rfp') l2 = 'Red Flags';
     if(d === 'cd') l2 = 'Dettagli cliente';
     if(d === 'load') l2 = _navProtoNome + ' · prototipo, non salva';
@@ -11937,12 +11940,15 @@ window.addEventListener('load', function(){
     $('nv-s1').classList.toggle('nv-no', !l1);
     $('nv-l2').classList.toggle('nv-no', !l2);
     $('nv-s2').classList.toggle('nv-no', !l2);
+    $('nv-l3').textContent = l3;
+    $('nv-l3').classList.toggle('nv-no', !l3);
+    $('nv-s3').classList.toggle('nv-no', !l3);
     $('bc-proto').classList.toggle('nv-no', !conProto);
     $('bc-sep-0').classList.toggle('nv-no', !conProto);
     $('bc-sep-0').style.display = conProto ? '' : 'none';
     ['bc-client','bc-sep-1','bc-focus','bc-sep-2','bc-rf-indicator'].forEach(function(i){ var e=$(i); if(e) e.classList.toggle('nv-no', !conProto); });
     /* l'ultimo pezzo visibile è dove si è: non è un tasto */
-    var pezzi = ['nv-sb','nv-l1','nv-l2','bc-proto','bc-client','bc-focus'].map($).filter(function(e){
+    var pezzi = ['nv-sb','nv-l1','nv-l2','nv-l3','bc-proto','bc-client','bc-focus'].map($).filter(function(e){
       return e && !e.classList.contains('nv-no') && e.style.display !== 'none';
     });
     pezzi.forEach(function(e, i){
@@ -11975,6 +11981,7 @@ window.addEventListener('load', function(){
       if(d === 'ese' || d === 'load' || d === 'rfp' || d === 'cd'){ navChiudiFinestre(); }
       else if(d === 'elenco' || d === 'dentro'){ navFuoriDalCliente(); }
     }
+    else if(dove === 'l2'){ if(d === 'ese' && vis('load-screen')) eseClose(); }
     else if(dove === 'proto'){
       var p = (typeof _currentProto !== 'undefined') ? _currentProto : null;
       if(d === 'dentro' && window._csId && (p === 'open' || p === 'grid') && typeof bcGoClient === 'function') bcGoClient();
@@ -12007,7 +12014,7 @@ window.addEventListener('load', function(){
      Dai tre riquadri (o dalla password) Indietro esce davvero. */
   function vis(id){ var e = document.getElementById(id); return !!e && !e.classList.contains('off'); }
   function passoIndietro(){
-    var fin = [['load-screen', window.prototipoClose], ['ese-screen', window.eseClose], ['rfp-screen', window.rfpClose], ['cd-screen', window.cdClose],
+    var fin = [['ese-screen', window.eseClose], ['load-screen', window.prototipoClose], ['rfp-screen', window.rfpClose], ['cd-screen', window.cdClose],
                ['ore-screen', window.oreClose], ['riu-screen', window.riuClose]];
     for(var i=0;i<fin.length;i++){
       if(vis(fin[i][0]) && typeof fin[i][1] === 'function'){ fin[i][1](); return true; }
@@ -13142,7 +13149,9 @@ function eseClose(){
     <span class="bc-sep" id="nv-s1">›</span>
     <span class="bc-item bc-link" id="nv-l1" onclick="navVai('l1')"></span>
     <span class="bc-sep" id="nv-s2">›</span>
-    <span class="bc-item" id="nv-l2"></span>
+    <span class="bc-item" id="nv-l2" onclick="navVai('l2')"></span>
+    <span class="bc-sep nv-no" id="nv-s3">›</span>
+    <span class="bc-item nv-no" id="nv-l3"></span>
     <span class="bc-item bc-link" id="bc-pt" onclick="csOpen()" title="cambia PT o protocollo"></span>
     <span class="bc-sep" id="bc-sep-0" style="display:none">›</span>
     <span class="bc-item bc-link" id="bc-proto" onclick="navVai('proto')"></span>

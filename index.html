@@ -10259,7 +10259,9 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   .mp-n3{background:rgba(240,235,220,0.09);}
   .mp-n3{gap:0;}
   /* su monitor bassi le caselle si abbassano: i nomi si stringono senza uscire */
-  .mp-k .mp-p{flex:0 1 16px;min-height:0;height:auto;line-height:1;}
+  .mp-k .mp-p{flex:0 1 calc(var(--fs,11px) * 1.55);min-height:0;height:auto;line-height:1;font-size:var(--fs,11px);letter-spacing:0.32em;text-indent:0.32em;}
+  .mp-s{height:calc(2px + var(--fs,11px) * 0.14) !important;}
+  .mp-k{padding-top:calc(2px + var(--fs,11px) * 0.14) !important;}
   .mp-s{position:absolute;left:0;top:0;right:0;height:3px;display:flex;gap:2px;}
   .mp-s i{flex:1;}
   .mp-p{
@@ -10959,13 +10961,17 @@ function clEntra(clientId){
 function prMisura(){
   var z = document.getElementById('pr-zona'), mappa = document.getElementById('mappa');
   if(!z || !mappa || !z.clientWidth) return;
-  var lato = document.getElementById('home-lato');
-  /* sotto la griglia devono starci l'elenco, il grafico e i tasti: il resto va alla griglia */
-  var graf = document.getElementById('proto-chart-wrap');
-  var restoSotto = (lato ? lato.offsetHeight : 210) + (graf ? graf.offsetHeight : 120) + 34 + 16 * 3 + 14;
-  var alta = z.clientHeight - restoSotto;
-  var massima = Math.round(z.clientWidth * 0.62);     /* oltre, le caselle diventano troppo alte */
-  mappa.style.height = Math.max(300, Math.min(alta, massima)) + 'px';
+  var lato = document.getElementById('home-lato'), graf = document.getElementById('proto-chart-wrap');
+  /* tre cose impilate: la griglia, l'elenco, il grafico. Il grafico sta in
+     fondo, l'elenco sopra il grafico, e la griglia prende tutto il resto. */
+  var alta = z.clientHeight - (lato ? lato.offsetHeight : 210) - (graf ? graf.offsetHeight : 200) - 14 - 16 * 2;
+  var massima = Math.round(z.clientWidth * 0.85);     /* oltre, le caselle diventano più alte che larghe */
+  alta = Math.max(300, Math.min(alta, massima));
+  mappa.style.height = alta + 'px';
+  /* le scritte crescono con la casella: tre nomi devono starci, uno sotto l'altro */
+  var casella = (alta - 52) / 5;
+  var fs = Math.max(10, Math.min((casella - 14) / 4.7, 15));
+  mappa.style.setProperty('--fs', fs.toFixed(1) + 'px');
 }
 function clDisegna(){
   var lista = document.getElementById('cl-lista'), inp = document.getElementById('cl-cerca');
@@ -10987,7 +10993,8 @@ window.addEventListener('load', function(){
   var hr = document.getElementById('home-riga');
   if(hr){
     ps.insertBefore(z, hr);
-    ['home-riga','proto-actions','proto-chart-wrap'].forEach(function(i){ var e = document.getElementById(i); if(e) z.appendChild(e); });
+    /* i tre tasti restano fuori: sono il piè di pagina */
+    ['home-riga','proto-chart-wrap'].forEach(function(i){ var e = document.getElementById(i); if(e) z.appendChild(e); });
   }
   inp.addEventListener('input', function(){ _clAperto = null; clDisegna(); });
   lista.addEventListener('click', function(ev){
@@ -11473,8 +11480,8 @@ window.addEventListener('load', function(){
 #pr-zona{display:contents;}   /* sul telefono è come se non ci fosse */
 @media (min-width:1000px){
   body #proto-select{
-    display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);grid-template-rows:minmax(0,1fr);
-    gap:0 40px;padding:24px 40px 20px;box-sizing:border-box;align-items:stretch;justify-content:stretch;
+    display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);grid-template-rows:minmax(0,1fr) auto;
+    gap:0 40px;padding:24px 40px 0;box-sizing:border-box;align-items:stretch;justify-content:stretch;
   }
   body #proto-select.off{display:none;}
   #proto-pt-strip{display:none !important;}
@@ -11482,13 +11489,21 @@ window.addEventListener('load', function(){
   #pr-zona{display:flex;flex-direction:column;gap:16px;min-height:0;overflow-y:auto;overflow-x:hidden;}
   #home-riga{flex:none;}
   /* grafico e tasti: larghi come la griglia, allineati ai suoi bordi */
-  #pr-zona > #proto-chart-wrap{order:2;flex:none;display:flex;flex-direction:column;box-sizing:border-box;
+  #pr-zona > #proto-chart-wrap{order:2;flex:none;margin-top:auto !important;display:flex;flex-direction:column;box-sizing:border-box;
     margin:0 18px 0 14px;padding:0;width:auto;}
-  #proto-chart-wrap > div[style*="height:200px"]{flex:none;height:86px !important;}
+  #proto-chart-wrap > div[style*="height:200px"]{flex:none;height:172px !important;}
   /* i tre tasti in basso: stessa misura, in fila, dentro la colonna */
-  #pr-zona #proto-tools{position:static !important;display:flex;gap:8px;margin:0 0 0 auto;}
-  #pr-zona #proto-tools > button{position:static !important;height:34px;padding:0 14px;font-size:10px;letter-spacing:3px;}
-  #pr-zona > #proto-actions{order:3;flex:none;margin-top:auto !important;justify-content:flex-end;box-sizing:border-box;width:auto;margin:0 18px 0 14px;}
+  #proto-actions #proto-tools{position:static !important;display:flex;gap:8px;margin:0 0 0 auto;}
+  #proto-actions #proto-tools > button{position:static !important;height:34px;padding:0 14px;font-size:10px;letter-spacing:3px;}
+  /* il piè di pagina: una riga sua, larga tutta la pagina, come la barra in
+     alto. Sopra non ci va niente: l'elenco clienti e la colonna dei protocolli
+     si fermano prima. A sinistra resta vuoto, i tre tasti stanno a destra. */
+  body #proto-select > #proto-actions{
+    grid-column:1 / -1;grid-row:2;height:57px;box-sizing:border-box;margin:16px -40px 0;padding:0 58px 0 40px;
+    display:flex !important;align-items:center;justify-content:flex-end;gap:8px !important;
+    border-top:1px solid var(--border);background:var(--bg-panel);
+  }
+  #cl-zona,#pr-zona{grid-row:1;}
   #proto-chart-title{font-size:9px;letter-spacing:3px;color:rgba(190,204,218,0.5);}
   /* i vecchi riquadri di Grid e Skip: restano solo le schede da rifare */
   #home-riga .proto-group-sandbox{display:none !important;}

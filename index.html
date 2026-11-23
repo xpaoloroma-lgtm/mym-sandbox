@@ -11789,9 +11789,9 @@ window.addEventListener('load', function(){
 #main-layout #tl-panel,#skip-history,#grid-tl-panel,#grid-tl-panel.collapsed{
   position:absolute !important;top:0;right:0;bottom:0;width:300px !important;z-index:40;box-sizing:border-box;
   padding-left:14px;background:var(--bg-panel);border-left:1px solid rgba(212,168,74,0.45);
-  transform:translateX(calc(100% - 14px));transition:transform .22s ease .15s, box-shadow .22s ease .15s;box-shadow:none;
+  transform:translateX(calc(100% - 14px));transition:transform .2s ease, box-shadow .2s ease;box-shadow:none;
 }
-#main-layout #tl-panel:hover,#skip-history:hover,#grid-tl-panel:hover,#grid-tl-panel.collapsed:hover{transform:none;transition-delay:0s;box-shadow:-14px 0 30px rgba(0,0,0,0.50);}
+#main-layout #tl-panel.sto-aperto,#skip-history.sto-aperto,#grid-tl-panel.sto-aperto,#grid-tl-panel.collapsed.sto-aperto{transform:none;box-shadow:-14px 0 30px rgba(0,0,0,0.50);}
 #main-layout #tl-panel::before,#skip-history::before,#grid-tl-panel::before,#grid-tl-panel.collapsed::before{content:'';position:absolute;left:0;top:0;bottom:0;width:14px;background:rgba(212,168,74,0.07);border-right:1px solid rgba(180,195,210,0.10);pointer-events:none;}
 #main-layout #tl-panel::after,#skip-history::after,#grid-tl-panel::after,#grid-tl-panel.collapsed::after{content:'Storico';position:absolute;left:1px;top:18px;width:12px;writing-mode:vertical-rl;transform:rotate(180deg);
   font-size:8px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:rgba(212,168,74,0.85);pointer-events:none;}
@@ -11799,6 +11799,35 @@ window.addEventListener('load', function(){
   #grid-tl-panel .grid-tl-tab, #grid-tl-panel .grid-tl-collapse{display:none !important;}
 }
 </style>
+<script id="sbx-storico-js">
+/* Lo storico a scomparsa segue il mouse con una regola sola, senza scatti:
+   si apre quando il mouse arriva contro il bordo destro (anche sopra la
+   barra di scorrimento, anche se esce dalla finestra da quella parte) e si
+   richiude solo quando il mouse si allontana davvero verso sinistra. */
+(function(){
+  function monta(panel){
+    var aperto = false, t = null;
+    function apri(){ clearTimeout(t); t = null; if(!aperto){ aperto = true; panel.classList.add('sto-aperto'); } }
+    function chiudi(){ if(t || !aperto) return; t = setTimeout(function(){ t = null; aperto = false; panel.classList.remove('sto-aperto'); }, 280); }
+    function resta(){ clearTimeout(t); t = null; }
+    document.addEventListener('mousemove', function(e){
+      /* il riquadro dentro cui scorre: non sempre è il genitore diretto */
+      var casa = (panel.offsetParent || panel.parentNode).getBoundingClientRect();
+      if(!casa.width || !casa.height) return;                 /* protocollo non a schermo */
+      var dentroInAltezza = e.clientY >= casa.top && e.clientY <= casa.bottom;
+      if(!aperto){ if(dentroInAltezza && e.clientX >= casa.right - 18) apri(); return; }
+      var bordoPannello = casa.right - panel.offsetWidth;
+      if(dentroInAltezza && e.clientX >= bordoPannello - 30) resta(); else chiudi();
+    }, true);   /* in cattura: lo sente anche se la pagina ferma l'evento */
+    document.documentElement.addEventListener('mouseleave', function(e){
+      /* uscire dalla finestra verso destra non lo chiude */
+      if(aperto && e.clientX < window.innerWidth - 4) chiudi();
+    });
+  }
+  function parti(){ [].forEach.call(document.querySelectorAll('#main-layout #tl-panel,#skip-history,#grid-tl-panel'), monta); }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', parti); else parti();
+})();
+</script>
 <div id="ingresso" class="off">
   <div class="ing-logo">Sandbox</div>
   <div class="ing-carte">

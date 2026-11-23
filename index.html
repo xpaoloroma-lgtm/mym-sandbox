@@ -10666,6 +10666,19 @@ body:not(.nv-dentro) .header-right > :not(.nv-sempre){display:none !important;}
   color:rgba(225,160,160,0.92);padding:10px 16px;transition:all 0.2s;
 }
 #rfp-btn:hover{border-color:rgba(225,140,140,0.85);color:rgba(240,180,180,1);}
+/* ══ PAGINA DETTAGLI CLIENTE ══ (solo monitor) Per ora mostra la bozza che
+   stava dentro Admin, così com'era: è da sistemare. */
+#cd-screen{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;font-family:var(--font);}
+#cd-corpo{padding:0 8px;}
+#cd-screen.off{display:none;}
+/* la bozza ha già il nome del cliente: qui restano solo i due tasti, in alto a destra */
+.cd-testa{position:absolute;right:40px;top:28px;z-index:2;}
+.cd-nome{display:none;}
+.cd-tasti{display:flex;gap:8px;}
+#cd-corpo{flex:1;min-height:0;display:flex;flex-direction:column;}
+#cd-corpo > #admin-client-detail-body{flex:1;min-height:0;overflow-y:auto;}
+@media (max-width:999px){ #cd-screen{display:none !important;} }
+@media (min-width:1000px){ body #cd-screen{top:57px;} }
 #rfp-screen{position:fixed;inset:0;z-index:9999;background:var(--bg);overflow-y:auto;font-family:var(--font);}
 #rfp-screen.off{display:none;}
 .rfp-wrap{max-width:1200px;margin:0 auto;padding:34px 32px 70px;display:flex;gap:32px;align-items:flex-start;}
@@ -10759,6 +10772,16 @@ body:not(.nv-dentro) .header-right > :not(.nv-sempre){display:none !important;}
   #proto-tools > #ore-screen-btn, #proto-tools > #riu-screen-btn{display:none !important;}
 }
 </style>
+<div id="cd-screen" class="off">
+  <div class="cd-testa">
+    <div class="cd-nome" id="cd-nome"></div>
+    <div class="cd-tasti">
+      <button type="button" class="hdr-btn" onclick="rfOpen(_cdCliente)">Red Flags</button>
+      <button type="button" class="hdr-btn" onclick="csHistoryOpen(_cdCliente)">scheda cliente</button>
+    </div>
+  </div>
+  <div id="cd-corpo"></div>
+</div>
 <div id="rfp-screen" class="off">
   <div class="rfp-wrap">
     <div class="rfp-a">
@@ -10934,8 +10957,9 @@ function clGiu(c, proto){
   var ptScelto = clPt();
   var pts = (typeof PT_LIST !== 'undefined' && Array.isArray(PT_LIST)) ? PT_LIST : [];
   h += '<div class="cl-piede"><div class="cl-legenda"><span><b>★</b>progressione finita</span><span><b>✕</b>interrotta</span></div>'
-     + '<div class="cl-azioni"><button type="button" class="cl-scheda" data-scheda="' + clEsc(c.id) + '">scheda cliente</button>'
+     + '<div class="cl-azioni"><div class="cl-pts">'
      + pts.map(function(p){ return '<button type="button" class="cl-pt' + (p === ptScelto ? ' sel' : '') + '" data-pt="' + clEsc(p) + '">' + clEsc(p) + '</button>'; }).join('')
+     + '</div><button type="button" class="cl-entra" data-dettagli="' + clEsc(c.id) + '">Dettagli</button>'
      + '<button type="button" class="cl-entra" data-entra="' + clEsc(c.id) + '"' + (ptScelto ? '' : ' disabled title="Seleziona prima chi sei"') + '>Entra →</button></div></div>';
   return '<div class="cl-giu">' + h + '</div>';
 }
@@ -10994,7 +11018,7 @@ window.addEventListener('load', function(){
     var t = ev.target, e;
     if((e = t.closest('[data-pt]'))){ try{ sessionStorage.setItem('mym_pt', e.getAttribute('data-pt')); }catch(x){} clDisegna(); return; }
     if((e = t.closest('[data-entra]'))){ clEntra(e.getAttribute('data-entra')); return; }
-    if((e = t.closest('[data-scheda]'))){ if(typeof csHistoryOpen === 'function') csHistoryOpen(e.getAttribute('data-scheda')); return; }
+    if((e = t.closest('[data-dettagli]'))){ cdOpen(e.getAttribute('data-dettagli')); return; }
     if((e = t.closest('[data-nuovo]'))){ var n = e.getAttribute('data-nuovo'); inp.value = ''; if(typeof csSearchAddNew === 'function') csSearchAddNew(n); clDisegna(); return; }
     if((e = t.closest('[data-cl]'))){ var id = e.getAttribute('data-cl'); _clAperto = (_clAperto === id) ? null : id; clDisegna(); }
   });
@@ -11437,6 +11461,30 @@ function rfNomeScheda(id){
   var f = (window.RF_DATA || []).find(function(x){ return x.id === id; });
   return f ? f.name : id;
 }
+/* ── Pagina dettagli cliente ──
+   Riusa la bozza di Admin: il suo contenuto viene spostato qui dentro mentre
+   la pagina è aperta e rimesso al suo posto quando si chiude. */
+var _cdCliente = null, _cdCasa = null, _cdElencoPrima;
+function cdOpen(clientId){
+  var corpo = document.getElementById('cd-corpo'), bozza = document.getElementById('admin-client-detail-body');
+  if(!corpo || !bozza || typeof adminDetailRender !== 'function') return;
+  _cdCliente = clientId;
+  _cdElencoPrima = window._adminLastClients;
+  window._adminLastClients = (typeof _csList !== 'undefined' && Array.isArray(_csList)) ? _csList.filter(function(c){ return c && c.id && c.state; }) : [];
+  if(!_cdCasa){ _cdCasa = bozza.parentNode; }
+  corpo.appendChild(bozza);
+  _adminDetailClient = clientId; _adminDetailProto = 'timeline';
+  adminDetailRender();
+  document.getElementById('cd-nome').textContent = clientId;
+  document.getElementById('cd-screen').classList.remove('off');
+}
+function cdClose(){
+  var bozza = document.getElementById('admin-client-detail-body');
+  if(bozza && _cdCasa) _cdCasa.appendChild(bozza);
+  window._adminLastClients = _cdElencoPrima;
+  _adminDetailClient = null; _cdCliente = null;
+  document.getElementById('cd-screen').classList.add('off');
+}
 function rfpOpen(){ _rfpSel = null; rfpDisegna(); document.getElementById('rfp-screen').classList.remove('off'); }
 function rfpClose(){ document.getElementById('rfp-screen').classList.add('off'); }
 /* quando si chiude la finestra del cliente, la pagina si ridisegna */
@@ -11557,12 +11605,13 @@ window.addEventListener('load', function(){
   .cl-piede button{flex:none;white-space:nowrap;}
   .cl-legenda{display:flex;gap:14px;flex:none;font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:rgba(190,204,218,0.6);}
   .cl-legenda b{font-weight:400;color:#f0ebdc;letter-spacing:0;margin-right:6px;}
-  .cl-azioni{margin-left:auto;display:flex;align-items:center;gap:6px;}
+  .cl-azioni{margin-left:auto;display:flex;align-items:center;gap:8px;}
+  .cl-pts{display:flex;gap:6px;margin-right:22px;}
   .cl-pt{height:28px;min-width:30px;padding:0 6px;background:none;border:1px solid rgba(180,195,210,0.20);border-radius:2px;cursor:pointer;font-family:var(--font);font-size:10px;font-weight:600;letter-spacing:1.5px;color:rgba(200,214,228,0.8);}
   .cl-pt.sel{border-color:rgba(228,184,90,0.9);color:#E4B85A;background:rgba(212,168,74,0.12);}
   .cl-scheda{height:28px;padding:0 6px;margin-right:8px;background:none;border:0;cursor:pointer;font-family:var(--font);font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(190,204,218,0.6);}
   .cl-scheda:hover{color:#E4B85A;}
-  .cl-entra{height:34px;padding:0 18px;margin-left:8px;background:none;border:1px solid rgba(200,175,90,0.78);border-radius:2px;cursor:pointer;font-family:var(--font);font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#E4B85A;}
+  .cl-entra{height:34px;padding:0 18px;background:none;border:1px solid rgba(200,175,90,0.78);border-radius:2px;cursor:pointer;font-family:var(--font);font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#E4B85A;}
   .cl-entra:disabled{opacity:0.35;cursor:default;}
   .cl-vuoto{padding:18px 20px;font-size:12px;color:rgba(190,204,218,0.6);}
   .cl-nuovo{display:block;width:100%;padding:14px 20px;text-align:left;background:none;border:1px dashed rgba(212,168,74,0.5);border-radius:3px;cursor:pointer;font-family:var(--font);font-size:13px;letter-spacing:1px;color:#E4B85A;}
@@ -11606,6 +11655,7 @@ window.addEventListener('load', function(){
     if(vis('login-splash')) return 'login';
     if(vis('load-screen')) return 'load';
     if(vis('rfp-screen')) return 'rfp';
+    if(vis('cd-screen')) return 'cd';
     if(vis('ese-screen')) return 'ese';
     if(vis('ore-screen')) return 'ore';
     if(vis('riu-screen')) return 'riu';
@@ -11622,6 +11672,7 @@ window.addEventListener('load', function(){
     else if(d !== 'sandbox' && d !== 'login') l1 = 'Protocolli';
     if(d === 'ese') l2 = 'Esercizi';
     if(d === 'rfp') l2 = 'Red Flags';
+    if(d === 'cd') l2 = 'Dettagli cliente';
     if(d === 'load') l2 = _navProtoNome + ' · prototipo, non salva';
     var conProto = (d === 'elenco' || d === 'dentro');
     $('nv-l1').textContent = l1;
@@ -11651,6 +11702,7 @@ window.addEventListener('load', function(){
     if(vis('load-screen')) prototipoClose();
     if(vis('ese-screen')) eseClose();
     if(vis('rfp-screen')) rfpClose();
+    if(vis('cd-screen')) cdClose();
     if(vis('ore-screen') && typeof window.oreClose === 'function') window.oreClose();
     if(vis('riu-screen') && typeof window.riuClose === 'function') window.riuClose();
   }
@@ -11664,7 +11716,7 @@ window.addEventListener('load', function(){
     var d = navDove();
     if(dove === 'sandbox'){ navChiudiFinestre(); navFuoriDalCliente(); ingressoOpen(); }
     else if(dove === 'l1'){
-      if(d === 'ese' || d === 'load' || d === 'rfp'){ navChiudiFinestre(); }
+      if(d === 'ese' || d === 'load' || d === 'rfp' || d === 'cd'){ navChiudiFinestre(); }
       else if(d === 'elenco' || d === 'dentro'){ navFuoriDalCliente(); }
     }
     else if(dove === 'proto'){
@@ -11684,7 +11736,7 @@ window.addEventListener('load', function(){
   }
   if(window.MutationObserver){
     var _no = new MutationObserver(navAggiorna);
-    ['login-splash','ingresso','proto-select','cs','ore-screen','riu-screen','ese-screen','load-screen','rfp-screen'].forEach(function(i){
+    ['login-splash','ingresso','proto-select','cs','ore-screen','riu-screen','ese-screen','load-screen','rfp-screen','cd-screen'].forEach(function(i){
       var e = document.getElementById(i);
       if(e) _no.observe(e, {attributes:true, attributeFilter:['class']});
     });
@@ -11699,7 +11751,7 @@ window.addEventListener('load', function(){
      Dai tre riquadri (o dalla password) Indietro esce davvero. */
   function vis(id){ var e = document.getElementById(id); return !!e && !e.classList.contains('off'); }
   function passoIndietro(){
-    var fin = [['load-screen', window.prototipoClose], ['ese-screen', window.eseClose], ['rfp-screen', window.rfpClose],
+    var fin = [['load-screen', window.prototipoClose], ['ese-screen', window.eseClose], ['rfp-screen', window.rfpClose], ['cd-screen', window.cdClose],
                ['ore-screen', window.oreClose], ['riu-screen', window.riuClose]];
     for(var i=0;i<fin.length;i++){
       if(vis(fin[i][0]) && typeof fin[i][1] === 'function'){ fin[i][1](); return true; }

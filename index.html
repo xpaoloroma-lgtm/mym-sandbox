@@ -11785,16 +11785,19 @@ window.addEventListener('load', function(){
 @media (min-width:1000px){
   .top-area{grid-template-columns:440px 1fr !important;position:relative;overflow:hidden;padding-right:14px;box-sizing:border-box;}
   .skip-top-area{grid-template-columns:1fr !important;position:relative;overflow:hidden;padding-right:14px;box-sizing:border-box;}
+  .skip-single-area{grid-template-columns:1fr 2fr !important;position:relative;overflow:hidden;padding-right:14px;box-sizing:border-box;}
   .grid-body{position:relative;overflow:hidden;}
-#main-layout #tl-panel,#skip-history,#grid-tl-panel,#grid-tl-panel.collapsed{
+#main-layout #tl-panel,#skip-history,#skip-single-history,#grid-tl-panel,#grid-tl-panel.collapsed{
   position:absolute !important;top:0;right:0;bottom:0;width:300px !important;z-index:40;box-sizing:border-box;
   padding-left:14px;background:var(--bg-panel);border-left:1px solid rgba(212,168,74,0.45);
   transform:translateX(calc(100% - 14px));transition:transform .2s ease, box-shadow .2s ease;box-shadow:none;
 }
-#main-layout #tl-panel.sto-aperto,#skip-history.sto-aperto,#grid-tl-panel.sto-aperto,#grid-tl-panel.collapsed.sto-aperto{transform:none;box-shadow:-14px 0 30px rgba(0,0,0,0.50);}
-#main-layout #tl-panel::before,#skip-history::before,#grid-tl-panel::before,#grid-tl-panel.collapsed::before{content:'';position:absolute;left:0;top:0;bottom:0;width:14px;background:rgba(212,168,74,0.07);border-right:1px solid rgba(180,195,210,0.10);pointer-events:none;}
-#main-layout #tl-panel::after,#skip-history::after,#grid-tl-panel::after,#grid-tl-panel.collapsed::after{content:'Storico';position:absolute;left:1px;top:18px;width:12px;writing-mode:vertical-rl;transform:rotate(180deg);
+#main-layout #tl-panel.sto-aperto,#skip-history.sto-aperto,#skip-single-history.sto-aperto,#grid-tl-panel.sto-aperto,#grid-tl-panel.collapsed.sto-aperto{transform:none;box-shadow:-14px 0 30px rgba(0,0,0,0.50);}
+#main-layout #tl-panel::before,#skip-history::before,#skip-single-history::before,#grid-tl-panel::before,#grid-tl-panel.collapsed::before{content:'';position:absolute;left:0;top:0;bottom:0;width:14px;background:rgba(212,168,74,0.07);border-right:1px solid rgba(180,195,210,0.10);pointer-events:none;}
+#main-layout #tl-panel::after,#skip-history::after,#skip-single-history::after,#grid-tl-panel::after,#grid-tl-panel.collapsed::after{content:'Storico';position:absolute;left:1px;top:18px;width:12px;writing-mode:vertical-rl;transform:rotate(180deg);
   font-size:8px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:rgba(212,168,74,0.85);pointer-events:none;}
+  /* nello Skip a un cliente solo l'elenco non scorreva */
+  #skip-single-hist-list{flex:1;min-height:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(212,168,74,0.76) transparent;}
   /* Grid aveva una linguetta e una freccetta sue: non servono più */
   #grid-tl-panel .grid-tl-tab, #grid-tl-panel .grid-tl-collapse{display:none !important;}
 }
@@ -11824,7 +11827,7 @@ window.addEventListener('load', function(){
       if(aperto && e.clientX < window.innerWidth - 4) chiudi();
     });
   }
-  function parti(){ [].forEach.call(document.querySelectorAll('#main-layout #tl-panel,#skip-history,#grid-tl-panel'), monta); }
+  function parti(){ [].forEach.call(document.querySelectorAll('#main-layout #tl-panel,#skip-history,#skip-single-history,#grid-tl-panel'), monta); }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', parti); else parti();
 })();
 </script>
@@ -12092,7 +12095,10 @@ function prototipoOpen(file, nome){
    è caricato qui dentro, il suo percorso si nasconde e la sua barra resta
    solo come riga dei suoi tasti. Il file del prototipo non viene modificato. */
 var PROTOTIPO_BARRA_CSS = 'header > .bc, header > #breadcrumb{display:none !important;}'
-  + 'header{justify-content:flex-end !important;height:48px !important;background:none !important;border-bottom:0 !important;}';
+  + 'header{justify-content:flex-end !important;height:48px !important;background:none !important;border-bottom:0 !important;}'
+  /* l'avviso "modalità consultazione" stava al centro e copriva il tasto Annulla:
+     a sinistra c'è posto, ora che il percorso del prototipo non c'è più */
+  + '#view-only-banner{left:28px !important;transform:none !important;}';
 function prototipoSistemaBarra(){
   var f = document.getElementById('load-frame'), d;
   try{ d = f && f.contentDocument; }catch(e){ d = null; }

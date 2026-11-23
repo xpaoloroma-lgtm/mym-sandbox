@@ -79,46 +79,49 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
 #work{flex-direction:row;gap:18px;padding:18px 22px;min-height:0;}
 #main{padding-right:0 !important;}
 .col{display:flex;flex-direction:column;min-height:0;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:2px;}
-.col-hd{flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;min-height:56px;box-sizing:border-box;border-bottom:1px solid var(--line);}
+.col-hd{flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 16px;height:84px;box-sizing:border-box;border-bottom:1px solid var(--line);}
 .col-bd{flex:1;min-height:0;overflow-y:auto;padding:12px;scrollbar-width:thin;scrollbar-color:rgba(212,168,74,0.6) transparent;}
 #c-blocchi{flex:0 0 330px;}
 #c-destra{flex:1 1 0;min-width:0;min-height:0;display:flex;flex-direction:column;gap:18px;}
 #c-blocco{flex:none;}
 #c-ese{flex:1 1 0;}
-.b-riga{display:flex;gap:12px;padding:12px;align-items:stretch;}
+.b-riga{display:flex;gap:12px;padding:14px 16px;align-items:stretch;height:84px;box-sizing:border-box;}
+.b-riga > .btn{flex:none;height:auto;}
 #b-posti{flex:1;min-width:0;display:flex;gap:12px;}
 .vuoto{padding:14px 6px;font-size:12px;color:var(--text-xlo);line-height:1.6;}
 /* un blocco fatto */
-.bk{border:1px solid var(--line);border-left:3px solid var(--move);border-radius:2px;padding:10px 12px;margin-bottom:10px;cursor:pointer;background:rgba(26,24,21,0.5);}
+.bk{border:1px solid var(--line);border-left:3px solid var(--move);border-radius:2px;padding:12px 14px;margin-bottom:10px;cursor:pointer;background:rgba(26,24,21,0.5);}
 .bk:hover{border-color:rgba(120,205,155,0.55);}
 .bk.sel{background:rgba(120,205,155,0.07);border-color:rgba(120,205,155,0.7);}
-.bk-n{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--text-hi);letter-spacing:.5px;margin-bottom:6px;}
-.bk-r{font-size:12px;color:var(--text-lo);line-height:1.6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.bk-r i{font-style:normal;display:inline-block;width:52px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-xlo);}
+.bk-n{display:flex;align-items:center;gap:8px;font-size:17px;color:var(--text-hi);letter-spacing:.5px;margin-bottom:6px;}
+.bk-r{font-size:14px;color:var(--text-lo);line-height:1.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bk-r i{font-style:normal;display:inline-block;width:60px;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-xlo);}
 .srt{font-style:normal;font-size:9px;font-weight:700;letter-spacing:1.5px;padding:1px 5px;border-radius:2px;border:1px solid rgba(224,138,138,0.55);color:var(--red);}
 /* il blocco che si sta facendo */
-#b-nome{flex:0 0 24%;min-width:0;height:auto;padding:0 12px;background:rgba(0,0,0,0.25);border:1px solid var(--line);border-radius:2px;color:var(--text-hi);font-size:15px;letter-spacing:.5px;outline:none;}
+#b-nome{flex:0 0 22%;min-width:0;height:auto;padding:0 14px;background:rgba(0,0,0,0.25);border:1px solid var(--line);border-radius:2px;color:var(--text-hi);font-size:15px;letter-spacing:.5px;outline:none;}
 #b-nome:focus{border-color:var(--gold-soft);}
-.posto{flex:1 1 0;min-width:0;border:1px dashed rgba(180,195,210,0.28);border-radius:2px;padding:10px 12px;cursor:pointer;min-height:66px;}
+.posto{flex:1 1 0;min-width:0;border:1px dashed rgba(180,195,210,0.28);border-radius:2px;padding:0 14px;cursor:pointer;display:flex;flex-direction:column;justify-content:center;}
 .posto.att{border-style:solid;border-color:var(--gold-soft);background:rgba(212,168,74,0.06);}
 .posto.pieno{border-style:solid;}
 .posto-t{display:flex;justify-content:space-between;align-items:center;font-size:9px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--text-xlo);}
 .posto-t b{font-weight:600;color:var(--text-lo);letter-spacing:1.5px;}
-.posto-e{margin-top:6px;font-size:14px;color:var(--text-hi);display:flex;align-items:center;gap:8px;min-width:0;}
+.posto-e{margin-top:4px;font-size:14px;color:var(--text-hi);display:flex;align-items:center;gap:8px;min-width:0;}
 .posto-e > span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .posto-e.no{color:var(--text-xlo);font-size:12px;}
 .posto-x{margin-left:auto;background:none;border:0;color:var(--text-xlo);cursor:pointer;font-size:14px;padding:2px 6px;}
 .posto-x:hover{color:var(--red);}
-.b-tasti{display:flex;gap:8px;}
-.b-tasti .btn.via{border-color:rgba(224,138,138,0.4);color:var(--red);}
+.btn.via{border-color:rgba(224,138,138,0.4);color:var(--red);}
 /* l'elenco degli esercizi */
-#e-cerca{flex:1;height:34px;padding:0 10px;background:rgba(0,0,0,0.25);border:1px solid var(--line);border-radius:2px;color:var(--text-hi);font-size:13px;outline:none;min-width:0;}
-.e-filtri{flex:none;display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px;border-bottom:1px solid var(--line);}
-.e-f{height:26px;padding:0 10px;background:none;border:1px solid var(--line);border-radius:2px;color:var(--text-lo);font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
+#e-cerca{flex:0 1 300px;height:34px;padding:0 12px;background:rgba(0,0,0,0.25);border:1px solid var(--line);border-radius:2px;color:var(--text-hi);font-size:13px;outline:none;min-width:0;}
+.e-barra{flex:none;display:flex;align-items:center;flex-wrap:wrap;gap:10px 16px;padding:14px 16px;}
+.e-barra #e-vai{margin-left:auto;}
+.e-filtri{display:flex;flex-wrap:wrap;gap:6px;}
+.e-f{height:34px;padding:0 14px;background:none;border:1px solid var(--line);border-radius:2px;color:var(--text-lo);font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
 .e-f.on{border-color:var(--gold-soft);color:var(--gold-txt);background:rgba(212,168,74,0.08);}
 /* elenco a tabella: quanti blocchi · esercizio · Prot. Fil · in quali blocchi */
 .e-testa,.e-r{display:grid;grid-template-columns:84px minmax(220px,2fr) 150px minmax(0,3fr);align-items:center;column-gap:18px;padding:0 16px;}
-.e-testa{flex:none;height:34px;border-bottom:1px solid rgba(212,168,74,0.35);background:rgba(0,0,0,0.25);}
+.e-testa{flex:none;height:34px;border-top:1px solid var(--line);border-bottom:1px solid rgba(212,168,74,0.35);background:rgba(0,0,0,0.25);}
+.e-testa:empty{display:none;}
 .e-th{all:unset;font-size:9px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--text-xlo);cursor:pointer;white-space:nowrap;}
 .e-th:hover{color:var(--text-hi);}
 .e-th.on{color:var(--gold-txt);}
@@ -185,20 +188,21 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
     <!-- a destra: sopra il blocco che si sta facendo, in una riga sola; sotto gli esercizi -->
     <div id="c-destra">
     <div class="col" id="c-blocco">
-      <div class="col-hd"><span class="lbl" id="b-titolo">Nuovo blocco</span>
-        <div class="b-tasti">
-          <button type="button" class="btn via" id="b-via">Elimina</button>
-          <button type="button" class="btn gold" id="b-salva">Salva blocco</button>
-        </div>
-      </div>
+      <!-- il blocco che si sta facendo, tutto in una riga: salva · nome · esercizio 1 · esercizio 2 · cardio -->
       <div class="b-riga">
+        <button type="button" class="btn gold" id="b-salva">Salva blocco</button>
         <input id="b-nome" placeholder="Nome del blocco" spellcheck="false" autocomplete="off">
         <div id="b-posti"></div>
+        <button type="button" class="btn via" id="b-via">Elimina</button>
       </div>
     </div>
     <div class="col" id="c-ese">
-      <div class="col-hd"><span class="lbl" id="e-titolo">Esercizi</span><input id="e-cerca" placeholder="Cerca esercizio" spellcheck="false" autocomplete="off"><button type="button" class="btn" id="e-vai" title="Apri la pagina Esercizi per aggiungere o segnare un esercizio">Esercizi →</button></div>
-      <div class="e-filtri" id="e-filtri"></div>
+      <!-- una riga sola di comandi, poi la tabella: tutto allineato sullo stesso margine -->
+      <div class="e-barra">
+        <input id="e-cerca" placeholder="Cerca esercizio" spellcheck="false" autocomplete="off">
+        <div class="e-filtri" id="e-filtri"></div>
+        <button type="button" class="btn" id="e-vai" title="Apri la pagina Esercizi per aggiungere o segnare un esercizio">Esercizi →</button>
+      </div>
       <div class="e-testa" id="e-testa"></div>
       <div class="col-bd" id="e-lista" style="padding:0"></div>
     </div>
@@ -271,7 +275,6 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
     }).join('') : '<div class="vuoto">Nessun blocco ancora.</div>';
   }
   function disegnaBozza(){
-    $('b-titolo').textContent = bozza.id ? 'Modifica blocco' : 'Nuovo blocco';
     if($('b-nome').value !== bozza.nome) $('b-nome').value = bozza.nome;
     var P = [
       {t:'Esercizio 1', d:'', v:bozza.e[0]},
@@ -292,7 +295,6 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
   }
   function disegnaEsercizi(){
     var cardio = (posto === 2);
-    $('e-titolo').textContent = cardio ? 'Cardio' : 'Esercizi';
     $('e-filtri').innerHTML = [''].concat(VOCI).map(function(v){
       return '<button type="button" class="e-f' + ((cardio ? v === 'Cardio' : filtro === v) ? ' on' : '') + '" data-f="' + esc(v) + '">' + (v ? esc(v) : 'Tutti') + (SRT[v] ? ' · SRT' : '') + '</button>';
     }).join('');

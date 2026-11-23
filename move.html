@@ -191,7 +191,7 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
    - I blocchi si salvano solo in questo browser: è un prototipo, non tocca i clienti. */
 (function(){
   var SRT = {'Prono/Sup.':1, 'Quadrupedia':1};
-  var VOCI = ['In piedi','Seduto','Prono/Sup.','Quadrupedia'];
+  var VOCI = ['In piedi','Seduto','Prono/Sup.','Quadrupedia','Cardio'];
   var MOVIMENTI = 50;
   var CHIAVE = 'move-blocchi';
   var ESE = [];                    /* {nome, label, pos} */
@@ -265,9 +265,8 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
   function disegnaEsercizi(){
     var cardio = (posto === 2);
     $('e-titolo').textContent = cardio ? 'Cardio' : 'Esercizi';
-    $('e-filtri').style.display = cardio ? 'none' : '';
     $('e-filtri').innerHTML = [''].concat(VOCI).map(function(v){
-      return '<button type="button" class="e-f' + (filtro === v ? ' on' : '') + '" data-f="' + esc(v) + '">' + (v ? esc(v) : 'Tutti') + (SRT[v] ? ' · SRT' : '') + '</button>';
+      return '<button type="button" class="e-f' + ((cardio ? v === 'Cardio' : filtro === v) ? ' on' : '') + '" data-f="' + esc(v) + '">' + (v ? esc(v) : 'Tutti') + (SRT[v] ? ' · SRT' : '') + '</button>';
     }).join('');
     if(!caricati){ $('e-lista').innerHTML = '<div class="vuoto" style="padding:14px">Carico gli esercizi…</div>'; return; }
     if(errore){ $('e-lista').innerHTML = '<div class="vuoto" style="padding:14px">' + esc(errore) + '</div>'; return; }
@@ -304,7 +303,12 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
     var p = ev.target.closest('.posto'); if(!p) return;
     posto = +p.getAttribute('data-posto'); disegna();
   });
-  $('e-filtri').addEventListener('click', function(ev){ var f = ev.target.closest('[data-f]'); if(!f) return; filtro = f.getAttribute('data-f'); disegnaEsercizi(); });
+  $('e-filtri').addEventListener('click', function(ev){ var f = ev.target.closest('[data-f]'); if(!f) return;
+    var v = f.getAttribute('data-f');
+    /* il filtro Cardio e il posto del cardio vanno insieme */
+    if(v === 'Cardio'){ posto = 2; }
+    else { filtro = v; if(posto === 2) posto = bozza.e[0] ? 1 : 0; }
+    disegna(); });
   $('e-lista').addEventListener('click', function(ev){
     var r = ev.target.closest('.e-r'); if(!r || r.classList.contains('usato')) return;
     var n = r.getAttribute('data-e');

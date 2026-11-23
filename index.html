@@ -10819,7 +10819,9 @@ function clEsc(t){ return String(t == null ? '' : t).replace(/&/g,'&amp;').repla
 function clData(isoGiorno){ var p = String(isoGiorno).slice(0,10).split('-'); return new Date(+p[0], +p[1]-1, +p[2], 12); }
 function clOggi(){ var d = new Date(); d.setHours(12,0,0,0); return d; }
 function clGiorniDa(d){ return Math.round((clOggi() - d) / 86400000); }
-function clPt(){ try{ return sessionStorage.getItem('mym_pt') || ''; }catch(e){ return ''; } }
+/* Nessun trainer già scelto: chi sei lo dici ogni volta, per il cliente che hai aperto. */
+var _clPtScelto = null;
+function clPt(){ return (_clPtScelto && _clPtScelto.id === _clAperto) ? _clPtScelto.pt : ''; }
 /* cosa è successo quel giorno in Open: un livello salito o un esercizio cambiato */
 function clCosa(c, giorno){
   var log = (c.state && c.state.open && c.state.open.log) || [];
@@ -11093,7 +11095,7 @@ window.addEventListener('load', function(){
   }
   lista.addEventListener('click', function(ev){
     var t = ev.target, e;
-    if((e = t.closest('[data-pt]'))){ try{ sessionStorage.setItem('mym_pt', e.getAttribute('data-pt')); }catch(x){} clDisegna(); return; }
+    if((e = t.closest('[data-pt]'))){ _clPtScelto = { id:_clAperto, pt:e.getAttribute('data-pt') }; clDisegna(); return; }
     if((e = t.closest('[data-entra]'))){ clEntra(e.getAttribute('data-entra')); return; }
     if((e = t.closest('[data-dettagli]'))){ cdOpen(e.getAttribute('data-dettagli')); return; }
     if((e = t.closest('[data-nuovo]'))){ var n = e.getAttribute('data-nuovo'); inp.value = ''; if(typeof csSearchAddNew === 'function') csSearchAddNew(n); clDisegna(); return; }

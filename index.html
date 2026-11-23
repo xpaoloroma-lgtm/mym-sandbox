@@ -10385,14 +10385,17 @@ tr.ore-scala td{border-top:1px solid var(--border);}
 </style>
 <script id="demo-testa">
 /* ══ DEMO ══ clienti finti per vedere le pagine piene. Si accende dal tasto
-   "demo" nella barra in alto e vale solo per questa scheda del browser.
+   "demo" nella barra in alto; nel ramo parte già accesa.
    Con la demo accesa NIENTE dei clienti arriva a Supabase: ogni lettura e
    ogni scrittura della tabella dei clienti viene fermata qui e servita da
    una lista finta tenuta in memoria. Anche la copia locale dei clienti veri
    non viene né letta né toccata. Ore, Riunioni ed Esercizi restano veri. */
 (function(){
-  var on = false;
-  try{ on = sessionStorage.getItem('mym_demo') === '1'; }catch(e){}
+  /* NEL RAMO la demo parte accesa da sola: si entra sempre sui clienti finti,
+     e i veri si vedono solo spegnendola dal tasto. DA TOGLIERE prima di
+     rendere operativo il ramo: in uso vero si deve partire dai clienti veri. */
+  var on = true;
+  try{ on = sessionStorage.getItem('mym_demo') !== '0'; }catch(e){}
   window.MYM_DEMO = on;
   if(!on) return;
   var _gi = Storage.prototype.getItem, _si = Storage.prototype.setItem;
@@ -10912,14 +10915,14 @@ function demoGenera(){
 }
 function demoCambia(){
   try{
-    if(window.MYM_DEMO) sessionStorage.removeItem('mym_demo'); else sessionStorage.setItem('mym_demo', '1');
+    sessionStorage.setItem('mym_demo', window.MYM_DEMO ? '0' : '1');
   }catch(e){ return; }
   location.reload();
 }
 window.addEventListener('load', function(){
   var b = document.getElementById('demo-btn');
   if(!b) return;
-  b.textContent = window.MYM_DEMO ? 'clienti finti · chiudi' : 'demo';
+  b.textContent = window.MYM_DEMO ? 'clienti finti · passa ai veri' : 'clienti veri · torna alla demo';
   b.classList.toggle('acceso', !!window.MYM_DEMO);
 });
 </script>

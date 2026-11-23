@@ -10235,20 +10235,24 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   #home-riga{display:flex;flex-direction:column;align-items:stretch;gap:14px;}
   /* la griglia riempie la colonna: caselle in percentuale, così si allarga e
      si abbassa con il monitor senza deformare le scritte */
-  #mappa{display:block;position:relative;flex:1 1 auto;min-height:260px;width:100%;font-family:var(--font);}
-  .mp-g{position:absolute;left:14px;right:18px;top:26px;bottom:26px;}
+  #mappa{display:block;position:relative;flex:1 1 auto;min-height:330px;width:100%;font-family:var(--font);}
+  .mp-g{position:absolute;left:124px;right:18px;top:26px;bottom:62px;}
   .mp-l{position:absolute;width:0;height:0;}
   .mp-lv{border-left:1px dashed rgba(200,214,228,0.20);}
   .mp-lh{border-top:1px dashed rgba(200,214,228,0.20);}
-  .mp-ay{position:absolute;left:14px;top:6px;bottom:26px;width:1px;background:rgba(200,214,228,0.5);}
-  .mp-ax{position:absolute;left:14px;right:0;bottom:26px;height:1px;background:rgba(200,214,228,0.5);}
+  .mp-ay{position:absolute;left:124px;top:6px;bottom:62px;width:1px;background:rgba(200,214,228,0.5);}
+  .mp-ax{position:absolute;left:124px;right:0;bottom:62px;height:1px;background:rgba(200,214,228,0.5);}
   .mp-ay::before,.mp-ax::after{content:'';position:absolute;width:7px;height:7px;box-sizing:border-box;border-top:1px solid rgba(200,214,228,0.5);transform:rotate(45deg);}
   .mp-ay::before{left:-3px;top:0;border-left:1px solid rgba(200,214,228,0.5);}
   .mp-ax::after{right:0;top:-3px;border-right:1px solid rgba(200,214,228,0.5);}
   .mp-t{position:absolute;font-size:11px;font-weight:500;letter-spacing:5px;text-transform:uppercase;color:#e8c878;}
   .mp-e{position:absolute;font-size:10px;font-weight:500;letter-spacing:1.5px;line-height:1.35;text-transform:uppercase;color:#f0ebdc;}
-  .mp-ey{left:0;width:136px;height:48px;display:flex;align-items:center;justify-content:flex-end;text-align:right;}
-  .mp-ex{width:156px;text-align:center;}
+  /* i paletti: a sinistra quelli della difficoltà, sotto quelli dell'autonomia, ognuno all'altezza della sua linea */
+  .mp-ys{position:absolute;left:0;width:112px;top:26px;bottom:62px;}
+  .mp-xs{position:absolute;left:124px;right:18px;bottom:0;height:54px;}
+  .mp-ey{right:0;width:112px;transform:translateY(-50%);text-align:right;}
+  .mp-ex{top:0;width:25%;transform:translateX(-50%);text-align:center;padding:0 4px;box-sizing:border-box;}
+  @media (max-height:860px), (max-width:1500px){ .mp-e{font-size:8.5px;letter-spacing:0.6px;line-height:1.25;} .mp-ex{font-size:8px;letter-spacing:0.1px;} }
   .mp-k{
     position:absolute;width:calc(25% - 8px);height:calc(20% - 8px);box-sizing:border-box;overflow:hidden;padding-top:3px;
     border:1px solid rgba(180,195,210,0.18);border-radius:4px;
@@ -10534,8 +10538,19 @@ tr.ore-scala td{border-top:1px solid var(--border);}
     </div>
     <div class="mp-ay"></div>
     <div class="mp-ax"></div>
-    <div class="mp-t" style="left:26px;top:2px">Difficoltà</div>
-    <div class="mp-t" style="right:18px;bottom:2px">Autonomia</div>
+    <div class="mp-t" style="left:136px;top:2px">Difficoltà</div>
+    <div class="mp-t" style="right:22px;bottom:70px">Autonomia</div>
+    <div class="mp-ys">
+      <div class="mp-e mp-ey" style="top:20%">3/week</div>
+      <div class="mp-e mp-ey" style="top:40%">2/week</div>
+      <div class="mp-e mp-ey" style="top:60%">Basi: aerobica, mobilità, schemi di movimento</div>
+      <div class="mp-e mp-ey" style="top:80%">SRT</div>
+    </div>
+    <div class="mp-xs">
+      <div class="mp-e mp-ex" style="left:25%">Ricorda da solo 5-6 esercizi</div>
+      <div class="mp-e mp-ex" style="left:50%">Autoregolazione: muscolare, cardio, intensità</div>
+      <div class="mp-e mp-ex" style="left:75%">Esplorazione: prova, scopre, propone</div>
+    </div>
   </div>
   <div id="home-lato">
   <div id="mp-leg">
@@ -11007,7 +11022,7 @@ function prMisura(){
      scritte: crescono con la casella, e tre nomi devono starci. */
   var mappa = document.getElementById('mappa');
   if(!mappa || !mappa.clientHeight) return;
-  var casella = (mappa.clientHeight - 52) / 5;
+  var casella = (mappa.clientHeight - 88) / 5;
   var fs = Math.max(10, Math.min((casella - 14) / 4.7, 16));
   mappa.style.setProperty('--fs', fs.toFixed(1) + 'px');
 }
@@ -12119,18 +12134,29 @@ var PROTOTIPO_BARRA_CSS = 'header > .bc, header > #breadcrumb{display:none !impo
   /* l'avviso "modalità consultazione" stava al centro e copriva il tasto Annulla:
      a sinistra c'è posto, ora che il percorso del prototipo non c'è più */
   + '#view-only-banner{left:28px !important;transform:none !important;}';
-function prototipoSistemaBarra(){
-  var f = document.getElementById('load-frame'), d;
+/* La pagina Esercizi ha lo stesso problema: una sua barra con un suo percorso
+   ("Sandbox › Esercizi FLOW"), che non porta da nessuna parte. Dentro Sandbox
+   il percorso è solo quello della barra vera; la sua diventa la riga dei
+   suoi tasti (Esercizi / Interdipendenze, Salva, Esporta). */
+var ESERCIZI_BARRA_CSS = 'header > .bc{display:none !important;}'
+  + 'header{height:46px !important;background:none !important;}'
+  + '.tabs{margin-left:0 !important;}';
+function sbxSistemaBarra(idFrame, css){
+  var f = document.getElementById(idFrame), d;
   try{ d = f && f.contentDocument; }catch(e){ d = null; }
   if(!d || !d.head || d.getElementById('sbx-barra')) return;
   var st = d.createElement('style');
   st.id = 'sbx-barra';
-  st.textContent = PROTOTIPO_BARRA_CSS;
+  st.textContent = css;
   d.head.appendChild(st);
 }
+function prototipoSistemaBarra(){ sbxSistemaBarra('load-frame', PROTOTIPO_BARRA_CSS); }
+function eserciziSistemaBarra(){ sbxSistemaBarra('ese-frame', ESERCIZI_BARRA_CSS); }
 window.addEventListener('load', function(){
   var f = document.getElementById('load-frame');
   if(f) f.addEventListener('load', prototipoSistemaBarra);
+  var e = document.getElementById('ese-frame');
+  if(e) e.addEventListener('load', eserciziSistemaBarra);
 });
 function prototipoClose(){
   document.getElementById('load-screen').classList.add('off');

@@ -413,8 +413,12 @@ function mostraStato(quando){
 window.addEventListener('beforeunload',function(e){ if(NONSAL>0){ e.preventDefault(); e.returnValue=''; } });
 document.addEventListener('keydown',function(e){ if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'){ e.preventDefault(); salvaFile(); } });
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');}
-function opts(id,k){var v={};R.forEach(function(r){if(r[k])v[r[k]]=1;});
- var sel=document.getElementById(id), cur=sel.value, ks=Object.keys(v).sort();
+/* Prot. Fil: le voci sono fisse (c'è anche Cardio, che vale con e senza SRT);
+   se nei dati ne esiste un'altra, si aggiunge in coda */
+var FIL=['In piedi','Seduto','Prono/Sup.','Quadrupedia','Cardio'];
+function filVoci(){ var ks=FIL.slice(); R.forEach(function(r){ if(r.pos&&ks.indexOf(r.pos)<0) ks.push(r.pos); }); return ks; }
+function opts(id,k){
+ var sel=document.getElementById(id), cur=sel.value, ks=filVoci();
  sel.innerHTML='<option value="">tutti</option>'+ks.map(function(x){return '<option>'+esc(x)+'</option>';}).join('');
  sel.value=cur;
 }
@@ -483,7 +487,7 @@ tb.addEventListener('click',function(e){
   if(pmBtn===b){ pmChiudi(); return; }
   pmBtn=b; var f=b.dataset.f, cur=R[+b.dataset.i][f], lista;
   if(LISTE[f]) lista=LISTE[f];
-  else { var v={}; R.forEach(function(r){ if(r.pos) v[r.pos]=1; }); lista=Object.keys(v).sort(); }
+  else lista=filVoci();
   pm.innerHTML='<button data-v="" class="'+(cur?'':'sel')+'">— vuoto</button>'
     +lista.map(function(x){ return '<button data-v="'+esc(x)+'" class="'+(x===cur?'sel ':'')+(f==='ste'?'c-'+PILL[x]:'')+'"'+(f==='fam'?' style="color:'+FAMCOL[x]+'"':'')+'>'+esc(x)+(f==='pos'&&SRT[x]?'<em class="srt">SRT</em>':'')+'</button>'; }).join('')
     ;

@@ -10287,6 +10287,14 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   .mp-r.sel{background:rgba(212,168,74,0.10);}
   .mp-r.sel > b{color:#E4B85A;}
 
+  /* passando sopra un protocollo nell'elenco, sulla mappa si accende la sua zona */
+  .mp-k,.mp-p,.mp-s i,.mp-r{transition:opacity 0.18s, border-color 0.18s, background 0.18s;}
+  #mappa.foco .mp-k{opacity:0.2;}
+  #mappa.foco .mp-k.dentro{opacity:1;border-color:var(--fc);background:color-mix(in srgb, var(--fc) 13%, transparent);}
+  #mappa.foco .mp-k.dentro .mp-p:not(.io){opacity:0.28;}
+  #mappa.foco .mp-k.dentro .mp-s i:not(.io){opacity:0.18;}
+  #mappa.foco .mp-k.dentro .mp-p.io{color:var(--fc);}
+  #mp-leg.foco .mp-r:not(.io){opacity:0.38;}
   #home-riga .proto-groups{flex-direction:column;align-items:stretch;justify-content:flex-start;gap:8px;}
   #home-riga .proto-group{gap:0;padding:0;margin:0;align-items:stretch;}
   #home-riga .proto-group-cards{padding:0;margin:0;align-items:stretch;}
@@ -11329,6 +11337,45 @@ window.addEventListener('load', function(){
       [].forEach.call(document.querySelectorAll('#home-riga .sel'), function(b){ b.classList.remove('sel'); });
     }).observe(_psel, {attributes:true, attributeFilter:['class']});
   }
+  /* ── La zona di un protocollo ──
+     Il mouse sopra una riga dell'elenco accende sulla mappa le caselle di
+     quel protocollo e spegne le altre. Si guarda la posizione del mouse e
+     non l'evento sulla riga, perché le righe di Lift e Move sono tasti spenti
+     e i tasti spenti non sentono il mouse. */
+  (function(){
+    var leg = document.getElementById('mp-leg'), mappa = document.getElementById('mappa');
+    if(!leg || !mappa) return;
+    var attuale = null;
+    function accendi(riga){
+      if(riga === attuale) return;
+      attuale = riga;
+      [].forEach.call(mappa.querySelectorAll('.dentro, .io'), function(e){ e.classList.remove('dentro','io'); });
+      [].forEach.call(leg.querySelectorAll('.io'), function(e){ e.classList.remove('io'); });
+      mappa.classList.toggle('foco', !!riga);
+      leg.classList.toggle('foco', !!riga);
+      if(!riga) return;
+      var nome = (riga.querySelector('b') || {}).textContent || '';
+      mappa.style.setProperty('--fc', riga.style.getPropertyValue('--c'));
+      riga.classList.add('io');
+      [].forEach.call(mappa.querySelectorAll('.mp-k'), function(k){
+        var nomi = k.querySelectorAll('.mp-p'), pezzi = k.querySelectorAll('.mp-s i');
+        [].forEach.call(nomi, function(n, i){
+          if(n.textContent.trim() !== nome) return;
+          k.classList.add('dentro'); n.classList.add('io');
+          if(pezzi[i]) pezzi[i].classList.add('io');
+        });
+      });
+    }
+    leg.addEventListener('mousemove', function(e){
+      var trovata = null;
+      [].forEach.call(leg.querySelectorAll('.mp-r'), function(r){
+        var q = r.getBoundingClientRect();
+        if(e.clientY >= q.top && e.clientY < q.bottom && e.clientX >= q.left && e.clientX <= q.right) trovata = r;
+      });
+      accendi(trovata);
+    });
+    leg.addEventListener('mouseleave', function(){ accendi(null); });
+  })();
   /* quanti clienti: per ora tutte le schede cliente che esistono (le stesse
      della ricerca). Nei dati non c'è scritto in quale protocollo sta un
      cliente, quindi questo numero è una scelta e va rivisto. */

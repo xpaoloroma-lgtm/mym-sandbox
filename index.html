@@ -10886,8 +10886,11 @@ function clSegni(c){
   return segni;
 }
 function clGiu(c, proto){
+  /* un anno indietro e un mese avanti: il futuro resta vuoto, serve a far
+     vedere dov'è oggi. Oggi cade nello stesso punto in tutte le righe. */
   var oggi = clOggi(), inizio = new Date(oggi); inizio.setFullYear(inizio.getFullYear() - 1);
-  var durata = oggi - inizio, ETI = 86, RH = 17, TOP = 22;
+  var fine = new Date(oggi); fine.setMonth(fine.getMonth() + 1);
+  var durata = fine - inizio, ETI = 86, RH = 17, TOP = 22;
   var tratti = c.state ? clTratti(c) : [], segni = c.state ? clSegni(c) : [];
   var corsie = ['lift','load','self','open','move','grid'];
   tratti.forEach(function(t){ if(corsie.indexOf(t.proto) === -1 && t.a > inizio) corsie.push(t.proto); });
@@ -10896,11 +10899,12 @@ function clGiu(c, proto){
   var h = '<div class="cl-tl" style="height:' + (TOP + corsie.length * RH + 4) + 'px"><div style="position:absolute;left:' + ETI + 'px;right:0;top:0;bottom:0">';
   /* i mesi */
   var m = new Date(inizio.getFullYear(), inizio.getMonth() + 1, 1, 12);
-  while(m < oggi){
-    h += '<div class="cl-tl-mese" style="left:' + x(m) + '%;height:' + (TOP + corsie.length * RH + 4) + 'px">' + CL_MESI[m.getMonth()] + '</div>';
+  while(m < fine){
+    h += '<div class="cl-tl-mese' + (m > oggi ? ' dopo' : '') + '" style="left:' + x(m) + '%;height:' + (TOP + corsie.length * RH + 4) + 'px">' + CL_MESI[m.getMonth()] + '</div>';
     m = new Date(m.getFullYear(), m.getMonth() + 1, 1, 12);
   }
   corsie.forEach(function(p){ h += '<div class="cl-tl-riga" style="left:0;right:0;top:' + yy(p) + 'px"></div>'; });
+  h += '<div class="cl-tl-oggi" style="left:' + x(oggi) + '%;height:' + (TOP + corsie.length * RH + 4) + 'px"><span>oggi</span></div>';
   var prec = null;
   tratti.forEach(function(t){
     if(t.a <= inizio){ prec = t; return; }
@@ -10956,8 +10960,9 @@ function prMisura(){
   var z = document.getElementById('pr-zona'), mappa = document.getElementById('mappa');
   if(!z || !mappa || !z.clientWidth) return;
   var lato = document.getElementById('home-lato');
-  /* sotto la griglia devono starci l'elenco, il grafico (almeno 190) e i tasti */
-  var restoSotto = (lato ? lato.offsetHeight : 210) + 190 + 34 + 16 * 3 + 14;
+  /* sotto la griglia devono starci l'elenco, il grafico e i tasti: il resto va alla griglia */
+  var graf = document.getElementById('proto-chart-wrap');
+  var restoSotto = (lato ? lato.offsetHeight : 210) + (graf ? graf.offsetHeight : 120) + 34 + 16 * 3 + 14;
   var alta = z.clientHeight - restoSotto;
   var massima = Math.round(z.clientWidth * 0.62);     /* oltre, le caselle diventano troppo alte */
   mappa.style.height = Math.max(300, Math.min(alta, massima)) + 'px';
@@ -11477,13 +11482,13 @@ window.addEventListener('load', function(){
   #pr-zona{display:flex;flex-direction:column;gap:16px;min-height:0;overflow-y:auto;overflow-x:hidden;}
   #home-riga{flex:none;}
   /* grafico e tasti: larghi come la griglia, allineati ai suoi bordi */
-  #pr-zona > #proto-chart-wrap{order:2;flex:1 1 auto;min-height:190px;display:flex;flex-direction:column;box-sizing:border-box;
+  #pr-zona > #proto-chart-wrap{order:2;flex:none;display:flex;flex-direction:column;box-sizing:border-box;
     margin:0 18px 0 14px;padding:0;width:auto;}
-  #proto-chart-wrap > div[style*="height:200px"]{flex:1 1 auto;height:auto !important;min-height:150px;}
+  #proto-chart-wrap > div[style*="height:200px"]{flex:none;height:86px !important;}
   /* i tre tasti in basso: stessa misura, in fila, dentro la colonna */
   #pr-zona #proto-tools{position:static !important;display:flex;gap:8px;margin:0 0 0 auto;}
   #pr-zona #proto-tools > button{position:static !important;height:34px;padding:0 14px;font-size:10px;letter-spacing:3px;}
-  #pr-zona > #proto-actions{order:3;flex:none;justify-content:flex-end;box-sizing:border-box;width:auto;margin:0 18px 0 14px;}
+  #pr-zona > #proto-actions{order:3;flex:none;margin-top:auto !important;justify-content:flex-end;box-sizing:border-box;width:auto;margin:0 18px 0 14px;}
   #proto-chart-title{font-size:9px;letter-spacing:3px;color:rgba(190,204,218,0.5);}
   /* i vecchi riquadri di Grid e Skip: restano solo le schede da rifare */
   #home-riga .proto-group-sandbox{display:none !important;}
@@ -11525,6 +11530,9 @@ window.addEventListener('load', function(){
   .cl-giu{position:relative;border-top:1px solid rgba(212,168,74,0.30);padding:14px 18px 14px 18px;}
   .cl-tl{position:relative;}
   .cl-tl-mese{position:absolute;top:0;font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:rgba(190,204,218,0.5);padding-left:4px;border-left:1px solid rgba(180,195,210,0.07);box-sizing:border-box;}
+  .cl-tl-mese.dopo{color:rgba(190,204,218,0.28);}
+  .cl-tl-oggi{position:absolute;top:0;width:0;border-left:1px solid rgba(240,235,220,0.75);}
+  .cl-tl-oggi span{position:absolute;left:5px;bottom:-2px;font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:#f0ebdc;}
   .cl-tl-nome{position:absolute;left:0;display:flex;align-items:center;gap:9px;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#f0ebdc;white-space:nowrap;}
   .cl-tl-nome i{width:3px;height:11px;background:var(--lc);}
   .cl-tl-nome.tratt i{background:none;border-left:3px dashed rgba(200,214,228,0.7);box-sizing:border-box;}
@@ -21315,8 +21323,8 @@ function protoChartBuild(){
       borderColor: ptColors[pt] || 'rgba(180,195,210,0.82)',
       backgroundColor: 'transparent',
       borderWidth: 1.8,
-      pointRadius: gran === 'day' ? 0 : 2,
-      pointHoverRadius: 5,
+      pointRadius: 0,          /* senza puntini: sulla pagina dei protocolli è piccolo */
+      pointHoverRadius: 4,
       tension: gran === 'day' ? 0.15 : 0.35
     };
   });

@@ -10792,31 +10792,45 @@ function demoGenera(){
     if(!st.createdDate) st.createdDate = st.startDate;
     st.journal.push({ts:st.startDate, kind:'progression_start', proto:'open', pt:pt, detail:seq.label});
   }
-  /* sedute da "da" a "a" giorni fa. freq = sedute a settimana, passo = ogni
-     quante sedute si sale di uno step. Ritorna il giorno dell'ultima seduta. */
-  function sedute(st, da, a, freq, passo){
-    var steps = SEQUENCES[st.type].steps, g = da, conta = 0, prossimo = passo + tra(-1, 1), ultima = da;
-    while(true){
-      var salto = Math.max(2, Math.round(7 / freq) + tra(-2, 3));
-      var mese = giorno(g).getMonth();
-      if(mese === 7) salto = Math.round(salto * 1.9);        /* agosto */
-      if(mese === 11 && giorno(g).getDate() > 20) salto += 6; /* feste */
-      if(r() < 0.12) salto += tra(5, 12);                     /* una settimana saltata */
-      g -= salto;
-      if(g <= a) break;
-      var pt = r() < 0.78 ? st.pt : uno(PT), ora = tra(7, 20);
+  /* Il cliente ha i suoi appuntamenti fissi nella settimana (uno, due o tre).
+     Da "da" ad "a" giorni fa si scorrono tutti: lo studio è chiuso a
+     ferragosto e a Natale, e ogni appuntamento salta con la probabilità di
+     annullo di quel cliente. passo = ogni quante sedute si sale di uno step.
+     Ritorna il giorno dell'ultima seduta fatta. */
+  var STAT = {appuntamenti:0, annullati:0};
+  function chiuso(d){
+    var m = d.getMonth(), g = d.getDate();
+    return (m === 7 && g >= 8 && g <= 22) || (m === 11 && g >= 24) || (m === 0 && g <= 1);
+  }
+  function appuntamenti(da, a, cli, fatta){
+    var ultima = null;
+    for(var g = da - 1; g > a; g--){
+      var d = giorno(g), slot = null;
+      cli.slot.forEach(function(x){ if(x.wd === d.getDay()) slot = x; });
+      if(!slot || chiuso(d)) continue;
+      STAT.appuntamenti++;
+      if(r() < cli.annullo){ STAT.annullati++; continue; }
+      var ora = r() < 0.85 ? slot.ora : tra(7, 20);
+      if(fatta(g, ora) === false) { ultima = g; break; }
+      ultima = g;
+    }
+    return ultima === null ? da : ultima;
+  }
+  function sedute(st, da, a, cli, passo){
+    var steps = SEQUENCES[st.type].steps, conta = 0, prossimo = passo + tra(-1, 1);
+    return appuntamenti(da, a, cli, function(g, ora){
+      var pt = r() < 0.8 ? st.pt : uno(PT);
       st.log.push({pt:pt, date:iso(g), time:ora + ':00', type:'session'});
       st.journal.push({ts:ts(g, ora), kind:'session', proto:'open', pt:pt, detail:null});
-      ultima = g; conta++;
+      conta++;
       if(conta >= prossimo && st.current < steps.length){
         var o = steps[st.current], daLiv = st.levels[o.fam];
         st.levels[o.fam] = o.to; st.current++;
         st.log.push({type:'step', date:iso(g), fam:o.fam, from_lvl:daLiv, to:o.to, label:FAM_LABEL[o.fam] + ' → L' + o.to, pt:pt});
         conta = 0; prossimo = passo + tra(-1, 2);
-        if(st.current >= steps.length){ st.completedAt = ts(g, ora); break; }
+        if(st.current >= steps.length){ st.completedAt = ts(g, ora); return false; }
       }
-    }
-    return ultima;
+    });
   }
   function chiudi(st, esito, fa){
     var seq = SEQUENCES[st.type], nomi = {};
@@ -10834,16 +10848,18 @@ function demoGenera(){
     st.journal.push({ts:fine, kind:'progression_end', proto:'open', pt:st.pt, detail:seq.label + ' · ' + esito + ' · ' + st.current + '/' + seq.steps.length});
   }
   function altroTipo(t){ var x = uno(TIPI); return x === t ? TIPI[(TIPI.indexOf(t) + 1) % TIPI.length] : x; }
-  function griglia(st, da, a, freq, pt){
+  function griglia(st, da, a, cli, pt){
     var righe = ['Camminata tappeto','Mobilità anche','Goblet Squat','Remata elastico','Plank','Bike'];
-    var log = [], g = da;
-    while(true){ g -= Math.max(3, Math.round(7 / freq) + tra(-2, 3)); if(g <= a) break; log.push({pt:pt, date:iso(g), time:tra(8, 19) + ':00'}); }
+    var log = [];
+    appuntamenti(da, a, cli, function(g, ora){
+      log.push({pt:pt, date:iso(g), time:ora + ':00'});
+      st.journal.push({ts:ts(g, ora), kind:'session', proto:'grid', pt:pt, detail:null});
+    });
     st.grid = {pt:pt, startDate:ts(da, 18), archive:[], schede:[{
       id:'sch-demo-' + tra(1000, 9999), cells:righe.map(function(t, i){ return {c:0, r:i, t:t}; }), log:log,
       description:'Scheda base', createdAt:ts(da, 18), archivedAt:null, isCurrent:true,
       status:'active', sessionCount:log.length, activeFor:8
     }]};
-    log.forEach(function(e){ st.journal.push({ts:e.date + 'T' + ('0'+e.time).slice(-5) + ':00.000Z', kind:'session', proto:'grid', pt:e.pt, detail:null}); });
   }
 
   var NOMI = ['Giulia Santoro','Marco Bellini','Elena Caruso','Davide Orlandi','Sara Lombardi','Luca Parisi',
@@ -10855,9 +10871,9 @@ function demoGenera(){
     'Lucia Farina','Giovanni Sartori'];
   /* che tipo di percorso ha ciascuno, nell'ordine dei nomi */
   var PERCORSI = ['costante','costante','chiude','pianta','torna','costante','sparito','nuovo','chiude','costante',
-    'pianta','grid','torna','costante','sparito','chiude','nuovo','pianta','costante','torna',
-    'grid','sparito','costante','chiude','pianta','nuovo','torna','costante','sparito','grid',
-    'chiude','pianta','mai','torna','nuovo','sparito','grid','costante'];
+    'pianta','cambia','torna','costante','sparito','chiude','nuovo','pianta','costante','torna',
+    'cambia','sparito','costante','chiude','pianta','nuovo','torna','costante','sparito','cambia',
+    'chiude','pianta','mai','torna','nuovo','sparito','cambia','costante'];
   /* i red flag: nome → elenco. Circa un cliente su tre. */
   var RF = {
     'Marco Bellini':{ipertensione:'ramipril, controllata'},
@@ -10876,43 +10892,53 @@ function demoGenera(){
   };
   var CUSTOM = {'Roberto Pagani':{nome:'Ernia discale L4-L5', descrizione:'diagnosi 2024', cosaFare:'niente flessione sotto carico', attivo:true}};
 
-  return NOMI.map(function(nome, i){
+  /* Quante volte a settimana: metà una, il 40% due, il 10% tre (38 clienti:
+     19, 15, 4). Annulli: ognuno ha la sua regolarità, tra il 7% e il 31%;
+     nell'insieme gli appuntamenti annullati vengono il 18% circa. Sono i numeri dati da Paolo; la forma è una scelta. */
+  var VOLTE = [1,2,1,1,2,1,3,2,1,1, 2,1,2,2,1,2,1,3,1,2, 1,2,1,1,2,1,2,3,1,2, 1,2,1,1,2,1,3,2];
+  var ANNULLI = [0.07, 0.11, 0.15, 0.19, 0.23, 0.27, 0.31];
+  var GIORNI = [[1],[2],[3],[4],[5],[6],[1,4],[2,5],[1,3],[3,6],[2,4],[1,3,5],[2,4,6]];
+
+  var out = NOMI.map(function(nome, i){
     var st = {journal:[], openArchive:[], _sessionConsistencyDone:true};
     var pt = PT[i % PT.length], tipo = TIPI[i % TIPI.length], p = PERCORSI[i];
-    var freq = 0.9 + r() * 0.9;          /* da quasi 1 a quasi 2 a settimana */
-    var passo = tra(3, 6), ultima = null;
+    var volte = VOLTE[i], possibili = GIORNI.filter(function(x){ return x.length === volte; });
+    var cli = {annullo:ANNULLI[(i * 3 + 1) % ANNULLI.length],
+               slot:uno(possibili).map(function(wd){ return {wd:wd, ora:tra(7, 20)}; })};
+    var passo = volte === 1 ? tra(3, 4) : (volte === 2 ? tra(4, 6) : tra(6, 8)), ultima = null;
     if(p === 'costante'){
-      apri(st, tipo, tra(150, 270), pt); ultima = sedute(st, tra(150, 270), 0, freq, passo);
-      if(st.completedAt){ chiudi(st, 'completata', ultima); apri(st, altroTipo(tipo), ultima - 3, pt); ultima = sedute(st, ultima - 3, 0, freq, passo); }
+      var da0 = tra(150, 270);
+      apri(st, tipo, da0, pt); ultima = sedute(st, da0, 0, cli, passo);
+      if(st.completedAt){ chiudi(st, 'completata', ultima); apri(st, altroTipo(tipo), ultima - 3, pt); ultima = sedute(st, ultima - 3, 0, cli, passo); }
     } else if(p === 'chiude'){
       var da = tra(300, 380);
-      apri(st, tipo, da, pt); ultima = sedute(st, da, 60, freq + 0.3, 3);
+      apri(st, tipo, da, pt); ultima = sedute(st, da, 60, cli, Math.max(2, passo - 1));
       chiudi(st, st.completedAt ? 'completata' : 'interrotta', ultima);
-      apri(st, altroTipo(tipo), ultima - tra(4, 14), pt); ultima = sedute(st, ultima - 6, 0, freq, passo);
+      apri(st, altroTipo(tipo), ultima - tra(4, 14), pt); ultima = sedute(st, ultima - 6, 0, cli, passo);
     } else if(p === 'pianta'){
       var da2 = tra(200, 300), stop = tra(90, 140);
-      apri(st, tipo, da2, pt); ultima = sedute(st, da2, stop, freq, passo + 1);
+      apri(st, tipo, da2, pt); ultima = sedute(st, da2, stop, cli, passo + 1);
       chiudi(st, 'interrotta', ultima);
-      apri(st, altroTipo(tipo), ultima - tra(5, 20), pt); ultima = sedute(st, ultima - 8, 0, freq, passo);
+      apri(st, altroTipo(tipo), ultima - tra(5, 20), pt); ultima = sedute(st, ultima - 8, 0, cli, passo);
     } else if(p === 'torna'){
-      var da3 = tra(180, 260), buco = tra(40, 75), rientro = tra(10, 24);
-      apri(st, tipo, da3, pt); sedute(st, da3, rientro + buco, freq, passo);
-      ultima = sedute(st, rientro, 0, freq, passo + 2);
-      if(ultima > rientro){              /* è tornato da poco: almeno una seduta */
-        var gg = tra(1, 5), oo = tra(8, 19);
+      var da3 = tra(180, 260), buco = tra(40, 75), rientro = tra(14, 28);
+      apri(st, tipo, da3, pt); sedute(st, da3, rientro + buco, cli, passo);
+      ultima = sedute(st, rientro, 0, cli, passo + 2);
+      if(ultima >= rientro){             /* è tornato da poco: almeno una seduta */
+        var gg = tra(1, 5), oo = cli.slot[0].ora;
         st.log.push({pt:pt, date:iso(gg), time:oo + ':00', type:'session'});
         st.journal.push({ts:ts(gg, oo), kind:'session', proto:'open', pt:pt, detail:null});
       }
     } else if(p === 'sparito'){
       var da4 = tra(160, 260);
-      apri(st, tipo, da4, pt); ultima = sedute(st, da4, tra(45, 115), freq, passo);
+      apri(st, tipo, da4, pt); ultima = sedute(st, da4, tra(45, 115), cli, passo);
     } else if(p === 'nuovo'){
-      var da5 = tra(8, 28);
-      apri(st, tipo, da5, pt); ultima = sedute(st, da5, 0, Math.max(1.2, freq), 99);
-    } else if(p === 'grid'){
-      var da6 = tra(170, 240);
-      apri(st, tipo, da6, pt); ultima = sedute(st, da6, 0, freq * 0.7, passo + 1);
-      griglia(st, tra(60, 110), 0, 0.7, pt);
+      var da5 = tra(10, 30);
+      apri(st, tipo, da5, pt); ultima = sedute(st, da5, 0, cli, 99);
+    } else if(p === 'cambia'){           /* prima Open, poi lo lascia e passa a Grid: mai insieme */
+      var da6 = tra(190, 260), cambio = tra(60, 110);
+      apri(st, tipo, da6, pt); ultima = sedute(st, da6, cambio, cli, passo + 1);
+      griglia(st, Math.min(cambio, ultima) - tra(3, 9), 0, cli, pt);
     } else {                             /* mai: scheda fatta, mai allenato */
       apri(st, tipo, tra(10, 40), pt);
     }
@@ -10923,8 +10949,10 @@ function demoGenera(){
     Object.keys(RF[nome] || {}).forEach(function(k){ flags[k] = {attivo:true, note:RF[nome][k]}; });
     if(RF[nome] || CUSTOM[nome]) st.redFlags = {flags:flags, custom:CUSTOM[nome] || null, ultimoAggiornamento:giorno(tra(5, 60)).getTime()};
     var date = st.journal.map(function(e){ return e.ts; });
-    return {id:nome, state:st, updated_at: date.length ? date[date.length - 1] : st.startDate};
+    return {id:nome, state:st, updated_at: date.length ? date[date.length - 1] : st.startDate, _volte:volte};
   });
+  window._demoStat = STAT;
+  return out;
 }
 function demoCambia(){
   try{

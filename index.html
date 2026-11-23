@@ -10725,6 +10725,9 @@ body:not(.nv-dentro) .header-right > :not(.nv-sempre){display:none !important;}
 .rfp-chips.sx{justify-content:flex-start;}
 /* la richiesta di password deve stare sopra la finestra Red Flags */
 #admin-pw-modal{z-index:100010 !important;}
+.admin-pw-cosa{font-family:var(--font);font-size:13px;font-weight:500;letter-spacing:1.5px;color:rgba(235,170,170,0.98);margin:0;}
+.admin-pw-spiega{font-family:var(--font);font-size:12px;font-weight:300;line-height:1.55;color:rgba(200,214,228,0.88);margin:-6px 0 4px;}
+.admin-pw-cosa:empty,.admin-pw-spiega:empty{display:none;}
 @media (max-width:999px){ #rfp-btn,#rfp-screen{display:none !important;} }
 @media (min-width:1000px){
   body #rfp-screen{top:57px;}
@@ -11089,7 +11092,7 @@ function rfpDisegna(){
     e.addEventListener('click', function(){ if(typeof rfOpen === 'function') rfOpen(e.getAttribute('data-apri')); });
   });
   [].forEach.call(b.querySelectorAll('[data-togli]'), function(e){
-    e.addEventListener('click', function(){ var chi = e.getAttribute('data-togli'), quale = _rfpSel; rfChiedi(false, function(){ rfpMetti(chi, quale, false); }); });
+    e.addEventListener('click', function(){ var chi = e.getAttribute('data-togli'), quale = _rfpSel; rfChiedi(false, function(){ rfpMetti(chi, quale, false); }, rfNomeScheda(quale) + ' · ' + chi); });
   });
   [].forEach.call(b.querySelectorAll('[data-nota]'), function(e){
     e.addEventListener('change', function(){ rfpScriviNota(e.getAttribute('data-nota'), _rfpSel, e.value); });
@@ -11112,7 +11115,7 @@ function rfpCerca(){
       var id = e.getAttribute('data-agg');
       /* il Custom ha bisogno di un nome: si scrive nella finestra del cliente */
       if(sel === '__custom'){ if(typeof rfOpen === 'function') rfOpen(id); }
-      else rfChiedi(true, function(){ rfpMetti(id, sel, true); });
+      else rfChiedi(true, function(){ rfpMetti(id, sel, true); }, rfNomeScheda(sel) + ' · ' + id);
     });
   });
 }
@@ -11121,10 +11124,17 @@ function rfpCerca(){
    Per TOGLIERLO serve la password admin.
    Le note si scrivono liberamente. Vale nella finestra del cliente e nella
    pagina Red Flags. È un freno contro gli errori, non una cassaforte. */
-function rfChiedi(accendi, poi){
+function rfChiedi(accendi, poi, cosa){
   adminPwOpen(accendi
-    ? {type:'rf-accesso', label:'Accendere un red flag · password di accesso', conferma:'Conferma', ok:poi}
-    : {type:'rf-admin',   label:'Togliere un red flag · password admin', conferma:'Conferma', ok:poi});
+    ? {type:'rf-accesso', label:'Accendere un red flag', conferma:'Conferma', cosa:cosa || '', ok:poi,
+       spiega:'Serve la password di accesso perché un red flag influenza tutto il percorso del cliente.'}
+    : {type:'rf-admin', label:'Togliere un red flag', conferma:'Conferma', cosa:cosa || '', ok:poi,
+       spiega:'Serve la password admin solo per evitare errori di valutazione: è un doppio controllo.'});
+}
+function rfNomeScheda(id){
+  if(id === '__custom') return 'Custom';
+  var f = (window.RF_DATA || []).find(function(x){ return x.id === id; });
+  return f ? f.name : id;
 }
 function rfpOpen(){ _rfpSel = null; rfpDisegna(); document.getElementById('rfp-screen').classList.remove('off'); }
 function rfpClose(){ document.getElementById('rfp-screen').classList.add('off'); }
@@ -11143,7 +11153,7 @@ window.addEventListener('load', function(){
     var _ta = rfToggleActive;
     rfToggleActive = function(id){
       var acceso = !!(window.RF_STATE[id] && window.RF_STATE[id].attivo);
-      rfChiedi(!acceso, function(){ _ta(id); });
+      rfChiedi(!acceso, function(){ _ta(id); }, rfNomeScheda(id) + (window.RF_CURRENT_CLIENT ? ' · ' + window.RF_CURRENT_CLIENT : ''));
     };
   }
   if(typeof rfClose === 'function'){
@@ -12235,6 +12245,8 @@ function eseClose(){
 <div id="admin-pw-modal" onclick="if(event.target===this)adminPwClose()">
   <div class="admin-pw-box">
     <div class="admin-pw-title">Accesso admin</div>
+    <div class="admin-pw-cosa" id="admin-pw-cosa"></div>
+    <div class="admin-pw-spiega" id="admin-pw-spiega"></div>
     <input spellcheck="false" type="password" id="admin-pw-inp" placeholder="password"
       onkeydown="if(event.key==='Enter'){adminPwConfirm();}">
     <div id="admin-pw-err">Password errata.</div>
@@ -20947,6 +20959,9 @@ function adminPwOpen(intent){
       titleEl.textContent = 'Accesso admin';
     }
   }
+  var cosaEl = document.getElementById('admin-pw-cosa'), spiegaEl = document.getElementById('admin-pw-spiega');
+  if(cosaEl) cosaEl.textContent = (intent && intent.cosa) || '';
+  if(spiegaEl) spiegaEl.textContent = (intent && intent.spiega) || '';
   var confBtn = document.querySelector('#admin-pw-modal .admin-pw-confirm');
   if(confBtn) confBtn.textContent = (intent && intent.conferma) || 'Entra';
   document.getElementById('admin-pw-modal').classList.add('open');

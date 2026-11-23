@@ -25834,7 +25834,8 @@ function rfSetNote(id, val){
 function rfSetCustom(field, val){
   if(!window.RF_STATE.__custom) window.RF_STATE.__custom = {};
   window.RF_STATE.__custom[field] = val;
-  if(field === 'nome' && val) window.RF_STATE.__custom.attivo = true;
+  /* scrivere il nome non accende più il Custom da solo: si accende con
+     l'interruttore, che chiede la password come per gli altri red flag */
   rfPersist();
   rfUpdateTriggerBadge();
   rfUpdateBreadcrumb();

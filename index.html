@@ -10383,6 +10383,63 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   .proto-card-proto,#load-screen{display:none !important;}
 }
 </style>
+<script id="demo-testa">
+/* ══ DEMO ══ clienti finti per vedere le pagine piene. Si accende dal tasto
+   "demo" nella barra in alto e vale solo per questa scheda del browser.
+   Con la demo accesa NIENTE dei clienti arriva a Supabase: ogni lettura e
+   ogni scrittura della tabella dei clienti viene fermata qui e servita da
+   una lista finta tenuta in memoria. Anche la copia locale dei clienti veri
+   non viene né letta né toccata. Ore, Riunioni ed Esercizi restano veri. */
+(function(){
+  var on = false;
+  try{ on = sessionStorage.getItem('mym_demo') === '1'; }catch(e){}
+  window.MYM_DEMO = on;
+  if(!on) return;
+  var _gi = Storage.prototype.getItem, _si = Storage.prototype.setItem;
+  Storage.prototype.getItem = function(k){
+    if(this === window.localStorage && k === 'cs_v1') return '[]';
+    return _gi.apply(this, arguments);
+  };
+  Storage.prototype.setItem = function(k){
+    if(this === window.localStorage && k === 'cs_v1') return;
+    return _si.apply(this, arguments);
+  };
+  function righe(){
+    if(!window._demoRows) window._demoRows = (typeof demoGenera === 'function') ? demoGenera() : [];
+    return window._demoRows;
+  }
+  function risposta(obj){
+    return Promise.resolve(new Response(JSON.stringify(obj), {status:200, headers:{'Content-Type':'application/json'}}));
+  }
+  var _fetch = window.fetch;
+  window.fetch = function(url, opts){
+    var u = (typeof url === 'string') ? url : (url && url.url) || '';
+    if(u.indexOf('/rest/v1/sessions') === -1) return _fetch.apply(this, arguments);
+    var metodo = ((opts && opts.method) || 'GET').toUpperCase();
+    var m = u.match(/[?&]id=eq\.([^&]*)/), id = m ? decodeURIComponent(m[1]) : null;
+    var r = righe();
+    if(metodo === 'GET'){
+      return risposta(id === null ? r : r.filter(function(x){ return x.id === id; }));
+    }
+    if(metodo === 'POST'){
+      try{
+        var b = JSON.parse(opts.body);
+        (Array.isArray(b) ? b : [b]).forEach(function(n){
+          if(!n || n.id == null) return;
+          var i = r.findIndex(function(x){ return x.id === n.id; });
+          var riga = {id:n.id, state:n.state, updated_at:n.updated_at || new Date().toISOString()};
+          if(i === -1) r.push(riga); else r[i] = riga;
+        });
+      }catch(e){}
+      return risposta([]);
+    }
+    if(metodo === 'DELETE' && id !== null){
+      window._demoRows = r.filter(function(x){ return x.id !== id; });
+    }
+    return risposta([]);
+  };
+})();
+</script>
 </head>
 <body>
 
@@ -10559,6 +10616,9 @@ tr.ore-scala td{border-top:1px solid var(--border);}
 .nv-no{display:none !important;}
 #nv-pt{font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:rgba(190,204,218,0.72);}
 #nv-esci{order:99;}
+#demo-btn{order:98;}
+#demo-btn.acceso{border-color:rgba(225,120,120,0.75);color:rgba(240,170,170,1);background:rgba(200,90,90,0.10);}
+@media (max-width:999px){ #demo-btn{display:none !important;} }
 body:not(.nv-dentro) .header-right > :not(.nv-sempre){display:none !important;}
 @media (min-width:1000px){
   body #ingresso, body #proto-select, body #cs, body #ore-screen, body #riu-screen,
@@ -10679,6 +10739,190 @@ body:not(.nv-dentro) .header-right > :not(.nv-sempre){display:none !important;}
     <div class="rfp-b" id="rfp-b"></div>
   </div>
 </div>
+<script id="demo-clienti">
+/* I clienti finti della demo. Stessi nomi e stessi percorsi a ogni apertura
+   (i numeri a caso partono sempre dallo stesso seme), ma le date sono contate
+   all'indietro da oggi, così "attivo" e "fermo" restano veri nel tempo.
+   Hanno storia solo in Open e, alcuni, in Grid: Load, Self, Lift e Move non
+   salvano ancora niente. Quanti sono e come si comportano sono scelte. */
+function demoGenera(){
+  var seme = 20261123;
+  function r(){ seme = (seme * 16807) % 2147483647; return (seme - 1) / 2147483646; }
+  function tra(a, b){ return Math.floor(r() * (b - a + 1)) + a; }
+  function uno(arr){ return arr[Math.floor(r() * arr.length)]; }
+  function giorno(fa){ var d = new Date(); d.setHours(12,0,0,0); d.setDate(d.getDate() - fa); return d; }
+  function iso(fa){ var d = giorno(fa); return d.getFullYear() + '-' + ('0'+(d.getMonth()+1)).slice(-2) + '-' + ('0'+d.getDate()).slice(-2); }
+  function ts(fa, ora){ var d = giorno(fa); d.setHours(ora || 18, 0, 0, 0); return d.toISOString(); }
+  var PT = (typeof PT_LIST !== 'undefined' && Array.isArray(PT_LIST)) ? PT_LIST : ['PR'];
+  var TIPI = ['cardio','lower2','core2','row2','buffer2'];
+
+  function scheda(tipo){
+    var out = {};
+    (FOCUS_SLOTS[tipo] || []).forEach(function(slot){
+      var adatti = DB_RAW.filter(function(e){ return slot.fams.indexOf(e[2]) !== -1; });
+      if(!adatti.length) return;
+      var e = uno(adatti);
+      out[slot.key] = {id:e[0], fam:e[2], nome:e[1]};
+    });
+    return out;
+  }
+  function apri(st, tipo, fa, pt){
+    var seq = SEQUENCES[tipo];
+    st.pt = pt; st.type = tipo; st.current = 0;
+    st.levels = Object.assign({}, seq.levels);
+    st.scheda = scheda(tipo);
+    st.log = []; st.notes = {}; st.calibration = null;
+    st.startDate = ts(fa, 18); st.completedAt = null;
+    if(!st.createdDate) st.createdDate = st.startDate;
+    st.journal.push({ts:st.startDate, kind:'progression_start', proto:'open', pt:pt, detail:seq.label});
+  }
+  /* sedute da "da" a "a" giorni fa. freq = sedute a settimana, passo = ogni
+     quante sedute si sale di uno step. Ritorna il giorno dell'ultima seduta. */
+  function sedute(st, da, a, freq, passo){
+    var steps = SEQUENCES[st.type].steps, g = da, conta = 0, prossimo = passo + tra(-1, 1), ultima = da;
+    while(true){
+      var salto = Math.max(2, Math.round(7 / freq) + tra(-2, 3));
+      var mese = giorno(g).getMonth();
+      if(mese === 7) salto = Math.round(salto * 1.9);        /* agosto */
+      if(mese === 11 && giorno(g).getDate() > 20) salto += 6; /* feste */
+      if(r() < 0.12) salto += tra(5, 12);                     /* una settimana saltata */
+      g -= salto;
+      if(g <= a) break;
+      var pt = r() < 0.78 ? st.pt : uno(PT), ora = tra(7, 20);
+      st.log.push({pt:pt, date:iso(g), time:ora + ':00', type:'session'});
+      st.journal.push({ts:ts(g, ora), kind:'session', proto:'open', pt:pt, detail:null});
+      ultima = g; conta++;
+      if(conta >= prossimo && st.current < steps.length){
+        var o = steps[st.current], daLiv = st.levels[o.fam];
+        st.levels[o.fam] = o.to; st.current++;
+        st.log.push({type:'step', date:iso(g), fam:o.fam, from_lvl:daLiv, to:o.to, label:FAM_LABEL[o.fam] + ' → L' + o.to, pt:pt});
+        conta = 0; prossimo = passo + tra(-1, 2);
+        if(st.current >= steps.length){ st.completedAt = ts(g, ora); break; }
+      }
+    }
+    return ultima;
+  }
+  function chiudi(st, esito, fa){
+    var seq = SEQUENCES[st.type], nomi = {};
+    Object.keys(st.scheda).forEach(function(k){ nomi[k] = st.scheda[k].nome; });
+    var giorni = {};
+    st.log.forEach(function(e){ if(e.type === 'session') giorni[e.date] = true; });
+    var fine = st.completedAt || ts(fa, 18);
+    st.openArchive.push({
+      id:'prog-demo-' + st.openArchive.length + '-' + tra(1000, 9999), proto:'open', type:st.type, label:seq.label,
+      pt:st.pt, ptChiusura:st.pt, startDate:st.startDate, endDate:fine, esito:esito,
+      step:st.current, stepTot:seq.steps.length, sessioni:Object.keys(giorni).length,
+      levels:Object.assign({}, st.levels), scheda:nomi,
+      avanzamenti:st.log.filter(function(e){ return e.type === 'step'; }).map(function(e){ return {date:e.date, fam:e.fam, to:e.to, label:e.label, pt:e.pt}; })
+    });
+    st.journal.push({ts:fine, kind:'progression_end', proto:'open', pt:st.pt, detail:seq.label + ' · ' + esito + ' · ' + st.current + '/' + seq.steps.length});
+  }
+  function altroTipo(t){ var x = uno(TIPI); return x === t ? TIPI[(TIPI.indexOf(t) + 1) % TIPI.length] : x; }
+  function griglia(st, da, a, freq, pt){
+    var righe = ['Camminata tappeto','Mobilità anche','Goblet Squat','Remata elastico','Plank','Bike'];
+    var log = [], g = da;
+    while(true){ g -= Math.max(3, Math.round(7 / freq) + tra(-2, 3)); if(g <= a) break; log.push({pt:pt, date:iso(g), time:tra(8, 19) + ':00'}); }
+    st.grid = {pt:pt, startDate:ts(da, 18), archive:[], schede:[{
+      id:'sch-demo-' + tra(1000, 9999), cells:righe.map(function(t, i){ return {c:0, r:i, t:t}; }), log:log,
+      description:'Scheda base', createdAt:ts(da, 18), archivedAt:null, isCurrent:true,
+      status:'active', sessionCount:log.length, activeFor:8
+    }]};
+    log.forEach(function(e){ st.journal.push({ts:e.date + 'T' + ('0'+e.time).slice(-5) + ':00.000Z', kind:'session', proto:'grid', pt:e.pt, detail:null}); });
+  }
+
+  var NOMI = ['Giulia Santoro','Marco Bellini','Elena Caruso','Davide Orlandi','Sara Lombardi','Luca Parisi',
+    'Chiara Benedetti','Andrea Fumagalli','Marta Riva','Stefano Galli','Federica Rota','Matteo Brambilla',
+    'Silvia Cattaneo','Roberto Pagani','Valentina Sala','Giorgio Colombo','Laura Negri','Simone Villa',
+    'Anna Mariani','Paolo Ferri','Francesca Testa','Alberto Grassi','Monica Barbieri','Claudio Leone',
+    'Irene Fabbri','Enrico Marchetti','Beatrice Rizzi','Daniele Piras','Cristina Guidi','Fabio Bassi',
+    'Alessia Donati','Nicola Vitali','Teresa Longo','Massimo Carbone','Elisa Poli','Tommaso Ruggeri',
+    'Lucia Farina','Giovanni Sartori'];
+  /* che tipo di percorso ha ciascuno, nell'ordine dei nomi */
+  var PERCORSI = ['costante','costante','chiude','pianta','torna','costante','sparito','nuovo','chiude','costante',
+    'pianta','grid','torna','costante','sparito','chiude','nuovo','pianta','costante','torna',
+    'grid','sparito','costante','chiude','pianta','nuovo','torna','costante','sparito','grid',
+    'chiude','pianta','mai','torna','nuovo','sparito','grid','costante'];
+  /* i red flag: nome → elenco. Circa un cliente su tre. */
+  var RF = {
+    'Marco Bellini':{ipertensione:'ramipril, controllata'},
+    'Davide Orlandi':{statine:'atorvastatina 20', ipertensione:''},
+    'Chiara Benedetti':{asma:'inalatore nello zaino'},
+    'Stefano Galli':{diabete:'metformina', statine:'', ipertensione:'pressione alta al mattino'},
+    'Silvia Cattaneo':{osteoporosi:'T-score -2.7, 2025'},
+    'Giorgio Colombo':{'beta-bloccanti':'bisoprololo'},
+    'Anna Mariani':{osteoporosi:'', asma:''},
+    'Alberto Grassi':{diabete:'insulina, glucometro sempre'},
+    'Claudio Leone':{ipertensione:'', 'beta-bloccanti':'atenololo 50'},
+    'Beatrice Rizzi':{'post-malattia':'influenza, rientrata questa settimana'},
+    'Fabio Bassi':{statine:'simvastatina'},
+    'Teresa Longo':{osteoporosi:'cortisone a lungo'},
+    'Tommaso Ruggeri':{asma:''}
+  };
+  var CUSTOM = {'Roberto Pagani':{nome:'Ernia discale L4-L5', descrizione:'diagnosi 2024', cosaFare:'niente flessione sotto carico', attivo:true}};
+
+  return NOMI.map(function(nome, i){
+    var st = {journal:[], openArchive:[], _sessionConsistencyDone:true};
+    var pt = PT[i % PT.length], tipo = TIPI[i % TIPI.length], p = PERCORSI[i];
+    var freq = 0.9 + r() * 0.9;          /* da quasi 1 a quasi 2 a settimana */
+    var passo = tra(3, 6), ultima = null;
+    if(p === 'costante'){
+      apri(st, tipo, tra(150, 270), pt); ultima = sedute(st, tra(150, 270), 0, freq, passo);
+      if(st.completedAt){ chiudi(st, 'completata', ultima); apri(st, altroTipo(tipo), ultima - 3, pt); ultima = sedute(st, ultima - 3, 0, freq, passo); }
+    } else if(p === 'chiude'){
+      var da = tra(300, 380);
+      apri(st, tipo, da, pt); ultima = sedute(st, da, 60, freq + 0.3, 3);
+      chiudi(st, st.completedAt ? 'completata' : 'interrotta', ultima);
+      apri(st, altroTipo(tipo), ultima - tra(4, 14), pt); ultima = sedute(st, ultima - 6, 0, freq, passo);
+    } else if(p === 'pianta'){
+      var da2 = tra(200, 300), stop = tra(90, 140);
+      apri(st, tipo, da2, pt); ultima = sedute(st, da2, stop, freq, passo + 1);
+      chiudi(st, 'interrotta', ultima);
+      apri(st, altroTipo(tipo), ultima - tra(5, 20), pt); ultima = sedute(st, ultima - 8, 0, freq, passo);
+    } else if(p === 'torna'){
+      var da3 = tra(180, 260), buco = tra(40, 75), rientro = tra(10, 24);
+      apri(st, tipo, da3, pt); sedute(st, da3, rientro + buco, freq, passo);
+      ultima = sedute(st, rientro, 0, freq, passo + 2);
+      if(ultima > rientro){              /* è tornato da poco: almeno una seduta */
+        var gg = tra(1, 5), oo = tra(8, 19);
+        st.log.push({pt:pt, date:iso(gg), time:oo + ':00', type:'session'});
+        st.journal.push({ts:ts(gg, oo), kind:'session', proto:'open', pt:pt, detail:null});
+      }
+    } else if(p === 'sparito'){
+      var da4 = tra(160, 260);
+      apri(st, tipo, da4, pt); ultima = sedute(st, da4, tra(45, 115), freq, passo);
+    } else if(p === 'nuovo'){
+      var da5 = tra(8, 28);
+      apri(st, tipo, da5, pt); ultima = sedute(st, da5, 0, Math.max(1.2, freq), 99);
+    } else if(p === 'grid'){
+      var da6 = tra(170, 240);
+      apri(st, tipo, da6, pt); ultima = sedute(st, da6, 0, freq * 0.7, passo + 1);
+      griglia(st, tra(60, 110), 0, 0.7, pt);
+    } else {                             /* mai: scheda fatta, mai allenato */
+      apri(st, tipo, tra(10, 40), pt);
+    }
+    st.journal.sort(function(a, b){ return a.ts < b.ts ? -1 : a.ts > b.ts ? 1 : 0; });
+    st.open = {pt:st.pt, type:st.type, current:st.current, levels:st.levels, scheda:st.scheda, log:st.log,
+               notes:st.notes, calibration:st.calibration, startDate:st.startDate, completedAt:st.completedAt};
+    var flags = {};
+    Object.keys(RF[nome] || {}).forEach(function(k){ flags[k] = {attivo:true, note:RF[nome][k]}; });
+    if(RF[nome] || CUSTOM[nome]) st.redFlags = {flags:flags, custom:CUSTOM[nome] || null, ultimoAggiornamento:giorno(tra(5, 60)).getTime()};
+    var date = st.journal.map(function(e){ return e.ts; });
+    return {id:nome, state:st, updated_at: date.length ? date[date.length - 1] : st.startDate};
+  });
+}
+function demoCambia(){
+  try{
+    if(window.MYM_DEMO) sessionStorage.removeItem('mym_demo'); else sessionStorage.setItem('mym_demo', '1');
+  }catch(e){ return; }
+  location.reload();
+}
+window.addEventListener('load', function(){
+  var b = document.getElementById('demo-btn');
+  if(!b) return;
+  b.textContent = window.MYM_DEMO ? 'clienti finti · chiudi' : 'demo';
+  b.classList.toggle('acceso', !!window.MYM_DEMO);
+});
+</script>
 <script id="rfp-script">
 /* ── Pagina Red Flags ──
    Legge e scrive gli stessi dati della finestra Red Flags del cliente
@@ -12074,6 +12318,7 @@ function eseClose(){
   </nav>
   <div class="header-right">
     <span class="nv-sempre" id="nv-pt"></span>
+    <button class="hdr-btn nv-sempre" id="demo-btn" onclick="demoCambia()" title="Clienti finti per vedere le pagine piene. Non salva niente.">demo</button>
     <button class="hdr-btn nv-sempre" id="nv-esci" onclick="navVai('esci')">esci</button>
     <button class="hdr-btn" onclick="openDB()">Esercizi</button>
     <button class="hdr-btn undo-btn" id="undo-btn" onclick="undoLast()" disabled>undo</button>

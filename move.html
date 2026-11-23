@@ -104,6 +104,8 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
 .posto-e.no{color:var(--text-xlo);font-size:12px;}
 .posto-x{margin-left:auto;background:none;border:0;color:var(--text-xlo);cursor:pointer;font-size:14px;padding:2px 6px;}
 .posto-x:hover{color:var(--red);}
+.tot{margin-top:8px;padding:8px 12px;border-left:2px solid var(--move);font-size:12px;line-height:1.5;color:var(--text-lo);}
+.tot b{color:var(--text-hi);font-weight:500;}
 .b-tasti{display:flex;gap:8px;margin-top:16px;}
 .b-tasti .btn.via{margin-left:auto;border-color:rgba(224,138,138,0.4);color:var(--red);}
 /* l'elenco degli esercizi */
@@ -190,7 +192,8 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
    - Gli esercizi sono quelli che nella pagina Esercizi hanno una voce in "Prot. Fil".
    - Le voci Prono/Sup. e Quadrupedia chiedono l'SRT: un blocco che ne contiene una chiede l'SRT.
    - Il cardio è la voce "Cardio" di Prot. Fil.
-   - 50 movimenti per esercizio è lo standard di adesso; la durata del cardio è ancora da decidere.
+   - 50 movimenti IN TUTTO tra i due esercizi è lo standard di adesso: come dividerli lo decide
+     il cliente (25-25, 10-40...). Fatti 50, passa al cardio. La durata del cardio è ancora da decidere.
    - I blocchi si salvano solo in questo browser: è un prototipo, non tocca i clienti. */
 (function(){
   var SRT = {'Prono/Sup.':1, 'Quadrupedia':1};
@@ -248,17 +251,18 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
     $('b-titolo').textContent = bozza.id ? 'Modifica blocco' : 'Nuovo blocco';
     if($('b-nome').value !== bozza.nome) $('b-nome').value = bozza.nome;
     var P = [
-      {t:'Esercizio 1', d:MOVIMENTI + ' movimenti', v:bozza.e[0]},
-      {t:'Esercizio 2', d:MOVIMENTI + ' movimenti', v:bozza.e[1]},
+      {t:'Esercizio 1', d:'', v:bozza.e[0]},
+      {t:'Esercizio 2', d:'', v:bozza.e[1]},
       {t:'Cardio',      d:'durata da decidere',     v:bozza.cardio}
     ];
+    var totale = '<div class="tot"><b>' + MOVIMENTI + ' movimenti in tutto</b> tra i due esercizi: come dividerli lo decide il cliente. Poi il cardio.</div>';
     $('b-posti').innerHTML = P.map(function(p, i){
       var e = p.v ? trova(p.v) : null;
       return '<div class="posto' + (i === posto ? ' att' : '') + (p.v ? ' pieno' : '') + '" data-posto="' + i + '">'
         + '<div class="posto-t"><span>' + p.t + '</span><b>' + p.d + '</b></div>'
         + (p.v ? '<div class="posto-e">' + esc(etichetta(p.v)) + (e && SRT[e.pos] ? '<em class="srt">SRT</em>' : '') + '<button type="button" class="posto-x" data-togli="' + i + '" title="Togli">✕</button></div>'
                : '<div class="posto-e no">' + (i === posto ? 'scegli dall\'elenco a destra' : 'vuoto') + '</div>')
-        + '</div>';
+        + '</div>' + (i === 1 ? totale : '');
     }).join('');
     var pronto = bozza.nome.trim() && bozza.e[0] && bozza.e[1] && bozza.cardio;
     $('b-salva').disabled = !pronto;

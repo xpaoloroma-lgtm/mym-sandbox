@@ -12036,6 +12036,26 @@ function prototipoOpen(file, nome){
   document.getElementById('load-titolo').textContent = nome + ' · prototipo con dati di esempio · non salva';
   document.getElementById('load-screen').classList.remove('off');
 }
+/* I prototipi hanno una loro barra in alto con un loro percorso ("Paolo ›
+   Self › Mario Rossi"). Dentro Sandbox il percorso è già nella barra vera,
+   sopra: due percorsi uno sotto l'altro non si capiscono. Quando il prototipo
+   è caricato qui dentro, il suo percorso si nasconde e la sua barra resta
+   solo come riga dei suoi tasti. Il file del prototipo non viene modificato. */
+var PROTOTIPO_BARRA_CSS = 'header > .bc, header > #breadcrumb{display:none !important;}'
+  + 'header{justify-content:flex-end !important;height:48px !important;background:none !important;border-bottom:0 !important;}';
+function prototipoSistemaBarra(){
+  var f = document.getElementById('load-frame'), d;
+  try{ d = f && f.contentDocument; }catch(e){ d = null; }
+  if(!d || !d.head || d.getElementById('sbx-barra')) return;
+  var st = d.createElement('style');
+  st.id = 'sbx-barra';
+  st.textContent = PROTOTIPO_BARRA_CSS;
+  d.head.appendChild(st);
+}
+window.addEventListener('load', function(){
+  var f = document.getElementById('load-frame');
+  if(f) f.addEventListener('load', prototipoSistemaBarra);
+});
 function prototipoClose(){
   document.getElementById('load-screen').classList.add('off');
   document.getElementById('load-frame').contentWindow.location.replace('about:blank');

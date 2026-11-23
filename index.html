@@ -10708,7 +10708,8 @@ function rfpScriviNota(clientId, id, testo){
   c.state.redFlags.flags[id].note = testo || '';
   rfpSalva(c);
 }
-function rfpScegli(id){ _rfpSel = (_rfpSel === id) ? _rfpSel : id; rfpDisegna(); }
+/* un secondo clic sulla stessa scheda la richiude */
+function rfpScegli(id){ _rfpSel = (_rfpSel === id) ? null : id; rfpDisegna(); }
 function rfpDisegna(){
   var carte = document.getElementById('rfp-carte'), b = document.getElementById('rfp-b');
   if(!carte || !b) return;
@@ -10803,6 +10804,14 @@ function rfpOpen(){ _rfpSel = null; rfpDisegna(); document.getElementById('rfp-s
 function rfpClose(){ document.getElementById('rfp-screen').classList.add('off'); }
 /* quando si chiude la finestra del cliente, la pagina si ridisegna */
 window.addEventListener('load', function(){
+  /* un clic fuori dalle schede e dal riquadro di destra richiude la scheda aperta */
+  var _rp = document.getElementById('rfp-screen');
+  if(_rp) _rp.addEventListener('click', function(e){
+    if(_rfpSel === null) return;
+    if(e.target.closest && e.target.closest('.rf-card, .rfp-b, .rfp-tutti')) return;
+    if(!document.body.contains(e.target)) return;   /* elemento appena ridisegnato */
+    _rfpSel = null; rfpDisegna();
+  });
   if(typeof rfClose === 'function'){
     var _rc = rfClose;
     rfClose = function(){

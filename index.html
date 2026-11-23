@@ -10492,6 +10492,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
        aperto. Un clic su un cliente allarga la sua riga con la timeline. -->
   <div id="cl-zona">
     <input id="cl-cerca" type="text" placeholder="cerca cliente" autocomplete="off" spellcheck="false">
+    <div id="cl-filtri"></div>
     <div id="cl-testa"><span class="a">cliente</span><span class="b">ultimi tre allenamenti</span><span class="c">ultimo</span></div>
     <div id="cl-lista"></div>
   </div>
@@ -10814,6 +10815,10 @@ body:not(.nv-dentro) .header-right > :not(.nv-sempre){display:none !important;}
    protocollo, red flag, gli ultimi tre allenamenti e da quanto non viene.
    Un clic allarga la riga: la timeline dell'ultimo anno e, da lì, "Entra". */
 var _clAperto = null;
+/* come è ordinato e filtrato l'elenco. Si parte dall'ultimo allenamento fatto. */
+var _clOrd = 'ultimo';      /* 'ultimo' | 'az' */
+var _clProto = '';          /* '' = tutti, oppure open, grid, ..., 'nuovo' */
+var _clRf = '';             /* '' = tutti, 'si', 'no', oppure l'id di un red flag */
 var CL_COLORE = {open:'#d4a84a', load:'#78a5e1', self:'#e08a6a', lift:'#c88ad8', move:'#78cd9b', grid:'#b4c3d2', skip:'#8f9aa5', pace:'#8f9aa5'};
 var CL_NOME   = {open:'Open', load:'Load', self:'Self', lift:'Lift', move:'Move', grid:'Grid', skip:'Skip', pace:'Pace'};
 var CL_GIORNI = ['dom','lun','mar','mer','gio','ven','sab'];
@@ -11012,16 +11017,63 @@ function prMisura(){
   var fs = Math.max(10, Math.min((casella - 14) / 4.7, 16));
   mappa.style.setProperty('--fs', fs.toFixed(1) + 'px');
 }
+function clProtoDi(c){ try{ return (c.state && csCurrentProto(c)) || 'nuovo'; }catch(e){ return 'nuovo'; } }
+function clUltimaDi(c){
+  if(!c.state) return '';
+  var sd = clSedute(c);
+  return sd.length ? sd[sd.length - 1].date : '';
+}
+function clRfDi(c){ return (typeof rfActiveFlagsForClient === 'function') ? rfActiveFlagsForClient(c.id) : []; }
+function clFiltri(tutti){
+  var box = document.getElementById('cl-filtri');
+  if(!box) return;
+  var presenti = {};
+  tutti.forEach(function(c){ presenti[clProtoDi(c)] = true; });
+  var ordine = ['open','load','self','lift','move','grid','skip','pace','nuovo'].filter(function(p){ return presenti[p]; });
+  if(_clProto && !presenti[_clProto]) _clProto = '';
+  function t(attr, val, testo, sel){ return '<button type="button" class="cl-f' + (sel ? ' sel' : '') + '" ' + attr + '="' + val + '">' + testo + '</button>'; }
+  var h = '<span class="cl-f-nome">ordine</span>' + t('data-ord', 'ultimo', 'ultimo allenamento', _clOrd === 'ultimo') + t('data-ord', 'az', 'A–Z', _clOrd === 'az');
+  h += '<span class="cl-f-nome">protocollo</span>' + t('data-proto', '', 'tutti', !_clProto)
+     + ordine.map(function(p){ return t('data-proto', p, p === 'nuovo' ? 'nuovi' : CL_NOME[p], _clProto === p); }).join('');
+  var opz = [['', 'tutti'], ['si', 'con red flag'], ['no', 'senza red flag']];
+  (window.RF_DATA || []).forEach(function(f){ opz.push([f.id, f.name]); });
+  opz.push(['__custom', 'Custom']);
+  h += '<span class="cl-f-nome">red flag</span><select class="cl-f' + (_clRf ? ' sel' : '') + '" id="cl-f-rf">'
+     + opz.map(function(o){ return '<option value="' + o[0] + '"' + (o[0] === _clRf ? ' selected' : '') + '>' + clEsc(o[1]) + '</option>'; }).join('') + '</select>';
+  box.innerHTML = h;
+}
 function clDisegna(){
   var lista = document.getElementById('cl-lista'), inp = document.getElementById('cl-cerca');
   if(!lista || !inp) return;
   var q = (inp.value || '').trim().toLowerCase();
   var tutti = (typeof _csList !== 'undefined' && Array.isArray(_csList)) ? _csList.filter(function(c){ return c && c.id; }) : [];
-  var visti = tutti.filter(function(c){ return !q || c.id.toLowerCase().indexOf(q) !== -1; })
-                   .sort(function(a, b){ return a.id.localeCompare(b.id, 'it', {sensitivity:'base'}); });
+  tutti.forEach(function(c){ if(c.state && typeof migrateStateShape === 'function') migrateStateShape(c.state); });
+  clFiltri(tutti);
+  var visti = tutti.filter(function(c){
+    if(q && c.id.toLowerCase().indexOf(q) === -1) return false;
+    if(_clProto && clProtoDi(c) !== _clProto) return false;
+    if(_clRf){
+      var rf = clRfDi(c);
+      if(_clRf === 'si') return rf.length > 0;
+      if(_clRf === 'no') return rf.length === 0;
+      return rf.some(function(f){ return f.id === _clRf; });
+    }
+    return true;
+  });
+  function perNome(a, b){ return a.id.localeCompare(b.id, 'it', {sensitivity:'base'}); }
+  if(_clOrd === 'az') visti.sort(perNome);
+  else {
+    /* dall'ultimo allenamento fatto; chi non si è mai allenato va in fondo */
+    var ult = {};
+    visti.forEach(function(c){ ult[c.id] = clUltimaDi(c); });
+    visti.sort(function(a, b){ return ult[a.id] === ult[b.id] ? perNome(a, b) : (ult[a.id] > ult[b.id] ? -1 : 1); });
+  }
   var h = visti.map(clRiga).join('');
-  if(!visti.length) h = q ? '<div class="cl-vuoto">Nessun cliente trovato.</div><button type="button" class="cl-nuovo" data-nuovo="' + clEsc(inp.value.trim()) + '">+ aggiungi <b>' + clEsc(inp.value.trim()) + '</b> come nuovo cliente</button>'
-                          : '<div class="cl-vuoto">Nessun cliente.</div>';
+  if(!visti.length){
+    var filtrato = !!(_clProto || _clRf);
+    h = (q && !filtrato) ? '<div class="cl-vuoto">Nessun cliente trovato.</div><button type="button" class="cl-nuovo" data-nuovo="' + clEsc(inp.value.trim()) + '">+ aggiungi <b>' + clEsc(inp.value.trim()) + '</b> come nuovo cliente</button>'
+                         : '<div class="cl-vuoto">Nessun cliente' + (q || filtrato ? ' con questi filtri' : '') + '.</div>';
+  }
   lista.innerHTML = h;
 }
 window.addEventListener('load', function(){
@@ -11036,6 +11088,17 @@ window.addEventListener('load', function(){
     ['home-riga','proto-chart-wrap'].forEach(function(i){ var e = document.getElementById(i); if(e) z.appendChild(e); });
   }
   inp.addEventListener('input', function(){ _clAperto = null; clDisegna(); });
+  var filtri = document.getElementById('cl-filtri');
+  if(filtri){
+    filtri.addEventListener('click', function(ev){
+      var e;
+      if((e = ev.target.closest('[data-ord]'))){ _clOrd = e.getAttribute('data-ord'); _clAperto = null; clDisegna(); lista.scrollTop = 0; return; }
+      if((e = ev.target.closest('[data-proto]'))){ _clProto = e.getAttribute('data-proto'); _clAperto = null; clDisegna(); lista.scrollTop = 0; }
+    });
+    filtri.addEventListener('change', function(ev){
+      if(ev.target && ev.target.id === 'cl-f-rf'){ _clRf = ev.target.value; _clAperto = null; clDisegna(); lista.scrollTop = 0; }
+    });
+  }
   lista.addEventListener('click', function(ev){
     var t = ev.target, e;
     if((e = t.closest('[data-pt]'))){ try{ sessionStorage.setItem('mym_pt', e.getAttribute('data-pt')); }catch(x){} clDisegna(); return; }
@@ -11636,7 +11699,14 @@ window.addEventListener('load', function(){
   }
   #cl-cerca:focus{border-color:rgba(228,184,90,0.9);}
   #cl-cerca::placeholder{color:rgba(190,204,218,0.5);}
-  #cl-testa{flex:none;display:flex;align-items:center;margin:16px 0 8px;font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(190,204,218,0.6);}
+  #cl-filtri{flex:none;display:flex;align-items:center;flex-wrap:wrap;gap:6px 6px;margin-top:12px;}
+  .cl-f-nome{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(190,204,218,0.55);margin:0 4px 0 14px;}
+  .cl-f-nome:first-child{margin-left:0;}
+  .cl-f{height:28px;padding:0 10px;background:none;border:1px solid rgba(180,195,210,0.20);border-radius:2px;cursor:pointer;font-family:var(--font);font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(200,214,228,0.8);white-space:nowrap;}
+  .cl-f.sel{border-color:rgba(228,184,90,0.9);color:#E4B85A;background:rgba(212,168,74,0.12);}
+  select.cl-f{appearance:none;-webkit-appearance:none;padding-right:24px;background:rgba(0,0,0,0.25) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='5'><path d='M0 0l4 5 4-5z' fill='%23b4c3d2'/></svg>") no-repeat right 9px center;}
+  select.cl-f option{background:#0c0b0a;color:#f0ebdc;}
+  #cl-testa{flex:none;display:flex;align-items:center;margin:14px 0 8px;font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(190,204,218,0.6);}
   #cl-testa .a{width:250px;padding-left:20px;box-sizing:border-box;}
   #cl-testa .b{flex:1;text-align:center;}
   #cl-testa .c{width:128px;text-align:center;}

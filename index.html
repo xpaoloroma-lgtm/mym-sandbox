@@ -10310,7 +10310,9 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   #mappa.foco .mp-k.dentro .mp-p:not(.io){opacity:0.28;}
   #mappa.foco .mp-k.dentro .mp-s i:not(.io){opacity:0.18;}
   #mappa.foco .mp-k.dentro .mp-p.io{color:var(--fc);}
-  #mp-leg.foco .mp-r:not(.io){opacity:0.38;}
+  /* i cinque protocolli si leggono sulla griglia: nell'elenco restano Grid e Skip gruppo */
+  #mp-leg .mp-r:not(.mp-x){display:none;}
+  #mp-leg.foco .mp-r.mp-x{opacity:1;}
   #home-riga .proto-groups{flex-direction:column;align-items:stretch;justify-content:flex-start;gap:8px;}
   #home-riga .proto-group{gap:0;padding:0;margin:0;align-items:stretch;}
   #home-riga .proto-group-cards{padding:0;margin:0;align-items:stretch;}
@@ -12071,6 +12073,20 @@ window.addEventListener('load', function(){
       accendi(trovata);
     });
     leg.addEventListener('mouseleave', function(){ accendi(null); });
+    /* lo stesso effetto dalla griglia: il mouse sopra il nome di un protocollo
+       in una casella accende la sua zona. Così l'elenco dei cinque nomi sotto
+       non serve più (restano solo Grid e Skip gruppo, che sulla griglia non ci sono). */
+    mappa.addEventListener('mousemove', function(e){
+      var nome = '';
+      [].forEach.call(mappa.querySelectorAll('.mp-p'), function(n){
+        var q = n.getBoundingClientRect();
+        if(e.clientY >= q.top && e.clientY < q.bottom && e.clientX >= q.left && e.clientX <= q.right) nome = n.textContent.trim();
+      });
+      var riga = null;
+      if(nome) [].forEach.call(leg.querySelectorAll('.mp-r'), function(r){ if(!r.classList.contains('mp-x') && ((r.querySelector('b') || {}).textContent || '') === nome) riga = r; });
+      accendi(riga);
+    });
+    mappa.addEventListener('mouseleave', function(){ accendi(null); });
   })();
   /* quanti clienti: quelli il cui protocollo attuale è quello (cioè l'ultimo
      in cui hanno fatto una seduta). Nei dati non c'è scritto in quale

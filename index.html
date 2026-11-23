@@ -13911,6 +13911,32 @@ function sbSync(cb){
 var _csId=null, _saveTimer=null, _pendingSaveTarget=null, _csSortMode='az';
 var _csList=[]; /* array in memoria: {id, state, ts} */
 
+/* ── NOMI DOPPI: non possono esistere ──
+   Due clienti sono lo stesso nome se, tolte maiuscole, accenti, spazi in più
+   e segni, hanno le stesse parole, in qualunque ordine: "Rossi Mario",
+   "mario  rossi" e "Mario Rossì" sono lo stesso cliente. Ogni punto in cui si
+   crea o si rinomina un cliente passa da qui. */
+function csChiaveNome(n){
+  var p = String(n || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/['’`]/g, '').replace(/[^a-z0-9]+/g, ' ').trim().split(' ').filter(Boolean);
+  /* una lettera sola si attacca alla parola dopo: "D Amato" vale "D'Amato" */
+  var out = [];
+  for(var i = 0; i < p.length; i++){
+    if(p[i].length === 1 && i + 1 < p.length){ out.push(p[i] + p[i + 1]); i++; }
+    else out.push(p[i]);
+  }
+  return out.sort().join(' ');
+}
+/* il cliente che ha già quel nome (escluso "tranne"), oppure null */
+function csNomeGiaUsato(nome, tranne){
+  var k = csChiaveNome(nome);
+  if(!k) return null;
+  return (_csList || []).find(function(c){ return c && c.id && c.id !== tranne && csChiaveNome(c.id) === k; }) || null;
+}
+function csAvvisaDoppio(esistente){
+  alert('Questo cliente esiste già: ' + esistente.id + '.\nNon ne viene creato un altro.');
+}
+
 function _csLoadLocal(){
   try{
     var list = JSON.parse(localStorage.getItem('cs_v1')||'[]');
@@ -14312,7 +14338,9 @@ function csAdd(){
   var name=inp.value.trim();
   if(!name) return;
   /* Add to local list immediately */
-  if(!_csList.find(function(c){return c.id===name;})){
+  var _gia = csNomeGiaUsato(name);
+  if(_gia){ if(_gia.id !== name) csAvvisaDoppio(_gia); name = _gia.id; }
+  else {
     _csList.push({id:name,state:null,ts:Date.now()});
     _csSaveLocal();
     /* Persist to Supabase immediately so sbSync doesn't lose it */
@@ -19554,7 +19582,9 @@ function skipAddNewClient(){
   if(!inp) return;
   var name = inp.value.trim();
   if(!name) return;
-  if(!_csList.find(function(c){ return c.id===name; })){
+  var _gia = csNomeGiaUsato(name);
+  if(_gia){ if(_gia.id !== name) csAvvisaDoppio(_gia); name = _gia.id; }
+  else {
     _csList.push({id:name, state:null, ts:Date.now()});
     _csSaveLocal();
     if(typeof sbSave === 'function') sbSave(name, null);
@@ -20647,10 +20677,9 @@ function csSearchAddNew(rawName){
   /* Capitalize first letter for visual consistency with manually-added clients */
   name = name.charAt(0).toUpperCase() + name.slice(1);
   /* Avoid duplicates: if a client already exists with the same id (case-insensitive), open it */
-  var existing = (_csList || []).find(function(c){
-    return c && c.id && c.id.toLowerCase() === name.toLowerCase();
-  });
+  var existing = csNomeGiaUsato(name);
   if(existing){
+    if(existing.id !== name) csAvvisaDoppio(existing);
     csHistoryOpen(existing.id);
     document.getElementById('proto-cs-search-results').classList.remove('open');
     var inp = document.getElementById('proto-cs-search'); if(inp) inp.value = '';
@@ -20925,11 +20954,9 @@ function csHistoryStartRename(clientId){
 function csHistoryCommitRename(oldId, newId){
   newId = newId.charAt(0).toUpperCase() + newId.slice(1);
   /* Validate uniqueness (case-insensitive), excluding self */
-  var lower = newId.toLowerCase();
-  var clash = (_csList || []).find(function(c){
-    return c && c.id && c.id.toLowerCase() === lower && c.id !== oldId;
-  });
+  var clash = csNomeGiaUsato(newId, oldId);
   if(clash){
+    csAvvisaDoppio(clash);
     /* Reset back and flash the name field with an error tone */
     var nameEl = document.getElementById('cs-history-name');
     if(nameEl){
@@ -26324,7 +26351,9 @@ function ggAddNewClient(){
   if(!inp) return;
   var name = (inp.value||'').trim();
   if(!name) return;
-  if(!(_csList||[]).find(function(c){ return c.id === name; })){
+  var _gia = csNomeGiaUsato(name);
+  if(_gia){ if(_gia.id !== name) csAvvisaDoppio(_gia); name = _gia.id; }
+  else {
     _csList.push({id:name, state:null, ts:Date.now()});
     if(typeof _csSaveLocal === 'function') _csSaveLocal();
     if(typeof sbSave === 'function') sbSave(name, null);

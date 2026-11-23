@@ -11099,7 +11099,7 @@ window.addEventListener('load', function(){
     if((e = t.closest('[data-entra]'))){ clEntra(e.getAttribute('data-entra')); return; }
     if((e = t.closest('[data-dettagli]'))){ cdOpen(e.getAttribute('data-dettagli')); return; }
     if((e = t.closest('[data-nuovo]'))){ var n = e.getAttribute('data-nuovo'); inp.value = ''; if(typeof csSearchAddNew === 'function') csSearchAddNew(n); clDisegna(); return; }
-    if((e = t.closest('[data-cl]'))){ var id = e.getAttribute('data-cl'); _clAperto = (_clAperto === id) ? null : id; clDisegna(); }
+    if((e = t.closest('[data-cl]'))){ var id = e.getAttribute('data-cl'); _clAperto = (_clAperto === id) ? null : id; _clPtScelto = null; clDisegna(); }
   });
   /* si ridisegna quando arriva l'elenco dei clienti e ogni volta che si torna qui */
   if(typeof gridRifareRender === 'function'){

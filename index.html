@@ -10526,6 +10526,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
     <div id="proto-tools">
     <button id="ore-screen-btn" onclick="oreOpen()" title="Conteggio ore — recap e consuntivo giornata">◷ Ore</button>
     <button id="riu-screen-btn" onclick="riuOpen()" title="Riunioni — la settimana e chi c'è">▦ Riunioni</button>
+    <button id="rfp-btn" onclick="rfpOpen()">Red Flags</button>
     <button id="ese-screen-btn" onclick="eseOpen()" title="Database esercizi — per ora scollegato dal resto">Esercizi</button>
     <button id="admin-btn" onclick="adminPwOpen()">Admin</button>
     </div>
@@ -10569,6 +10570,249 @@ body:not(.nv-dentro) .header-right > :not(.nv-sempre){display:none !important;}
   #ingresso .ing-logo{display:none;}
 }
 </style>
+<style>
+/* ══ PAGINA RED FLAGS ══ (solo monitor) Le stesse schede della finestra del
+   cliente, ma viste dal lato opposto: scegli un red flag e vedi chi ce l'ha. */
+#rfp-btn{
+  background:none;border:1px solid rgba(200,120,120,0.40);border-radius:2px;cursor:pointer;
+  font-family:var(--font);font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;
+  color:rgba(225,160,160,0.92);padding:10px 16px;transition:all 0.2s;
+}
+#rfp-btn:hover{border-color:rgba(225,140,140,0.85);color:rgba(240,180,180,1);}
+#rfp-screen{position:fixed;inset:0;z-index:9999;background:var(--bg);overflow-y:auto;font-family:var(--font);}
+#rfp-screen.off{display:none;}
+.rfp-wrap{max-width:1200px;margin:0 auto;padding:34px 32px 70px;display:flex;gap:32px;align-items:flex-start;}
+.rfp-a{flex:1 1 0;min-width:0;}
+.rfp-b{
+  flex:1 1 0;min-width:0;position:sticky;top:34px;
+  background:var(--bg-panel);border:1px solid rgba(200,120,120,0.18);border-radius:3px;
+  padding:26px 30px 28px;box-shadow:0 0 60px rgba(200,100,100,0.06);
+}
+.rfp-tit{font-size:21px;font-weight:300;letter-spacing:3px;text-transform:uppercase;color:var(--text-hi);}
+.rfp-sub{font-size:11.5px;font-weight:300;font-style:italic;color:rgba(180,195,210,0.86);line-height:1.55;margin:6px 0 20px;}
+.rfp-n{display:flex;align-items:baseline;gap:7px;font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:rgba(190,204,218,0.72);white-space:nowrap;}
+.rfp-n em{font-style:normal;font-size:19px;font-weight:300;letter-spacing:0;color:#f0ebdc;}
+.rfp-n.zero em{color:rgba(190,204,218,0.45);}
+.rfp-tutti{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;box-sizing:border-box;
+  margin-bottom:14px;padding:13px 18px;cursor:pointer;font-family:var(--font);text-align:left;
+  background:rgba(0,0,0,0.10);border:1px solid var(--border);border-radius:2px;
+  font-size:13px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:rgba(218,228,238,0.82);
+  transition:border-color 0.18s, background 0.18s;
+}
+.rfp-tutti.sel{border-color:rgba(212,168,74,0.65);background:rgba(212,168,74,0.06);color:#E4B85A;}
+#rfp-carte .rf-card-head{grid-template-columns:42px 1fr auto;}
+.rfp-b-tit{font-size:17px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:var(--rfc, var(--text-hi));}
+.rfp-b-fai{font-size:11.5px;font-weight:300;color:rgba(200,214,228,0.86);line-height:1.5;margin-top:6px;}
+.rfp-lista{margin-top:20px;border-top:1px solid rgba(180,195,210,0.08);}
+.rfp-cli{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(180,195,210,0.08);}
+.rfp-cli-nome{
+  flex:none;max-width:44%;background:none;border:0;padding:0;cursor:pointer;font-family:var(--font);text-align:left;
+  font-size:13px;font-weight:400;letter-spacing:1px;color:#f0ebdc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.rfp-cli-nome:hover{color:#E4B85A;}
+.rfp-cli-nota{
+  flex:1;min-width:0;background:rgba(0,0,0,0.25);border:1px solid rgba(180,195,210,0.12);border-radius:2px;
+  padding:6px 9px;font-family:var(--font);font-size:11.5px;color:rgba(218,228,238,0.9);outline:none;
+}
+.rfp-cli-nota:focus{border-color:rgba(200,175,90,0.55);}
+.rfp-chips{flex:1;min-width:0;display:flex;flex-wrap:wrap;gap:5px;justify-content:flex-end;}
+.rfp-chip{font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:3px 7px;border:1px solid var(--rfc);border-radius:2px;color:var(--rfc);}
+.rfp-togli{
+  flex:none;background:none;border:0;padding:0;cursor:pointer;font-family:var(--font);
+  font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(180,195,210,0.55);
+}
+.rfp-togli:hover{color:rgba(225,140,140,0.95);}
+.rfp-vuoto{padding:18px 0;font-size:11.5px;font-weight:300;color:rgba(180,195,210,0.6);}
+.rfp-agg{margin-top:20px;position:relative;}
+.rfp-agg input{
+  width:100%;box-sizing:border-box;background:rgba(0,0,0,0.25);border:1px solid rgba(180,195,210,0.16);border-radius:2px;
+  padding:10px 12px;font-family:var(--font);font-size:12px;letter-spacing:1px;color:#f0ebdc;outline:none;
+}
+.rfp-agg input:focus{border-color:rgba(200,175,90,0.55);}
+.rfp-agg-ris{margin-top:4px;max-height:230px;overflow-y:auto;}
+.rfp-agg-ris button{
+  display:block;width:100%;background:none;border:0;border-bottom:1px solid rgba(180,195,210,0.06);cursor:pointer;
+  padding:8px 12px;text-align:left;font-family:var(--font);font-size:12px;letter-spacing:1px;color:rgba(218,228,238,0.86);
+}
+.rfp-agg-ris button:hover{background:rgba(212,168,74,0.08);color:#E4B85A;}
+@media (max-width:999px){ #rfp-btn,#rfp-screen{display:none !important;} }
+@media (min-width:1000px){
+  body #rfp-screen{top:57px;}
+  /* Ore e Riunioni si raggiungono dalla pagina Sandbox: qui non servono */
+  #proto-tools > #ore-screen-btn, #proto-tools > #riu-screen-btn{display:none !important;}
+}
+</style>
+<div id="rfp-screen" class="off">
+  <div class="rfp-wrap">
+    <div class="rfp-a">
+      <div class="rfp-tit">Red Flags</div>
+      <div class="rfp-sub">Le 7 condizioni che il certificato medico non filtra.</div>
+      <button type="button" class="rfp-tutti" id="rfp-tutti" onclick="rfpScegli(null)"><span>Tutti</span><span class="rfp-n" id="rfp-tutti-n"></span></button>
+      <div id="rfp-carte"></div>
+    </div>
+    <div class="rfp-b" id="rfp-b"></div>
+  </div>
+</div>
+<script id="rfp-script">
+/* ── Pagina Red Flags ──
+   Legge e scrive gli stessi dati della finestra Red Flags del cliente
+   (state.redFlags dentro la scheda del cliente) e salva allo stesso modo. */
+var _rfpSel = null;      /* id del red flag scelto, null = tutti */
+function rfpEsc(t){ return String(t == null ? '' : t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function rfpClienti(){ return (typeof _csList !== 'undefined' && Array.isArray(_csList)) ? _csList.filter(function(c){ return c && c.id; }) : []; }
+function rfpHa(c, id){
+  var rf = c && c.state && c.state.redFlags;
+  if(!rf) return false;
+  if(id === '__custom') return !!(rf.custom && rf.custom.attivo);
+  return !!(rf.flags && rf.flags[id] && rf.flags[id].attivo);
+}
+function rfpNota(c, id){
+  var rf = c && c.state && c.state.redFlags;
+  if(!rf) return '';
+  if(id === '__custom') return (rf.custom && rf.custom.nome) || '';
+  return (rf.flags && rf.flags[id] && rf.flags[id].note) || '';
+}
+function rfpTutteLeSchede(){
+  return window.RF_DATA.concat([{id:'__custom', num:'+', name:'Custom', slug:'condizione non standard, definita dal PT', color:'rgba(190,170,140,0.85)', shortDo:''}]);
+}
+function rfpQuanti(id){ return rfpClienti().filter(function(c){ return rfpHa(c, id); }).length; }
+function rfpConAlmenoUno(){
+  var tutte = rfpTutteLeSchede();
+  return rfpClienti().filter(function(c){ return tutte.some(function(f){ return rfpHa(c, f.id); }); });
+}
+function rfpPerNome(a, b){ return (a.id||'').localeCompare(b.id||'', 'it', {sensitivity:'base'}); }
+function rfpSalva(c){
+  c.state.redFlags.ultimoAggiornamento = Date.now();
+  c.ts = Date.now();
+  if(typeof _csSaveLocal === 'function') _csSaveLocal();
+  if(typeof sbSave === 'function') sbSave(c.id, c.state);
+}
+function rfpTrova(clientId){ return rfpClienti().find(function(c){ return c.id === clientId; }); }
+function rfpMetti(clientId, id, attivo){
+  var c = rfpTrova(clientId);
+  if(!c || id === '__custom') return;
+  if(!c.state) c.state = {};
+  if(!c.state.redFlags) c.state.redFlags = {flags:{}, custom:null};
+  if(!c.state.redFlags.flags) c.state.redFlags.flags = {};
+  var f = c.state.redFlags.flags[id] || {attivo:false, note:''};
+  f.attivo = !!attivo;
+  if(f.attivo || (f.note && f.note.trim())) c.state.redFlags.flags[id] = f;
+  else delete c.state.redFlags.flags[id];
+  rfpSalva(c);
+  rfpDisegna();
+}
+function rfpScriviNota(clientId, id, testo){
+  var c = rfpTrova(clientId);
+  if(!c || id === '__custom' || !rfpHa(c, id)) return;
+  c.state.redFlags.flags[id].note = testo || '';
+  rfpSalva(c);
+}
+function rfpScegli(id){ _rfpSel = (_rfpSel === id) ? _rfpSel : id; rfpDisegna(); }
+function rfpDisegna(){
+  var carte = document.getElementById('rfp-carte'), b = document.getElementById('rfp-b');
+  if(!carte || !b) return;
+  var tutte = rfpTutteLeSchede();
+  var conUno = rfpConAlmenoUno();
+  document.getElementById('rfp-tutti').classList.toggle('sel', _rfpSel === null);
+  document.getElementById('rfp-tutti-n').innerHTML = '<em>'+conUno.length+'</em>clienti';
+  document.getElementById('rfp-tutti-n').classList.toggle('zero', !conUno.length);
+  var h = '';
+  tutte.forEach(function(f){
+    var n = rfpQuanti(f.id), sel = (_rfpSel === f.id);
+    h += '<div class="rf-card'+(f.id==='__custom'?' custom':'')+(sel?' active expanded':'')+'" style="--rf-color:'+f.color+';">'
+       +   '<div class="rf-card-head" onclick="rfpScegli(\''+f.id+'\')">'
+       +     '<span class="rf-card-num">'+f.num+'</span>'
+       +     '<div class="rf-card-name-wrap"><span class="rf-card-name">'+f.name+'</span><span class="rf-card-slug">'+f.slug+'</span></div>'
+       +     '<span class="rfp-n'+(n?'':' zero')+'"><em>'+n+'</em>clienti</span>'
+       +   '</div>';
+    if(f.id !== '__custom'){
+      h += '<div class="rf-card-body">'
+         +   '<div class="rf-detail"><div class="rf-detail-label">Come lo riconosci</div><div class="rf-detail-text">'+f.trigger+'</div></div>'
+         +   '<div class="rf-detail"><div class="rf-detail-label">Perché ti riguarda</div><div class="rf-detail-text">'+f.whyMatters+'</div></div>'
+         +   '<div class="rf-detail cosafai"><div class="rf-detail-label">Cosa fai</div><div class="rf-detail-text">'+f.whatYouDo+'</div></div>'
+         +   '<div class="rf-detail pattern"><div class="rf-detail-label">Pattern a rischio</div><div class="rf-detail-text">'+f.patterns+'</div></div>'
+         + '</div>';
+    }
+    h += '</div>';
+  });
+  carte.innerHTML = h;
+
+  /* il riquadro a destra: chi ce l'ha */
+  var r = '';
+  if(_rfpSel === null){
+    r += '<div class="rfp-b-tit">Tutti</div><div class="rfp-lista">';
+    if(!conUno.length) r += '<div class="rfp-vuoto">Nessun cliente con un red flag acceso.</div>';
+    conUno.sort(rfpPerNome).forEach(function(c){
+      var chips = '';
+      tutte.forEach(function(f){
+        if(rfpHa(c, f.id)) chips += '<span class="rfp-chip" style="--rfc:'+f.color+'">'+rfpEsc(f.id==='__custom' ? (rfpNota(c,f.id)||'Custom') : f.name)+'</span>';
+      });
+      r += '<div class="rfp-cli"><button type="button" class="rfp-cli-nome" data-apri="'+rfpEsc(c.id)+'">'+rfpEsc(c.id)+'</button><div class="rfp-chips">'+chips+'</div></div>';
+    });
+    r += '</div>';
+  } else {
+    var f = tutte.find(function(x){ return x.id === _rfpSel; });
+    var chi = rfpClienti().filter(function(c){ return rfpHa(c, f.id); }).sort(rfpPerNome);
+    r += '<div class="rfp-b-tit" style="--rfc:'+f.color+'">'+f.name+'</div>';
+    if(f.shortDo) r += '<div class="rfp-b-fai">'+f.shortDo+'</div>';
+    r += '<div class="rfp-lista">';
+    if(!chi.length) r += '<div class="rfp-vuoto">Nessun cliente.</div>';
+    chi.forEach(function(c){
+      r += '<div class="rfp-cli"><button type="button" class="rfp-cli-nome" data-apri="'+rfpEsc(c.id)+'">'+rfpEsc(c.id)+'</button>';
+      if(f.id === '__custom') r += '<div class="rfp-chips"><span class="rfp-chip" style="--rfc:'+f.color+'">'+rfpEsc(rfpNota(c,f.id)||'Custom')+'</span></div>';
+      else r += '<input class="rfp-cli-nota" data-nota="'+rfpEsc(c.id)+'" value="'+rfpEsc(rfpNota(c,f.id))+'" placeholder="nota">'
+              + '<button type="button" class="rfp-togli" data-togli="'+rfpEsc(c.id)+'">togli</button>';
+      r += '</div>';
+    });
+    r += '</div><div class="rfp-agg"><input type="text" id="rfp-agg-in" placeholder="aggiungi cliente" autocomplete="off"><div class="rfp-agg-ris" id="rfp-agg-ris"></div></div>';
+  }
+  b.innerHTML = r;
+  [].forEach.call(b.querySelectorAll('[data-apri]'), function(e){
+    e.addEventListener('click', function(){ if(typeof rfOpen === 'function') rfOpen(e.getAttribute('data-apri')); });
+  });
+  [].forEach.call(b.querySelectorAll('[data-togli]'), function(e){
+    e.addEventListener('click', function(){ rfpMetti(e.getAttribute('data-togli'), _rfpSel, false); });
+  });
+  [].forEach.call(b.querySelectorAll('[data-nota]'), function(e){
+    e.addEventListener('change', function(){ rfpScriviNota(e.getAttribute('data-nota'), _rfpSel, e.value); });
+  });
+  var inp = document.getElementById('rfp-agg-in');
+  if(inp) inp.addEventListener('input', rfpCerca);
+}
+function rfpCerca(){
+  var inp = document.getElementById('rfp-agg-in'), ris = document.getElementById('rfp-agg-ris');
+  if(!inp || !ris) return;
+  var q = (inp.value || '').trim().toLowerCase();
+  if(!q){ ris.innerHTML = ''; return; }
+  var sel = _rfpSel;
+  var trovati = rfpClienti().filter(function(c){ return c.id.toLowerCase().indexOf(q) !== -1 && !rfpHa(c, sel); }).sort(rfpPerNome).slice(0, 12);
+  ris.innerHTML = trovati.length
+    ? trovati.map(function(c){ return '<button type="button" data-agg="'+rfpEsc(c.id)+'">'+rfpEsc(c.id)+'</button>'; }).join('')
+    : '<div class="rfp-vuoto">Nessun cliente trovato.</div>';
+  [].forEach.call(ris.querySelectorAll('[data-agg]'), function(e){
+    e.addEventListener('click', function(){
+      var id = e.getAttribute('data-agg');
+      /* il Custom ha bisogno di un nome: si scrive nella finestra del cliente */
+      if(sel === '__custom'){ if(typeof rfOpen === 'function') rfOpen(id); }
+      else rfpMetti(id, sel, true);
+    });
+  });
+}
+function rfpOpen(){ _rfpSel = null; rfpDisegna(); document.getElementById('rfp-screen').classList.remove('off'); }
+function rfpClose(){ document.getElementById('rfp-screen').classList.add('off'); }
+/* quando si chiude la finestra del cliente, la pagina si ridisegna */
+window.addEventListener('load', function(){
+  if(typeof rfClose === 'function'){
+    var _rc = rfClose;
+    rfClose = function(){
+      _rc.apply(this, arguments);
+      var p = document.getElementById('rfp-screen');
+      if(p && !p.classList.contains('off')) rfpDisegna();
+    };
+  }
+});
+</script>
 <div id="ingresso" class="off">
   <div class="ing-logo">Sandbox</div>
   <div class="ing-carte">
@@ -10606,6 +10850,7 @@ window.addEventListener('load', function(){
   function navDove(){
     if(vis('login-splash')) return 'login';
     if(vis('load-screen')) return 'load';
+    if(vis('rfp-screen')) return 'rfp';
     if(vis('ese-screen')) return 'ese';
     if(vis('ore-screen')) return 'ore';
     if(vis('riu-screen')) return 'riu';
@@ -10621,6 +10866,7 @@ window.addEventListener('load', function(){
     else if(d === 'riu') l1 = 'Riunioni';
     else if(d !== 'sandbox' && d !== 'login') l1 = 'Protocolli';
     if(d === 'ese') l2 = 'Esercizi';
+    if(d === 'rfp') l2 = 'Red Flags';
     if(d === 'load') l2 = _navProtoNome + ' · prototipo, non salva';
     var conProto = (d === 'elenco' || d === 'dentro');
     $('nv-l1').textContent = l1;
@@ -10649,6 +10895,7 @@ window.addEventListener('load', function(){
   function navChiudiFinestre(){
     if(vis('load-screen')) prototipoClose();
     if(vis('ese-screen')) eseClose();
+    if(vis('rfp-screen')) rfpClose();
     if(vis('ore-screen') && typeof window.oreClose === 'function') window.oreClose();
     if(vis('riu-screen') && typeof window.riuClose === 'function') window.riuClose();
   }
@@ -10662,7 +10909,7 @@ window.addEventListener('load', function(){
     var d = navDove();
     if(dove === 'sandbox'){ navChiudiFinestre(); navFuoriDalCliente(); ingressoOpen(); }
     else if(dove === 'l1'){
-      if(d === 'ese' || d === 'load'){ navChiudiFinestre(); }
+      if(d === 'ese' || d === 'load' || d === 'rfp'){ navChiudiFinestre(); }
       else if(d === 'elenco' || d === 'dentro'){ navFuoriDalCliente(); }
     }
     else if(dove === 'proto'){
@@ -10682,7 +10929,7 @@ window.addEventListener('load', function(){
   }
   if(window.MutationObserver){
     var _no = new MutationObserver(navAggiorna);
-    ['login-splash','ingresso','proto-select','cs','ore-screen','riu-screen','ese-screen','load-screen'].forEach(function(i){
+    ['login-splash','ingresso','proto-select','cs','ore-screen','riu-screen','ese-screen','load-screen','rfp-screen'].forEach(function(i){
       var e = document.getElementById(i);
       if(e) _no.observe(e, {attributes:true, attributeFilter:['class']});
     });
@@ -10697,7 +10944,7 @@ window.addEventListener('load', function(){
      Dai tre riquadri (o dalla password) Indietro esce davvero. */
   function vis(id){ var e = document.getElementById(id); return !!e && !e.classList.contains('off'); }
   function passoIndietro(){
-    var fin = [['load-screen', window.prototipoClose], ['ese-screen', window.eseClose],
+    var fin = [['load-screen', window.prototipoClose], ['ese-screen', window.eseClose], ['rfp-screen', window.rfpClose],
                ['ore-screen', window.oreClose], ['riu-screen', window.riuClose]];
     for(var i=0;i<fin.length;i++){
       if(vis(fin[i][0]) && typeof fin[i][1] === 'function'){ fin[i][1](); return true; }

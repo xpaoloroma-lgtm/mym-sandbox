@@ -151,6 +151,7 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
 .block .who{display:flex;flex-direction:column;gap:3px;min-width:0;}
 .block .top{display:flex;align-items:baseline;gap:12px;min-width:0;}
 .block .who .fl{margin-left:0;}
+.block .fl .dur{margin-left:10px;font-size:12px;font-weight:600;letter-spacing:1px;color:var(--text-hi);}
 .block .fl{font-size:9px;letter-spacing:3px;text-transform:uppercase;font-weight:600;color:var(--ft);line-height:1;}
 .block .nm{font-size:23px;font-weight:300;color:var(--text-hi);line-height:1.2;letter-spacing:.2px;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;}
 .block .rm{position:absolute;right:6px;top:6px;z-index:2;width:22px;height:22px;display:flex;align-items:center;justify-content:center;border:none;border-radius:2px;
@@ -1207,6 +1208,10 @@ function renderDisp(){
    L'1 deve essere comodo come gli altri, il 5 deve vedersi più grande. Scelta grafica, non misura. */
 var HB = [1.5, 2.2, 2.9, 3.6, 4.8];
 
+/* Cardio Tempo: la durata dipende solo dal posto nel round. 1 minuto e mezzo per posto:
+   1 → 1′30″, 2 → 3′, 3 → 4′30″, 4 → 6′, 5 → 7′30″. */
+function durataTempo(p){ var s = p * 90, m = Math.floor(s / 60); return m + '′' + (s % 60 ? '30″' : ''); }
+
 /* ═══ ROUND: BLOCCHI ═══ */
 function renderBlocks(r, anim){
   var order = shown()[r], el = $('blocks-' + r), h = '', top = 0;
@@ -1230,7 +1235,7 @@ function renderBlocks(r, anim){
                '<button type="button" class="chg cg" data-chg="' + ex.fam + '" data-r="' + r + '" aria-label="Cambia ' + esc(ex.nome) + '" title="Cambia esercizio">' + CHG + '</button>' +
                '<button type="button" class="rm" data-rm="' + r + '-' + i + '" aria-label="Togli ' + esc(ex.nome) + ' dal round" title="Togli">' +
                '<svg aria-hidden="true" width="10" height="10" viewBox="0 0 10 10"><path d="M1.5 1.5l7 7M8.5 1.5l-7 7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>' +
-               '<div class="card"><span class="fl">' + f.label + '</span><span class="pn">' + p + '</span><span class="nm">' + esc(ex.nome) + '</span>' + box + '</div></div>';
+               '<div class="card"><span class="fl">' + f.label + (ex.fam === 'T' ? '<b class="dur">' + durataTempo(p) + '</b>' : '') + '</span><span class="pn">' + p + '</span><span class="nm">' + esc(ex.nome) + '</span>' + box + '</div></div>';
     }
     h += '<div class="slot" data-drop="slot" data-r="' + r + '" data-i="' + i + '" style="' + st + '">' + inner + '</div>';
     top += HB[i];

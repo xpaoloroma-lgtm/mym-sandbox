@@ -1387,7 +1387,7 @@ function renderBlocks(r, anim){
    Più la lettera è lontana dalla luce, più l'ombra è lunga, sfumata e debole. Con più luci ogni ombra è più leggera,
    perché le altre luci la rischiarano. Sotto ogni lettera resta un filo d'ombra di contatto.
    Anche il chiarore colorato del blocco viene dagli stessi punti. Tutti i numeri qui sono scelte, non misure. */
-var OMBRA_LUCE = 46, OMBRA_META = 240, OMBRA_MAX = 16;
+var OMBRA_LUCE = 70, OMBRA_META = 240, OMBRA_MAX = 16, LUCE_FORZA = 17;
 function lettere(t){ return String(t).split(' ').map(function(w){ return '<span class="pa">' + w.split('').map(function(c){ return '<span>' + esc(c) + '</span>'; }).join('') + '</span>'; }).join(' '); }
 function ombraDi(x, y, luci, rilievo, forza){
   /* il fianco della lettera che guarda le luci prende un filo del colore della famiglia */
@@ -1405,20 +1405,23 @@ function ombraDi(x, y, luci, rilievo, forza){
   });
   return out.join(',');
 }
-/* LUCI VIVE: quando il round è confermato i punti luce si staccano dalla riga e diventano particelle che vagano piano dentro il blocco.
-   Restano luci vere: chiarore e ombre le seguono. Chiave = round-esercizio, così sopravvivono ai ridisegni. */
-var LUCI_VIVE = {}, LUCE_VEL = [3, 7];   /* pixel al secondo: molto piano */
 function luciFerme(n, H){ var o = []; for(var i = 0; i < n; i++) o.push({x:0, y:H * (i + 0.5) / n}); return o; }
 function ombraApplica(b){
   var g = b._geo; if(!g) return;
   var luci = g.luci, n = luci.length, box = b.querySelector('.luci');
   if(box){
     if(box.children.length !== n) box.innerHTML = luci.map(function(){ return '<i></i>'; }).join('');
-    luci.forEach(function(l, i){ box.children[i].style.transform = 'translate3d(' + l.x.toFixed(2) + 'px,' + l.y.toFixed(2) + 'px,0)'; });
+    luci.forEach(function(l, i){ box.children[i].style.transform = 'translate(' + l.x.toFixed(1) + 'px,' + l.y.toFixed(1) + 'px)'; });
   }
-  var forzaLuce = Math.round(26 / Math.pow(n, 0.45)), raggio = Math.round(Math.max(150, g.W * 0.62));
+  /* CHIARORE DEL PIANO, calcolato e non disegnato a occhio.
+     Il blocco è una superficie opaca e ruvida (come dice la grana): rimanda la luce uguale in tutte le direzioni, senza riflessi lucidi.
+     Per un punto luce alto H sul piano, la luce che arriva a distanza d dal suo piede è  1 / (1 + (d/H)²)^1,5  di quella che arriva sotto la luce:
+     a d = H ne arriva il 35%, a 2H il 9%, a 3H il 3%. H è la stessa altezza usata per le ombre (OMBRA_LUCE), così luce e ombra dicono la stessa cosa.
+     Ogni punto luce ha la stessa forza: un blocco con più punti è più illuminato. */
+  var H = OMBRA_LUCE, passi = [0, 0.35, 0.7, 1, 1.4, 1.9, 2.5, 3.2, 4.2, 5.5], fine = passi[passi.length - 1] * H;
+  var stops = passi.map(function(q){ var e = 1 / Math.pow(1 + q * q, 1.5); return 'color-mix(in srgb,var(--fc) ' + (LUCE_FORZA * e).toFixed(2) + '%,transparent) ' + (q * H / fine * 100).toFixed(1) + '%'; }).join(',') + ',transparent 100%';
   b.style.setProperty('background', luci.map(function(l){
-    return 'radial-gradient(' + raggio + 'px ' + Math.round(raggio * 0.6) + 'px at ' + l.x.toFixed(1) + 'px ' + l.y.toFixed(1) + 'px,color-mix(in srgb,var(--fc) ' + forzaLuce + '%,transparent) 0%,color-mix(in srgb,var(--fc) ' + Math.round(forzaLuce * 0.4) + '%,transparent) 36%,transparent 100%)';
+    return 'radial-gradient(circle ' + Math.round(fine) + 'px at ' + l.x.toFixed(1) + 'px ' + l.y.toFixed(1) + 'px,' + stops + ')';
   }).concat(['linear-gradient(90deg,rgba(26,24,21,0.55) 0%,rgba(26,24,21,0.20) 60%,rgba(26,24,21,0) 100%)']).join(','), 'important');
   g.pezzi.forEach(function(q){ q.el.style.textShadow = ombraDi(q.x, q.y, luci, q.h, q.f); });
 }
@@ -1426,51 +1429,22 @@ function ombre(root){
   (root || document).querySelectorAll('.block').forEach(function(b){
     var R = b.getBoundingClientRect(); if(!R.height) return;
     var r = +b.dataset.r, n = (+b.dataset.i || 0) + 1, key = b.dataset.key;
-    var fatto = !!(S.conf && S.conf[r] && S.today[r].every(function(x){ return x != null; }));
     if(!b.querySelector('.luci')){ var box = document.createElement('div'); box.className = 'luci'; b.appendChild(box); }
-    var luci;
-    if(fatto){
-      luci = LUCI_VIVE[key];
-      if(!luci || luci.length !== n){   /* appena confermato: partono dalla riga, ognuna per la sua strada */
-        luci = luciFerme(n, R.height).map(function(l){ var a = (Math.random() - 0.5) * 1.6, v = LUCE_VEL[0] + Math.random() * (LUCE_VEL[1] - LUCE_VEL[0]); return {x:l.x, y:l.y, a:a, v:v, w:0}; });
-        LUCI_VIVE[key] = luci;
-      }
-    } else { delete LUCI_VIVE[key]; luci = luciFerme(n, R.height); }
+    var luci = luciFerme(n, R.height);   /* i punti luce stanno sempre sulla riga sinistra */
     /* le ombre stanno su una copia del testo messa SOTTO il testo vero: così un'ombra non può mai passare sopra una lettera */
     var vera = b.querySelector('.card:not(.omb)'), omb = b.querySelector('.card.omb');
     if(vera && !omb){ omb = vera.cloneNode(true); omb.classList.add('omb'); omb.setAttribute('aria-hidden', 'true'); b.insertBefore(omb, vera); }
     if(!omb) return;
     var pezzi = [];
     function metti(el, h, f){ if(!el) return; var q = el.getBoundingClientRect(); if(!q.width) return; pezzi.push({el:el, x:q.left + q.width / 2 - R.left, y:q.top + q.height / 2 - R.top, h:h, f:f}); }
-    metti(omb.querySelector('.pn'), 6, 1);
-    omb.querySelectorAll('.nm .pa > span').forEach(function(c){ metti(c, 4.6, 1); });
-    metti(omb.querySelector('.fl'), 2.4, 0.95);
-    metti(omb.querySelector('.notebox .tx'), 2.4, 0.9);
-    b._geo = {W:R.width, H:R.height, luci:luci, pezzi:pezzi, vive:fatto};
+    metti(omb.querySelector('.pn'), 8, 1);
+    omb.querySelectorAll('.nm .pa > span').forEach(function(c){ metti(c, 6, 1); });
+    metti(omb.querySelector('.fl'), 3.2, 0.95);
+    metti(omb.querySelector('.notebox .tx'), 3.2, 0.9);
+    b._geo = {W:R.width, H:R.height, luci:luci, pezzi:pezzi};
     ombraApplica(b);
   });
 }
-/* le particelle si muovono a ogni fotogramma, così scorrono lisce. La direzione gira dolcemente, senza scatti. */
-var luceT = 0;
-function luciGira(t){
-  var dt = Math.min(0.05, (t - luceT) / 1000 || 0); luceT = t;
-  if(!document.hidden && dt > 0){
-    document.querySelectorAll('.block').forEach(function(b){
-      var g = b._geo; if(!g || !g.vive) return;
-      var maxX = g.W * 0.72, m = 5;
-      g.luci.forEach(function(l){
-        l.w = (l.w || 0) * (1 - 0.6 * dt) + (Math.random() - 0.5) * 2.2 * dt;   /* la curva cambia piano */
-        l.a += l.w * dt;
-        l.x += Math.cos(l.a) * l.v * dt; l.y += Math.sin(l.a) * l.v * dt;
-        if(l.x < m){ l.x = m; l.a = Math.PI - l.a; l.w = 0; } if(l.x > maxX){ l.x = maxX; l.a = Math.PI - l.a; l.w = 0; }
-        if(l.y < m){ l.y = m; l.a = -l.a; l.w = 0; } if(l.y > g.H - m){ l.y = g.H - m; l.a = -l.a; l.w = 0; }
-      });
-      ombraApplica(b);
-    });
-  }
-  requestAnimationFrame(luciGira);
-}
-requestAnimationFrame(luciGira);
 window.addEventListener('resize', function(){ ombre(document); });
 
 /* ═══ ROUND: GRAFICO (con morph animato) ═══ */

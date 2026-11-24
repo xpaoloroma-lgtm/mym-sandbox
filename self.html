@@ -910,15 +910,15 @@ header .hdr-r{flex:none;}
 .slot .empty{inset:3px 0!important;border-radius:2px;background:rgba(4,4,3,0.45)!important;border:1px solid rgba(0,0,0,0.55);
   box-shadow:inset 0 3px 10px rgba(0,0,0,0.7),inset 0 -1px 0 rgba(255,246,224,0.05);}
 .slot.hot .empty{background:linear-gradient(90deg,rgba(212,168,74,0.16),rgba(4,4,3,0.45) 70%)!important;border-color:rgba(212,168,74,0.6);}
-/* le linee grigie di sfondo del grafico ondeggiano appena: un paio di pixel, in un minuto o più, ogni gruppo col suo tempo.
+/* le linee grigie di sfondo del grafico ondeggiano piano: circa 8 pixel, in 14-34 secondi, ogni gruppo col suo tempo.
    La linea dorata NO: quella è il dato e sta ferma. */
-@keyframes ondaA{from{transform:translateX(-0.7px);}to{transform:translateX(0.7px);}}
-@keyframes ondaB{from{transform:translateX(0.6px);}to{transform:translateX(-0.8px);}}
-.lane .onda{animation:ondaA 47s ease-in-out infinite alternate;will-change:transform;}
-.lane .onda.o1{animation:ondaB 61s ease-in-out -20s infinite alternate;}
-.lane .onda.o2{animation:ondaA 73s ease-in-out -35s infinite alternate;}
-.lane .onda.o3{animation:ondaB 89s ease-in-out -11s infinite alternate;}
-.lane .onda.o4{animation:ondaA 103s ease-in-out -50s infinite alternate;}
+@keyframes ondaA{from{transform:translateX(-2.2px);}to{transform:translateX(2.2px);}}
+@keyframes ondaB{from{transform:translateX(1.9px);}to{transform:translateX(-2.5px);}}
+.lane .onda{animation:ondaA 14s ease-in-out infinite alternate;will-change:transform;}
+.lane .onda.o1{animation:ondaB 19s ease-in-out -7s infinite alternate;}
+.lane .onda.o2{animation:ondaA 23s ease-in-out -12s infinite alternate;}
+.lane .onda.o3{animation:ondaB 29s ease-in-out -4s infinite alternate;}
+.lane .onda.o4{animation:ondaA 34s ease-in-out -17s infinite alternate;}
 @media (prefers-reduced-motion:reduce){ .lane .onda{animation:none!important;} }
 </style>
 </head>

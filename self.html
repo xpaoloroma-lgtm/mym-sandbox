@@ -952,8 +952,13 @@ header .hdr-r{flex:none;}
 .lane .filo.f7{animation:filoB 48s ease-in-out -48s infinite alternate;}
 .block .luci{position:absolute;left:0;top:0;width:0;height:0;z-index:3;pointer-events:none;}
 /* punti luce: piccoli, un paio di pixel, con un filo di alone */
-.block .luci i{position:absolute;left:0;top:-1.5px;width:3px;height:3px;border-radius:50%;background:#fff;
-  box-shadow:0 0 4px 1px color-mix(in srgb,var(--fc) 60%,#fff),0 0 10px 2px color-mix(in srgb,var(--fc) 70%,transparent);}
+/* i punti luce: bianco caldo */
+.block .luci i{position:absolute;left:0;top:-1.5px;width:3px;height:3px;border-radius:50%;background:#fff8e6;
+  box-shadow:0 0 4px 1px rgba(255,240,205,0.9),0 0 11px 3px rgba(255,232,180,0.45);}
+/* il trattino della nota è un oggetto: quello vero è colorato, la sua copia sotto fa solo l'ombra */
+.block .card .notebox{border-left-color:transparent!important;}
+.block .card .notebox:not(.note-empty)::before{content:'';position:absolute;left:0;top:2px;bottom:2px;width:2px;border-radius:1px;background:var(--tkc,color-mix(in srgb,var(--fc) 60%,transparent));}
+.block .card.omb .notebox:not(.note-empty)::before{background:transparent;box-shadow:var(--tks,none);}
 /* la copia per le ombre: stesso testo, stesso posto, invisibile; sta sotto il testo vero */
 .block .card.omb{z-index:1!important;pointer-events:none!important;}
 .block .card.omb,.block .card.omb *{color:transparent!important;-webkit-text-fill-color:transparent!important;border-color:transparent!important;}
@@ -1412,14 +1417,14 @@ function renderBlocks(r, anim){
    Più la lettera è lontana dalla luce, più l'ombra è lunga, sfumata e debole. Con più luci ogni ombra è più leggera,
    perché le altre luci la rischiarano. Sotto ogni lettera resta un filo d'ombra di contatto.
    Anche il chiarore colorato del blocco viene dagli stessi punti. Tutti i numeri qui sono scelte, non misure. */
-var OMBRA_LUCE = 70, OMBRA_META = 240, OMBRA_MAX = 9, LUCE_FORZA = 13, LUCE_TINTA = 30, LUCE_TINTA_MAX = 32;
+var OMBRA_LUCE = 70, OMBRA_META = 240, OMBRA_MAX = 9, LUCE_FORZA = 13, LUCE_BUIO = 70;   /* LUCE_BUIO: quanto resta luminosa (in %) una scritta lontana da ogni luce */
 function lettere(t){ return String(t).split(' ').map(function(w){ return '<span class="pa">' + w.split('').map(function(c){ return '<span>' + esc(c) + '</span>'; }).join('') + '</span>'; }).join(' '); }
 function ombraDi(x, y, luci, rilievo, forza){
   /* il fianco della lettera che guarda le luci prende un filo del colore della famiglia */
   var mx = 0, my = 0; luci.forEach(function(l){ mx += l.x; my += l.y; }); mx /= luci.length; my /= luci.length;
   var vx = mx - x, vy = my - y, vl = Math.sqrt(vx * vx + vy * vy) || 1;
-  var bordo = Math.round(95 / (1 + vl / OMBRA_META));
-  var out = [(vx / vl * 0.8).toFixed(2) + 'px ' + (vy / vl * 0.8).toFixed(2) + 'px 0.5px color-mix(in srgb,var(--fc) ' + bordo + '%,transparent)', '0 0.6px 0.6px rgba(0,0,0,0.9)'];
+  var bordo = (0.5 / (1 + vl / OMBRA_META)).toFixed(2);   /* il fianco verso la luce prende un filo di bianco caldo */
+  var out = [(vx / vl * 0.8).toFixed(2) + 'px ' + (vy / vl * 0.8).toFixed(2) + 'px 0.5px rgba(255,240,205,' + bordo + ')', '0 0.6px 0.6px rgba(0,0,0,0.9)'];
   var k = rilievo / (OMBRA_LUCE - rilievo), peso = 1 / Math.pow(luci.length, 0.5);
   luci.forEach(function(l){
     var dx = k * (x - l.x), dy = k * (y - l.y), len = Math.sqrt(dx * dx + dy * dy);
@@ -1464,23 +1469,35 @@ function ombre(root){
     function metti(el, h, f){ if(!el) return; var q = el.getBoundingClientRect(); if(!q.width) return; pezzi.push({el:el, x:q.left + q.width / 2 - R.left, y:q.top + q.height / 2 - R.top, h:h, f:f}); }
     metti(omb.querySelector('.pn'), 4.5, 0.7);
     omb.querySelectorAll('.nm .pa > span').forEach(function(c){ metti(c, 3.4, 0.7); });
-    metti(omb.querySelector('.fl'), 1.7, 0.6);
+    metti(omb.querySelector('.fl'), 2.2, 0.7);
     metti(omb.querySelector('.notebox .tx'), 1.7, 0.6);
-    /* LA LUCE È COLORATA (del colore della famiglia) e colora quello che illumina, tutto con la stessa regola:
-       ogni scritta tiene il suo colore e ne prende un po' da quello della luce, tanto più quanto è vicina a un punto luce
-       (stessa legge del chiarore del piano). Vale per numero, nome (lettera per lettera), nota e durata.
-       La famiglia e il trattino della nota sono già di quel colore. */
-    function tinta(el, base){
-      if(!el) return; var q = el.getBoundingClientRect(); if(!q.width) return;
+    /* LA REGOLA (24/11): la luce è BIANCA, un bianco caldo. È il piano a essere colorato (del colore della famiglia), e la luce lo fa vedere.
+       Sopra il piano ci sono cinque oggetti, tutti fisici allo stesso modo: numero, famiglia, nome, nota e trattino della nota.
+       Ognuno ha il suo colore (bianco il nome e la nota, dorato il numero, del colore della famiglia la scritta della famiglia e il trattino),
+       tutti fanno ombra, e tutti sono più luminosi vicino a un punto luce e meno lontano (stessa legge del chiarore del piano).
+       Nessuno prende il colore della luce, perché la luce è bianca. */
+    function lume(el){
+      var q = el.getBoundingClientRect(); if(!q.width && !q.height) return null;
       var x = q.left + q.width / 2 - R.left, y = q.top + q.height / 2 - R.top, e = 0;
       luci.forEach(function(l){ var d2 = ((x - l.x) * (x - l.x) + (y - l.y) * (y - l.y)) / (OMBRA_LUCE * OMBRA_LUCE); e += 1 / Math.pow(1 + d2, 1.5); });
-      el.style.color = 'color-mix(in srgb,var(--fc) ' + Math.min(LUCE_TINTA_MAX, LUCE_TINTA * e).toFixed(1) + '%,' + base + ')';
+      return {x:x, y:y, f:Math.round(LUCE_BUIO + (100 - LUCE_BUIO) * Math.min(1, e * 1.3))};
     }
+    function illumina(el, base){ if(!el) return; var m = lume(el); if(m) el.style.color = 'color-mix(in srgb,' + base + ' ' + m.f + '%,rgb(96,92,84))'; }
     if(vera){
-      tinta(vera.querySelector('.pn'), 'rgba(226,196,128,0.92)');
-      vera.querySelectorAll('.nm .pa > span').forEach(function(c){ tinta(c, 'rgba(246,242,232,0.97)'); });
-      tinta(vera.querySelector('.notebox .tx'), 'rgba(244,232,204,0.94)');
-      tinta(vera.querySelector('.fl .dur'), 'rgba(246,242,232,0.97)');
+      illumina(vera.querySelector('.pn'), 'rgb(232,200,128)');
+      vera.querySelectorAll('.nm .pa > span').forEach(function(c){ illumina(c, 'rgb(250,246,236)'); });
+      illumina(vera.querySelector('.notebox .tx'), 'rgb(246,236,210)');
+      illumina(vera.querySelector('.fl'), 'var(--ft)');
+      illumina(vera.querySelector('.fl .dur'), 'rgb(250,246,236)');
+      /* il trattino della nota: oggetto colorato, illuminato e con la sua ombra */
+      var nv = vera.querySelector('.notebox'), no = omb.querySelector('.notebox');
+      if(nv && no && !nv.classList.contains('note-empty')){
+        var m = lume(nv), nq = nv.getBoundingClientRect();
+        if(m){
+          nv.style.setProperty('--tkc', 'color-mix(in srgb,var(--fc) ' + m.f + '%,rgb(60,58,54))');
+          no.style.setProperty('--tks', ombraDi(nq.left + 1 - R.left, nq.top + nq.height / 2 - R.top, luci, 1.7, 0.6));
+        }
+      }
     }
     b._geo = {W:R.width, H:R.height, luci:luci, pezzi:pezzi};
     ombraApplica(b);

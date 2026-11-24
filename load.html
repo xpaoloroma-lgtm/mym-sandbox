@@ -1871,6 +1871,23 @@ header{gap:16px}
   #view-only-banner .view-only-cta,#view-only-banner .vo-cta{padding:0 8px!important;letter-spacing:1.5px!important;}
 }
 /* ══ fine CONSULTAZIONE ══ */
+/* ══ FINESTRA AFFIANCATA (metà monitor) ══
+   Con tre esercizi in ipertrofia e la finestra bassa, il complementare veniva nascosto per far stare tutto.
+   Non si nasconde niente: se non ci sta, la zona di lavoro scorre. */
+#zlist.densa .slotbox .srow.sub{display:grid!important}
+@media(max-height:960px){
+  #zlist{overflow-y:auto!important;scrollbar-width:thin;scrollbar-color:rgba(212,168,74,.6) transparent}
+  #zlist.densa .slotbox{flex:0 0 auto!important;height:auto!important;min-height:116px!important}
+  #zlist.densa .slotbox .srow{min-height:56px}
+  #zlist.densa .openzona .row{flex:0 0 46px!important;min-height:46px!important}
+  #zlist.densa .iperzona,#zlist.densa .openzona{flex:0 0 auto!important;height:auto!important}
+}
+/* a finestra stretta le note prendono lo spazio vuoto tra carico e note */
+@media(max-width:1100px){
+  /* nelle stazioni di Open la colonna delle reps è vuota: quello spazio va alle note */
+  #zlist .row.z-open{grid-template-columns:64px 112px minmax(0,1.3fr) minmax(0,.9fr) 0 minmax(0,1.9fr) 46px!important}
+  #zlist .srow{grid-template-columns:112px minmax(0,1.3fr) minmax(0,.9fr) minmax(0,.6fr) minmax(0,1.5fr) 46px!important}
+}
 /* ══ RED FLAG: la stessa striscia di Open, sotto la barra, lunga quanto la pagina. Non c'è se il cliente non ne ha. ══ */
 #rfh{display:none!important;}
 #rfh.on{display:flex!important;flex:none!important;width:100%!important;height:auto!important;margin:0!important;box-sizing:border-box;align-items:center;gap:14px!important;

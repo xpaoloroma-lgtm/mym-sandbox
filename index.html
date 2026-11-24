@@ -9917,6 +9917,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   #proto-tools > #ore-screen-btn{order:2;}
   #proto-tools > #ese-screen-btn{order:4;}
   #proto-tools > #admin-btn{order:5;}
+  #proto-tools > #clog-btn{order:6;}
 }
 @media (max-width:899px) and (pointer:coarse){
   #proto-select{
@@ -10363,7 +10364,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
    finestra a tutto schermo. Per ora è scollegato da tutto: ha i suoi dati
    e i suoi salvataggi, e non legge né scrive niente della Sandbox.
    Sul telefono non c'è: lì si usano solo le ore. */
-#ese-screen-btn{
+#ese-screen-btn,#clog-btn{
   background:none;border:1px solid rgba(180,195,210,0.14);
   border-radius:2px;cursor:pointer;
   font-family:var(--font);font-size:8px;font-weight:600;
@@ -10371,7 +10372,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   color:rgba(180,195,210,0.86);padding:6px 14px;
   transition:all 0.15s;
 }
-#ese-screen-btn:hover{border-color:rgba(200,175,90,0.76);color:rgba(200,175,90,0.85);}
+#ese-screen-btn:hover,#clog-btn:hover{border-color:rgba(200,175,90,0.76);color:rgba(200,175,90,0.85);}
 #ese-screen{
   position:fixed;inset:0;z-index:9999;background:var(--bg);
   display:flex;flex-direction:column;
@@ -10400,7 +10401,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
 #load-frame{flex:1 1 auto;width:100%;border:0;background:var(--bg);}
 .proto-card-proto{border-style:dashed;}
 @media (max-width:899px) and (pointer:coarse){
-  #ese-screen-btn,#ese-screen{display:none !important;}
+  #ese-screen-btn,#ese-screen,#clog-btn{display:none !important;}
   .proto-card-proto,#load-screen{display:none !important;}
 }
 </style>
@@ -10625,6 +10626,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
     <button id="rfp-btn" onclick="rfpOpen()">Red Flags</button>
     <button id="ese-screen-btn" onclick="eseOpen()" title="Database esercizi — per ora scollegato dal resto">Esercizi</button>
     <button id="admin-btn" onclick="adminPwOpen()">Admin</button>
+    <button id="clog-btn" onclick="prototipoOpen('changelog.html','Changelog')" title="Cosa è stato aggiunto, cambiato e tolto">Changelog</button>
     </div>
   </div>
   <div id="proto-chart-wrap">
@@ -12016,7 +12018,7 @@ window.addEventListener('load', function(){
     var l3 = '', ese = navEse();
     if(d === 'rfp') l2 = 'Red Flags';
     if(d === 'cd') l2 = 'Dettagli cliente';
-    if(d === 'load') l2 = _navProtoNome + (ese ? '' : ' · prototipo, non salva');
+    if(d === 'load') l2 = _navProtoNome + ((ese || _navProtoNome === 'Changelog') ? '' : ' · prototipo, non salva');
     var conProto = (d === 'elenco' || d === 'dentro');
     $('nv-l1').textContent = l1;
     $('nv-l2').textContent = l2;

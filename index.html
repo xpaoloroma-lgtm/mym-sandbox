@@ -10882,7 +10882,7 @@ function clRiga(c){
   var fermo = n !== null && n > 30, aperta = (_clAperto === c.id);
   return '<div class="cl-r' + (fermo ? ' fermo' : '') + (aperta ? ' aperta' : '') + '" style="--pc:' + pc + '">'
        + '<button type="button" class="cl-capo" data-cl="' + clEsc(c.id) + '">'
-       +   '<div class="cl-chi"><div class="cl-nome">' + clEsc(c.id) + '</div><div class="cl-sotto"><span class="cl-proto">' + (proto ? CL_NOME[proto] : 'nuovo') + '</span>' + chips + '</div></div>'
+       +   '<div class="cl-chi"><div class="cl-nome">' + clEsc(c.id) + (c.state && c.state.nick ? '<span class="cl-nick">' + clEsc(c.state.nick) + '</span>' : '') + '</div><div class="cl-sotto"><span class="cl-proto">' + (proto ? CL_NOME[proto] : 'nuovo') + '</span>' + chips + '</div></div>'
        +   '<div class="cl-tre">' + celle + '</div>'
        +   '<div class="cl-ultimo">' + ult + '</div>'
        + '</button>'
@@ -10935,7 +10935,7 @@ function clSegni(c){
   return segni;
 }
 function clGiu(c, proto){
-  var h = clTimeline(c, null);
+  var h = (c.state && c.state.notaCliente ? '<div class="cl-nota">' + clEsc(c.state.notaCliente) + '</div>' : '') + clTimeline(c, null);
   /* in fondo: i due simboli, poi chi sei e "Entra" */
   var ptScelto = clPt();
   var pts = (typeof PT_LIST !== 'undefined' && Array.isArray(PT_LIST)) ? PT_LIST : [];
@@ -13152,32 +13152,55 @@ function eseClose(){
 <div id="nc-velo" onclick="if(event.target===this)ncChiudi()">
   <div id="nc-box">
     <div class="nc-t">Nuovo cliente</div>
-    <input id="nc-nome" type="text" placeholder="Nome e cognome" autocomplete="off" spellcheck="false">
+    <div class="nc-due">
+      <label class="nc-c"><span class="nc-k">Nome e cognome</span><input id="nc-nome" type="text" autocomplete="off" spellcheck="false"></label>
+      <label class="nc-c nc-c2"><span class="nc-k">Nick</span><input id="nc-nick" type="text" autocomplete="off" spellcheck="false"></label>
+    </div>
     <div class="nc-err" id="nc-err"></div>
     <div class="nc-k">Red flag</div>
     <div id="nc-rf"></div>
+    <div class="nc-k">Note</div>
+    <textarea id="nc-nota" spellcheck="false"></textarea>
     <div class="nc-tasti"><button type="button" class="nc-b" onclick="ncChiudi()">Annulla</button><button type="button" class="nc-b nc-ok" id="nc-ok" onclick="ncSalva()">Crea cliente</button></div>
   </div>
 </div>
 <style>
 #cl-su{display:flex;gap:10px;align-items:stretch;}
+.cl-nick{margin-left:10px;font-size:12px;letter-spacing:1px;color:rgba(190,204,218,0.6);}
+.cl-nota{padding:2px 2px 12px;font-size:13px;line-height:1.5;color:rgba(215,226,236,0.8);white-space:pre-wrap;}
 #cl-su #cl-cerca{flex:1;min-width:0;}
 #nc-apri{flex:none;height:auto;padding:0 14px;background:rgba(200,175,90,0.05);border:1px solid rgba(212,168,74,0.55);border-radius:2px;cursor:pointer;
   font-family:var(--font);font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(232,207,143,0.95);white-space:nowrap;}
 #nc-apri:hover{background:rgba(200,175,90,0.12);}
 #nc-velo{display:none;position:fixed;inset:0;z-index:100005;background:rgba(6,6,5,0.78);align-items:center;justify-content:center;font-family:var(--font);}
 #nc-velo.si{display:flex;}
-#nc-box{width:min(440px,92vw);background:rgba(20,19,16,1);border:1px solid rgba(180,195,210,0.18);border-radius:2px;padding:22px 22px 18px;box-sizing:border-box;}
-.nc-t{font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(225,232,240,.92);margin-bottom:16px;}
-#nc-nome{width:100%;height:44px;box-sizing:border-box;padding:0 14px;background:rgba(0,0,0,0.25);border:1px solid rgba(180,195,210,0.18);border-radius:2px;outline:none;
-  font-family:var(--font);font-size:17px;font-weight:300;color:rgba(240,235,220,1);}
-#nc-nome:focus{border-color:rgba(212,168,74,0.6);}
-.nc-err{min-height:18px;padding:5px 0 0;font-size:12px;color:rgba(229,100,100,0.95);}
-.nc-k{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(180,195,210,0.6);margin:10px 0 8px;}
-#nc-rf{display:flex;flex-wrap:wrap;gap:6px;}
-.nc-f{height:32px;padding:0 12px;background:none;border:1px solid rgba(180,195,210,0.18);border-radius:2px;cursor:pointer;font-family:var(--font);font-size:12px;color:rgba(190,204,218,0.85);}
-.nc-f:hover{border-color:rgba(220,100,100,0.5);}
-.nc-f.si{border-color:rgba(225,140,140,0.85);background:rgba(220,100,100,0.12);color:rgba(240,190,190,1);}
+#nc-box{width:min(660px,94vw);max-height:92vh;overflow-y:auto;background:rgba(20,19,16,1);border:1px solid rgba(180,195,210,0.18);border-radius:2px;padding:22px 22px 18px;box-sizing:border-box;scrollbar-width:thin;}
+.nc-t{font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(225,232,240,.92);margin-bottom:18px;}
+.nc-k{display:block;font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(180,195,210,0.6);margin:0 0 7px;}
+.nc-due{display:flex;gap:12px;}
+.nc-c{flex:1 1 0;min-width:0;display:block;}
+.nc-c2{flex:0 0 32%;}
+#nc-nome,#nc-nick,#nc-nota{width:100%;box-sizing:border-box;background:rgba(0,0,0,0.25);border:1px solid rgba(180,195,210,0.18);border-radius:2px;outline:none;
+  font-family:var(--font);font-weight:300;color:rgba(240,235,220,1);}
+#nc-nome,#nc-nick{height:44px;padding:0 14px;font-size:17px;}
+#nc-nota{height:84px;padding:10px 14px;font-size:15px;line-height:1.5;resize:vertical;}
+#nc-nome:focus,#nc-nick:focus,#nc-nota:focus{border-color:rgba(212,168,74,0.6);}
+.nc-err{min-height:18px;padding:5px 0 8px;font-size:12px;color:rgba(229,100,100,0.95);}
+/* red flag: una riga per ognuno, con scritto quando vale. Si accende cliccando la riga. */
+#nc-rf{display:flex;flex-direction:column;border:1px solid rgba(180,195,210,0.14);border-radius:2px;margin-bottom:16px;}
+.nc-f{display:grid;grid-template-columns:38px 150px minmax(0,1fr);align-items:center;column-gap:12px;min-height:44px;padding:6px 12px 6px 10px;text-align:left;
+  background:none;border:0;border-bottom:1px solid rgba(180,195,210,0.09);cursor:pointer;font-family:var(--font);color:rgba(190,204,218,0.85);}
+.nc-f:last-child{border-bottom:0;}
+.nc-f:hover{background:rgba(220,100,100,0.05);}
+.nc-f i{width:34px;height:18px;border-radius:9px;border:1px solid rgba(180,195,210,0.3);position:relative;box-sizing:border-box;}
+.nc-f i::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:rgba(180,195,210,0.45);transition:left .15s;}
+.nc-f b{font-size:14px;font-weight:500;color:rgba(225,232,240,.92);}
+.nc-f span{font-size:12px;line-height:1.4;color:rgba(180,195,210,0.62);}
+.nc-f.si{background:rgba(220,100,100,0.10);}
+.nc-f.si i{border-color:rgba(225,140,140,0.9);background:rgba(220,100,100,0.25);}
+.nc-f.si i::after{left:18px;background:rgba(240,170,170,1);}
+.nc-f.si b{color:rgba(240,190,190,1);}
+@media (max-width:620px){ .nc-due{flex-direction:column;} .nc-c2{flex:1 1 auto;} .nc-f{grid-template-columns:38px minmax(0,1fr);} .nc-f span{grid-column:2;} }
 .nc-tasti{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;}
 .nc-b{height:32px;padding:0 14px;background:none;border:1px solid rgba(180,195,210,0.25);border-radius:2px;cursor:pointer;font-family:var(--font);font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(215,226,236,0.9);}
 .nc-b.nc-ok{border-color:rgba(212,168,74,0.6);color:rgba(232,207,143,0.95);background:rgba(200,175,90,0.05);}
@@ -13192,6 +13215,7 @@ var _ncRf = {};
 function ncApri(){
   _ncRf = {};
   var n = document.getElementById('nc-nome'); n.value = (document.getElementById('cl-cerca').value || '').trim();
+  document.getElementById('nc-nick').value = ''; document.getElementById('nc-nota').value = '';
   document.getElementById('nc-err').textContent = '';
   ncDisegna();
   document.getElementById('nc-velo').classList.add('si');
@@ -13200,7 +13224,7 @@ function ncApri(){
 function ncChiudi(){ document.getElementById('nc-velo').classList.remove('si'); }
 function ncDisegna(){
   document.getElementById('nc-rf').innerHTML = (window.RF_DATA || []).map(function(f){
-    return '<button type="button" class="nc-f' + (_ncRf[f.id] ? ' si' : '') + '" data-rf="' + f.id + '">' + clEsc(f.name) + '</button>';
+    return '<button type="button" class="nc-f' + (_ncRf[f.id] ? ' si' : '') + '" data-rf="' + f.id + '"><i></i><b>' + clEsc(f.name) + '</b><span>' + clEsc(f.trigger || f.slug || '') + '</span></button>';
   }).join('');
   ncControlla();
 }
@@ -13215,9 +13239,15 @@ function ncSalva(){
   var scelti = Object.keys(_ncRf).filter(function(k){ return _ncRf[k]; });
   function crea(){
     var c = {id:nome, state:null, ts:Date.now()};
-    if(scelti.length){
-      c.state = {redFlags:{flags:{}, custom:null, ultimoAggiornamento:Date.now()}};
-      scelti.forEach(function(id){ c.state.redFlags.flags[id] = {attivo:true, note:'', dal:Date.now()}; });
+    var nick = document.getElementById('nc-nick').value.trim(), nota = document.getElementById('nc-nota').value.trim();
+    if(scelti.length || nick || nota){
+      c.state = {};
+      if(nick) c.state.nick = nick;             /* il nick e le note stanno sul cliente, non su un protocollo */
+      if(nota) c.state.notaCliente = nota;
+      if(scelti.length){
+        c.state.redFlags = {flags:{}, custom:null, ultimoAggiornamento:Date.now()};
+        scelti.forEach(function(id){ c.state.redFlags.flags[id] = {attivo:true, note:'', dal:Date.now()}; });
+      }
       try{ if(typeof migrateStateShape === 'function') migrateStateShape(c.state); }catch(e){}
     }
     _csList.push(c);
@@ -13236,7 +13266,7 @@ function ncSalva(){
   } else crea();
 }
 document.getElementById('nc-nome').addEventListener('input', ncControlla);
-document.getElementById('nc-nome').addEventListener('keydown', function(e){ e.stopPropagation(); if(e.key === 'Enter') ncSalva(); if(e.key === 'Escape') ncChiudi(); });
+['nc-nome','nc-nick','nc-nota'].forEach(function(i){ document.getElementById(i).addEventListener('keydown', function(e){ e.stopPropagation(); if(e.key === 'Enter' && i !== 'nc-nota') ncSalva(); if(e.key === 'Escape') ncChiudi(); }); });
 document.getElementById('nc-rf').addEventListener('click', function(e){
   var b = e.target.closest('[data-rf]'); if(!b) return;
   var id = b.getAttribute('data-rf'); _ncRf[id] = !_ncRf[id]; ncDisegna();

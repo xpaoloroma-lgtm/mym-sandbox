@@ -1703,7 +1703,7 @@ header{gap:16px}
 .rfh-f b{font-size:12px;font-weight:600;color:var(--c);white-space:nowrap}
 .rfh-f em{font-style:normal;font-size:12px;font-weight:300;color:rgba(225,232,240,.8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sess{margin-left:0!important;flex-shrink:0}
-@media(max-width:1100px){ .rfh-f em{display:none} #breadcrumb .bc-item:not(.bc-active),#breadcrumb .bc-sep{display:none} }
+@media(max-width:1100px){ .rfh-f em{display:none} }
 
 #velo-rf{position:fixed;inset:0;z-index:300;display:none;align-items:center;justify-content:center;
   background:rgba(4,4,3,.72);backdrop-filter:blur(3px)}
@@ -1871,6 +1871,16 @@ header{gap:16px}
   #view-only-banner .view-only-cta,#view-only-banner .vo-cta{padding:0 8px!important;letter-spacing:1.5px!important;}
 }
 /* ══ fine CONSULTAZIONE ══ */
+/* ══ RED FLAG: la stessa striscia di Open, sotto la barra, lunga quanto la pagina. Non c'è se il cliente non ne ha. ══ */
+#rfh{display:none!important;}
+#rfh.on{display:flex!important;flex:none!important;width:100%!important;height:auto!important;margin:0!important;box-sizing:border-box;align-items:center;gap:14px!important;
+  padding:7px 22px!important;border:0!important;border-top:1px solid rgba(220,100,100,.25)!important;border-bottom:1px solid rgba(220,100,100,.10)!important;border-radius:0!important;
+  background:linear-gradient(90deg,rgba(220,100,100,.14) 0%,rgba(220,100,100,.06) 50%,rgba(220,100,100,.02) 100%)!important;cursor:pointer;font-family:var(--font);overflow:hidden;white-space:nowrap;position:relative;z-index:2;}
+#rfh.on:hover{background:linear-gradient(90deg,rgba(220,100,100,.18) 0%,rgba(220,100,100,.08) 50%,rgba(220,100,100,.03) 100%)!important;}
+#rfh .rfh-k{font-size:9.5px!important;font-weight:700!important;letter-spacing:2.5px!important;color:rgba(225,140,140,.95)!important;}
+#rfh .rfh-f{padding-left:14px!important;border-left:1px solid rgba(220,100,100,.25)!important;}
+#rfh .rfh-f b{font-size:11px!important;font-weight:600!important;letter-spacing:.5px;}
+#rfh .rfh-apri{margin-left:auto;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(225,140,140,.75);flex:none;}
 #view-only-banner{margin:0 auto 0 16px!important;}
 @media (max-width:1300px){ #view-only-banner{margin:0 auto 0 10px!important;} }
 #view-only-banner{display:none;}
@@ -1923,9 +1933,10 @@ header{gap:16px}
     <span class="bc-item bc-active">Mario Rossi</span>
   </div>
   <div id="view-only-banner"><span class="vo-text">Modalità consultazione</span><button type="button" class="vo-cta" id="vo-confirm">Conferma sessione</button></div>
-  <button id="rfh" class="rfh" title="Red Flags del cliente"></button>
   <button id="sess" class="sess" title="Apri la sessione o cambia PT"></button>
 </header>
+<!-- red flag: una striscia sotto la barra, solo se il cliente ne ha di attive. Uguale in tutti i protocolli. -->
+<button id="rfh" class="rfh" title="Red Flags del cliente"></button>
 
 <div id="shell">
  <div id="stack">
@@ -2186,6 +2197,9 @@ function tlBuild(){
     if (!forza && LANES[li-1] && slotDi(LANES[li-1].id).mobile)
       testa = '<div class="lgrp"><span>Open</span><em>cambi di esercizio</em></div>';
 
+    /* Le stazioni di Open (Buffer, Core, Cardio) non hanno più una barra in alto: senza progressione
+       non c'è niente da far vedere nel tempo. Il cambio di esercizio resta una riga nello storico. */
+    if (!forza) return '';
     if (!forza){
       /* PROGRESSIONE stile metro: tante linee quanto il livello; a ogni avanzamento si sdoppiano con una curva */
       var LV = livelli(L.id), GAP = 3.5, DX = 12, H = 22, MID = 11, col = colore(L.h, .95);
@@ -3098,15 +3112,11 @@ var ptCorrente = null;
 var LOG = (function(){
   var v = [];
   for (var g = 7; g <= OGGI; g += 7) v.push({ t:'session', g:g, pt:(g%14?'Ale':'Fil'), ora:'09:00' });
-  v.push({t:'step', g:38, pt:'Ale', fam:'core', from_lvl:1, to:2});
   v.push({t:'variation', g:52, pt:'Fil', fam:'buffer', from:'Easy Up & Down', to:'Up & Down'});
-  v.push({t:'step', g:80, pt:'Fil', fam:'buffer', from:'Up & Down', to:'Ground to Stand',
-          from_lvl:1, to_lvl:2});
+  v.push({t:'variation', g:80, pt:'Fil', fam:'buffer', from:'Up & Down', to:'Ground to Stand'});
   v.push({t:'variation', g:110, pt:'Ale', fam:'core', from:'Knee Plank', to:'Plank'});
   v.push({t:'pass', g:30,  pt:'Ale', fam:'row',  verso:'su'});
   v.push({t:'pass', g:107, pt:'Ale', fam:'lower', verso:'su'});
-  v.push({t:'step', g:138, pt:'Fil', fam:'cardio', from_lvl:1, to:2,
-          load_from:'resistenza 3', load_to:'resistenza 5'});
   return v;
 })();
 
@@ -3325,12 +3335,12 @@ function rfHeader(){
   var el = document.getElementById('rfh'), a = rfAttive();
   el.classList.toggle('on', a.length > 0);
   rfSegni();   /* sempre: anche quando non ne resta nessuna, i segni vanno tolti */
-  if (!a.length){ el.innerHTML = '<i class="rfh-ico"></i><span class="rfh-k">Red Flags</span><span class="rfh-0">nessuna</span>'; el.title = 'Nessuna Red Flag attiva'; return; }
+  if (!a.length){ el.innerHTML = ''; return; }
   el.innerHTML = '<i class="rfh-ico"></i><span class="rfh-k">Red Flags</span>'
     + a.map(function(f){
         return '<span class="rfh-f" style="--c:' + f.color.replace('0.85','1').replace('0.88','1') + '"><b>' + f.name + '</b>'
           + '</span>';
-      }).join('');
+      }).join('') + '<span class="rfh-apri">Apri →</span>';
   el.title = 'Red Flags attive: ' + a.map(function(f){ return f.name; }).join(', ');
 }
 function rfLista(){

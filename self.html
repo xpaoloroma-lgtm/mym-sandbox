@@ -881,7 +881,6 @@ header .hdr-r{flex:none;}
 .rconf.ok{background:none;border-color:transparent;box-shadow:none;color:rgba(120,200,150,0.9);cursor:default;padding:0 4px;}
 .round.prep .block .neon{background:repeating-linear-gradient(180deg,var(--fc) 0 6px,transparent 6px 11px)!important;box-shadow:none!important;}
 /* (24/11) l'aspetto giusto è quello meno acceso, e vale sempre: in preparazione e dopo la conferma. Tra i due cambia solo la riga, tratteggiata o piena. */
-.block .card:not(.omb) .nm,.block .card:not(.omb) .pn{opacity:.72;}
 
 .block .neon{box-shadow:none!important;}
 /* con il tasto di conferma nella riga, svuota e non fatto restano solo come icona: la riga deve stare a metà monitor */
@@ -985,7 +984,7 @@ header .hdr-r{flex:none;}
 /* ═══ PROPORZIONI DEL TESTO NEI BLOCCHI (24/11): numero grande e sottile, alto quanto il blocco; nome a peso normale ═══ */
 .block .card{grid-template-columns:44px minmax(0,1fr);}
 .block .card .pn{font-size:38px;font-weight:200;line-height:1;grid-row:1 / span 3;align-self:center;}
-.block .card .nm{font-size:22px;font-weight:400;}
+.block .card .nm{font-size:24px;font-weight:400;}
 .block .card .fl{white-space:nowrap;}
 .block .nm .pa{white-space:nowrap;}
 </style>
@@ -1413,7 +1412,7 @@ function renderBlocks(r, anim){
    Più la lettera è lontana dalla luce, più l'ombra è lunga, sfumata e debole. Con più luci ogni ombra è più leggera,
    perché le altre luci la rischiarano. Sotto ogni lettera resta un filo d'ombra di contatto.
    Anche il chiarore colorato del blocco viene dagli stessi punti. Tutti i numeri qui sono scelte, non misure. */
-var OMBRA_LUCE = 70, OMBRA_META = 240, OMBRA_MAX = 9, LUCE_FORZA = 13;
+var OMBRA_LUCE = 70, OMBRA_META = 240, OMBRA_MAX = 9, LUCE_FORZA = 13, LUCE_TINTA = 30, LUCE_TINTA_MAX = 32;
 function lettere(t){ return String(t).split(' ').map(function(w){ return '<span class="pa">' + w.split('').map(function(c){ return '<span>' + esc(c) + '</span>'; }).join('') + '</span>'; }).join(' '); }
 function ombraDi(x, y, luci, rilievo, forza){
   /* il fianco della lettera che guarda le luci prende un filo del colore della famiglia */
@@ -1467,6 +1466,22 @@ function ombre(root){
     omb.querySelectorAll('.nm .pa > span').forEach(function(c){ metti(c, 3.4, 0.7); });
     metti(omb.querySelector('.fl'), 1.7, 0.6);
     metti(omb.querySelector('.notebox .tx'), 1.7, 0.6);
+    /* LA LUCE È COLORATA (del colore della famiglia) e colora quello che illumina, tutto con la stessa regola:
+       ogni scritta tiene il suo colore e ne prende un po' da quello della luce, tanto più quanto è vicina a un punto luce
+       (stessa legge del chiarore del piano). Vale per numero, nome (lettera per lettera), nota e durata.
+       La famiglia e il trattino della nota sono già di quel colore. */
+    function tinta(el, base){
+      if(!el) return; var q = el.getBoundingClientRect(); if(!q.width) return;
+      var x = q.left + q.width / 2 - R.left, y = q.top + q.height / 2 - R.top, e = 0;
+      luci.forEach(function(l){ var d2 = ((x - l.x) * (x - l.x) + (y - l.y) * (y - l.y)) / (OMBRA_LUCE * OMBRA_LUCE); e += 1 / Math.pow(1 + d2, 1.5); });
+      el.style.color = 'color-mix(in srgb,var(--fc) ' + Math.min(LUCE_TINTA_MAX, LUCE_TINTA * e).toFixed(1) + '%,' + base + ')';
+    }
+    if(vera){
+      tinta(vera.querySelector('.pn'), 'rgba(226,196,128,0.92)');
+      vera.querySelectorAll('.nm .pa > span').forEach(function(c){ tinta(c, 'rgba(246,242,232,0.97)'); });
+      tinta(vera.querySelector('.notebox .tx'), 'rgba(244,232,204,0.94)');
+      tinta(vera.querySelector('.fl .dur'), 'rgba(246,242,232,0.97)');
+    }
     b._geo = {W:R.width, H:R.height, luci:luci, pezzi:pezzi};
     ombraApplica(b);
   });

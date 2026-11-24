@@ -130,7 +130,7 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
 .slot .erow{position:absolute;inset:0;display:flex;align-items:center;gap:12px;padding:0 12px 0 22px;}
 .slot .erow .hint{font-size:12px;color:var(--text-xlo);display:flex;align-items:baseline;gap:12px;}
 .slot .erow .nofirst{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(224,138,138,0.75);}
-.rdisp .tile.nofirst::after{content:'no 1';position:absolute;inset:auto 5px 4px auto;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:rgba(224,138,138,0.85);background:none;}
+.rdisp .tile.nofirst::after{content:'no 1';position:absolute;inset:4px 4px auto auto;padding:0 3px;background:#16140f!important;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:rgba(224,138,138,0.85);background:none;}
 .rdisp .tile.nofirst:hover::after{opacity:0;}
 .slot.hot .empty{background:linear-gradient(90deg,rgba(212,168,74,0.12),rgba(212,168,74,0));}
 .slot.hot .estrip{background:rgba(212,168,74,0.7);}
@@ -838,6 +838,13 @@ header .hdr-r{flex:none;}
 #rank .rk-linea span,#rank .rk-salvi span{position:absolute;right:0;top:4px;font-size:8.5px;font-weight:600;letter-spacing:1.8px;text-transform:uppercase;white-space:nowrap;color:var(--gold-txt);}
 #rank .rk-salvi{position:absolute;left:-6px;right:0;height:0;border-top:1px solid rgba(180,195,210,0.6);z-index:2;pointer-events:none;transition:top .7s cubic-bezier(.3,.7,.2,1),left .7s cubic-bezier(.3,.7,.2,1);}
 #rank .rk-salvi span{color:var(--text-lo);}
+#rank .rk-salvi.unita{border-color:transparent!important;}
+#rank .rk-salvi.unita span{display:none;}
+#rank .rk-linea.sicuro{border-top-width:2px;border-top-style:solid!important;box-shadow:0 0 12px rgba(222,190,120,0.6);}
+#rank.horiz .rk-linea.sicuro{border-top-width:0;border-left-width:2px;border-left-style:solid!important;}
+#rank .pr.sure .ex::after{content:''!important;}
+/* la scritta "no 1" sul riquadro piccolo finiva sopra il nome: lo dice già il primo posto ("non Upper") */
+.rdisp .tile.nofirst::after{display:none!important;}
 #rank.horiz .rk-salvi{left:auto;right:auto;top:0!important;bottom:0;width:0;height:auto;border-top:0;border-left:1px solid rgba(180,195,210,0.6);}
 #rank.horiz .rk-linea span{right:auto;left:6px;top:auto;bottom:0;}
 #rank.horiz .rk-salvi span{right:6px;top:auto;bottom:0;}
@@ -1753,7 +1760,10 @@ function placeRank(box, st, pct){
   if(ult === -1 || ult === rows.length - 1){ if(ln) ln.remove(); }
   else {
     if(!ln){ ln = document.createElement('div'); ln.className = 'rk-linea'; ln.innerHTML = '<span></span>'; box.appendChild(ln); }
-    ln.firstChild.textContent = 'cambio · round ' + (box.dataset.giro || '');
+    /* se sotto la linea del cambio sono già tutti "non cambia più" e sopra ce n'è una sola: il cambio è sicuro */
+    var sicuro = salvi === ult + 1 && ult === 0;
+    ln.firstChild.textContent = (sicuro ? 'cambio sicuro · round ' : 'cambio · round ') + (box.dataset.giro || '');
+    ln.classList.toggle('sicuro', sicuro);
     var q = rows[ult].y + rows[ult].h + GAPL / 2;
     if(horiz){ ln.style.top = ''; ln.style.left = Math.round(W - PADR - q) + 'px'; } else { ln.style.left = ''; ln.style.top = Math.round(q) + 'px'; }
   }
@@ -1761,7 +1771,8 @@ function placeRank(box, st, pct){
   var ls = box.querySelector('.rk-salvi');
   if(salvi <= 0 || salvi >= rows.length){ if(ls) ls.remove(); return; }
   if(!ls){ ls = document.createElement('div'); ls.className = 'rk-salvi'; ls.innerHTML = '<span>non cambia più</span>'; box.appendChild(ls); }
-  var q2 = rows[salvi].y - GAPL / 2;
+  ls.classList.toggle('unita', salvi === ult + 1);   /* le due linee sono arrivate nello stesso punto: ne resta una, quella del cambio */
+  var q2 = salvi === ult + 1 ? rows[ult].y + rows[ult].h + GAPL / 2 : rows[salvi].y - GAPL / 2;
   if(horiz){ ls.style.top = ''; ls.style.left = Math.round(W - PADR - q2) + 'px'; } else { ls.style.left = ''; ls.style.top = Math.round(q2) + 'px'; }
 }
 /* Tendenza: la media della famiglia adesso contro com'era prima dell'ultima seduta. ▲ sale verso il cambio, ▼ scende verso l'adattamento.

@@ -91,45 +91,57 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
    Pagina da riunione: cosa cambia per chi allena. Una frase per cosa, poche.
    Si aggiunge nella zona giusta. Niente ritocchi grafici. */
 var ZONE = [
- ['Come ci si muove', [
-  'Dopo l\'accesso si arriva alla pagina Sandbox: Ore e Riunioni da una parte, Protocolli dall\'altra.',
-  'In alto c\'è sempre scritto dove sei. Ogni parola è un tasto che ti riporta lì.',
-  'Il tasto Indietro del browser fa un passo indietro dentro la Sandbox, non ti butta fuori.',
-  'La Sandbox è fatta per stare a metà schermo, con un\'altra finestra accanto.'
+ ['I protocolli diventano cinque', [
+  'Lift, Load, Self, Open, Move. Durano tutti 40-45 minuti.',
+  'Move: mobilità blanda, attivazioni minime, cardio molto blando. Si impara anche ad andare a terra e a rialzarsi.',
+  'Open: quello che conosciamo. Aerobico, forza submassimale, piccolo lattacido.',
+  'Self: più vario nello stimolo. Può essere intenso, aerobico o di forza, e lo sceglie il cliente di volta in volta.',
+  'Load: ipertrofia, con dentro un po\' di Open.',
+  'Lift: come Load ma più ipertrofico. Ancora non esiste.',
+  'Pace non c\'è più. Skip resta solo per il gruppo. Grid resta un foglio libero, non è un protocollo.'
  ]],
- ['Clienti', [
-  'Clienti e protocolli sono in una pagina sola: i clienti a sinistra, i protocolli a destra.',
-  'Di ogni cliente si vedono subito gli ultimi tre allenamenti e da quanto non viene.',
-  'Un clic sul cliente apre il suo anno. Da lì dici chi sei ed entri.',
-  'Il cliente nuovo si crea lì: nome e cognome, nick, red flag, note.',
-  'Due clienti con lo stesso nome non si possono più creare.',
+ ['Load — nuovo', [
+  'La parte di ipertrofia: ogni posto ha un fondamentale e un complementare.',
+  'Dentro Load ci sono sempre 3-4 esercizi di Open. Sono gli stessi esercizi di Open, ma senza la progressione di Open: si cambiano liberamente.',
+  'Il cambio di un esercizio resta scritto nello storico.',
+  'A che punto è: l\'interfaccia c\'è e si può guardare, con dati di esempio. Non si usa ancora con i clienti. Il prossimo passo è collegare il fondamentale al complementare.'
+ ]],
+ ['Move — nuovo', [
+  'La seduta è fatta di blocchi. Un blocco è sempre 2 esercizi più 1 cardio.',
+  '50 movimenti in tutto tra i due esercizi: come dividerli lo decide il cliente. Fatti i 50, passa al cardio.',
+  'I blocchi li costruisce il trainer da solo, nelle ore libere. In allenamento mette i blocchi nei loro posti e la seduta è fatta.',
+  'SRT: è saper andare a terra e rialzarsi. Si impara dentro Move. Chi non ce l\'ha fa solo gli esercizi in piedi e da seduto; chi ce l\'ha usa tutto Move.',
+  'Gli esercizi di Move sono quelli segnati in "Prot. Fil" nella pagina Esercizi.',
+  'A che punto è: la parte dove si costruiscono i blocchi c\'è. La seduta con il cliente è ancora da fare.'
+ ]],
+ ['Self — nuovo', [
+  'Il cliente sceglie gli esercizi. Un grafico mostra come sta andando la seduta.',
+  '"Verso il cambio": dice quali esercizi sono vicini a essere cambiati.',
+  'A che punto è: l\'interfaccia c\'è e si può guardare, con dati di esempio. Non si usa ancora con i clienti.'
+ ]],
+ ['Dove sta un cliente', [
+  'La griglia nella pagina protocolli incrocia due cose: quanto è difficile il lavoro e quanto è autonomo il cliente.',
+  'Difficoltà, dal basso: SRT; basi di aerobica, mobilità e schemi di movimento; 2 volte a settimana; 3 volte a settimana.',
+  'Autonomia: ricorda da solo gli esercizi, nel dettaglio; riconosce le sensazioni e si regola; prova, scopre, propone.',
   'Un cliente sta in un protocollo alla volta.'
  ]],
- ['Red flag', [
-  'C\'è la pagina Red Flags: per ogni red flag dice in quali protocolli il cliente può stare.',
-  'Per accendere un red flag serve la password di accesso. Per toglierlo serve quella admin.',
-  'Durante l\'allenamento, se il cliente ha red flag attivi, c\'è una striscia rossa in alto. Se non ne ha, non c\'è niente.'
+ ['Red flag e protocolli', [
+  'Ogni red flag adesso dice in quali protocolli il cliente può stare: verde, giallo, arancione, rosso. Rosso vuol dire che quel protocollo non si fa.',
+  'Esempio: con l\'ipertensione Lift e Load sono rossi, Self e Open arancioni, Move verde.',
+  'Un red flag decide il percorso del cliente. Per accenderlo serve la password di accesso; per toglierlo quella admin.',
+  'In allenamento i red flag attivi stanno in una striscia rossa in alto, uguale in tutti i protocolli.'
  ]],
- ['Protocolli', [
-  'I protocolli sono cinque: Lift, Load, Self, Open, Move.',
-  'Pace non c\'è più. Skip resta solo per il gruppo. Grid è un foglio libero, non un protocollo.',
-  'La griglia dice dove sta un cliente: quanto è difficile il lavoro e quanto è autonomo lui.',
-  'Warm-up, storico, consultazione e Conferma sessione sono uguali e nello stesso posto in tutti i protocolli.',
-  'La pagina Esercizi si apre da dentro ogni protocollo e chiudendola torni dov\'eri.'
+ ['Si parte dal cliente', [
+  'Nella pagina protocolli a sinistra ci sono i clienti, già in ordine dall\'ultimo allenato.',
+  'Di ogni cliente si vedono gli ultimi tre allenamenti e da quanto non viene.',
+  'Un clic apre il suo anno: che protocollo fa, da quanto, cosa faceva prima. Da lì dici chi sei ed entri.',
+  'Il cliente nuovo si crea lì: nome e cognome, nick, red flag, note. Due clienti con lo stesso nome non si possono creare.'
  ]],
- ['Open', [
-  'Il warm-up è la prima riga della scheda.',
-  'Gli esercizi della scheda si cambiano con il tasto "Cambia esercizi", in fondo alla scheda.'
- ]],
- ['Load e Self', [
-  'Sono nella pagina protocolli, in prova con dati di esempio: non si usano ancora con i clienti.',
-  'Load: le stazioni di Open si cambiano liberamente. Il cambio resta scritto nello storico.',
-  'Self: per scegliere un esercizio basta un clic. Quando l\'intensità è alta, la linea del grafico diventa rossa.'
- ]],
- ['Move', [
-  'Move è cominciato: per ora c\'è la parte dove si costruiscono i blocchi, senza cliente.',
-  'Un blocco è sempre 2 esercizi più 1 cardio. 50 movimenti in tutto tra i due esercizi, divisi come vuole il cliente; poi il cardio.',
-  'Gli esercizi a terra chiedono l\'SRT.'
+ ['Uguale in tutti i protocolli', [
+  'Warm-up, storico, consultazione e Conferma sessione sono fatti allo stesso modo e stanno nello stesso posto.',
+  'In alto c\'è sempre scritto dove sei, e ogni parola ti riporta lì.',
+  'La pagina Esercizi si apre da dentro ogni protocollo.',
+  'Tutto è fatto per stare a metà schermo, con un\'altra finestra accanto.'
  ]]
 ];
 (function(){

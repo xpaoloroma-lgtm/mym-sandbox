@@ -2119,7 +2119,7 @@ function tlBuild(){
     var testa = '';
     if (li === 0) testa = '<div class="lgrp"><span>Forza</span><em>zona e maturazione</em></div>';
     if (!forza && LANES[li-1] && slotDi(LANES[li-1].id).mobile)
-      testa = '<div class="lgrp"><span>Progressione</span><em>livelli</em></div>';
+      testa = '<div class="lgrp"><span>Open</span><em>cambi di esercizio</em></div>';
 
     if (!forza){
       /* PROGRESSIONE stile metro: tante linee quanto il livello; a ogni avanzamento si sdoppiano con una curva */
@@ -2127,7 +2127,7 @@ function tlBuild(){
       var wTot = FINE * PX, paths = '', prev = null;
       LV.tratti.forEach(function(t){
         var a = t.a*PX, b = t.b*PX, now = [];
-        for (var i = 0; i < t.l; i++) now.push((i - (t.l-1)/2) * GAP);
+        for (var i = 0; i < 1; i++) now.push(0);   /* una linea sola: i livelli non ci sono più */
         now.forEach(function(off, i){
           var d;
           if (!prev) d = 'M' + a + ',' + (MID+off) + ' L' + b + ',' + (MID+off);
@@ -2147,7 +2147,7 @@ function tlBuild(){
         if (i) corpo += '<div class="mfer" style="left:' + (sg.a*PX) + 'px" title="' + sg.x + ' · dal ' + dataDi(sg.a) + '"></div>';
       });
       /* stazione di avanzamento: capsula che abbraccia le linee nuove */
-      LV.salti.forEach(function(e){
+      [].forEach(function(e){
         var l = e.to_lvl || e.to;
         corpo += '<div class="mcap l' + l + '" style="left:' + (e.g*PX + DX/2) + 'px;--c:' + colore(L.h, 1) + '"'
           + ' title="Avanzato a L' + l + ' · ' + dataDi(e.g) + '"><b>L' + l + '</b></div>';
@@ -2155,7 +2155,7 @@ function tlBuild(){
       return testa + '<div class="lane prog" data-l="' + L.id + '">'
         + '<div class="lab"><span class="dot" style="background:' + colore(L.h,.9) + '"></span>'
         + '<span class="d" style="color:var(--text-lo)">' + L.n + '</span>'
-        + '<span class="z" style="color:' + colore(L.h, 1) + '">L' + slotDi(L.id).lvl + '</span></div>'
+        + '<span class="z"></span></div>'
         + '<div class="track"><div class="mover">' + corpo + '</div></div></div>';
     }
 
@@ -2448,7 +2448,7 @@ function riga(s, i){
       + FRECCIA.su + '<span>Ipertrofia</span></button>'
     : '<span class="mv ghost"></span>';
 
-  var ob = s.id === famObiettivo();
+  var ob = false;   /* niente progressione di Open: nessuna stazione è "quella che avanza" */
   return '<div class="row z-open' + (primo ? ' primo' : '') + (s.mobile ? ' forza' : '') + (ob ? ' obiettivo' : '')
     + (ob && progCongelata ? ' congelata' : '') + '" data-s="' + s.id + '"'
     + (s.mobile ? ' style="--fc:' + rgbaV(s.h,.45) + '"' : '') + '>'
@@ -2567,12 +2567,9 @@ function zRender(){
     + (function(){
         var forza = b.filter(function(x){ return x.mobile; });
         var prog  = b.filter(function(x){ return !x.mobile; });
-        var h = '';
-        if (forza.length) h += '<div class="osub fuori"><b>Fuori progressione</b><span>crescono passando in ipertrofia</span></div>'
-          + forza.map(function(x,i){ return riga(x, i); }).join('');
-        if (prog.length) h += '<div class="osub osub-prog" id="tl-prog"></div>'
-          + prog.map(function(x,i){ return riga(x, forza.length + i); }).join('');
-        return h;
+        /* In Load la progressione di Open non c'è: le stazioni di Open sono esercizi
+           liberi, si cambiano quando si vuole. Niente riga "Progressione", niente livelli. */
+        return forza.concat(prog).map(function(x,i){ return riga(x, i); }).join('');
       })()
     + '</div>';
   if (typeof rfSegni === 'function') rfSegni();

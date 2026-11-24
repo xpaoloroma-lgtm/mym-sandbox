@@ -910,6 +910,16 @@ header .hdr-r{flex:none;}
 .slot .empty{inset:3px 0!important;border-radius:2px;background:rgba(4,4,3,0.45)!important;border:1px solid rgba(0,0,0,0.55);
   box-shadow:inset 0 3px 10px rgba(0,0,0,0.7),inset 0 -1px 0 rgba(255,246,224,0.05);}
 .slot.hot .empty{background:linear-gradient(90deg,rgba(212,168,74,0.16),rgba(4,4,3,0.45) 70%)!important;border-color:rgba(212,168,74,0.6);}
+/* le linee grigie di sfondo del grafico ondeggiano appena: un paio di pixel, in un minuto o più, ogni gruppo col suo tempo.
+   La linea dorata NO: quella è il dato e sta ferma. */
+@keyframes ondaA{from{transform:translateX(-0.7px);}to{transform:translateX(0.7px);}}
+@keyframes ondaB{from{transform:translateX(0.6px);}to{transform:translateX(-0.8px);}}
+.lane .onda{animation:ondaA 47s ease-in-out infinite alternate;will-change:transform;}
+.lane .onda.o1{animation:ondaB 61s ease-in-out -20s infinite alternate;}
+.lane .onda.o2{animation:ondaA 73s ease-in-out -35s infinite alternate;}
+.lane .onda.o3{animation:ondaB 89s ease-in-out -11s infinite alternate;}
+.lane .onda.o4{animation:ondaA 103s ease-in-out -50s infinite alternate;}
+@media (prefers-reduced-motion:reduce){ .lane .onda{animation:none!important;} }
 </style>
 </head>
 <body>
@@ -1376,15 +1386,16 @@ var ghostCache = {};
 function ghostSvg(r){
   var key = GHOST;
   if(ghostCache[key]) return ghostCache[key];
-  var s = '';
+  var s = '', gr = ['', '', '', '', ''], nn = 0;
   if(GHOST !== 'no'){
     var ys = [0], cum = 0; for(var i = 0; i < 5; i++){ cum += HB[i]; ys.push(cum * 100); }
     var X = function(v){ return 3 + Math.min(v, MAXV) / MAXV * 90; };
     (function perm(a, rest){
-      if(!rest.length){ s += '<path d="' + smooth(famVals(a).map(function(v, i){ return [X(v), ys[i]]; })) + '" vector-effect="non-scaling-stroke"/>'; return; }
+      if(!rest.length){ gr[(nn++) % 5] += '<path d="' + smooth(famVals(a).map(function(v, i){ return [X(v), ys[i]]; })) + '" vector-effect="non-scaling-stroke"/>'; return; }
       rest.forEach(function(k, i){ perm(a.concat(k), rest.slice(0, i).concat(rest.slice(i + 1))); });
     })([], ['U','L','B','C','T']);
-    s = '<g fill="none" stroke="rgba(220,228,236,0.019)" stroke-width="1">' + s + '</g>';
+    /* cinque gruppi di linee: ognuno ondeggia per conto suo, pianissimo (vedi .onda nel css) */
+    s = '<g fill="none" stroke="rgba(220,228,236,0.019)" stroke-width="1">' + gr.map(function(g, i){ return '<g class="onda o' + i + '">' + g + '</g>'; }).join('') + '</g>';
   }
   ghostCache[key] = s;
   return s;

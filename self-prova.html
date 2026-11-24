@@ -995,32 +995,10 @@ header .hdr-r{flex:none;}
 .block .nm .pa{white-space:nowrap;}
 
 /* ═════════ PROVA 25/11 — la parte alta con lo stesso linguaggio dei blocchi (superfici opache, oggetti in rilievo, luce da punti) ═════════ */
-/* ordine dall'alto: nome del round e tasti, poi le cinque piastrine, poi i cinque posti */
-.round{gap:8px!important;}
-.round-hd{order:0;border-bottom:0!important;padding-bottom:0!important;align-items:center!important;min-height:34px;}
-.rdisp{order:1;} .rbody{order:2;}
-.round-hd .rname{text-shadow:1.5px 0.6px 1.5px rgba(0,0,0,0.8);}
-/* le piastrine: stessi oggetti dei blocchi, non ancora posati. Opache, del colore della famiglia, SPENTE (nessun punto luce) */
-.rdisp{background:rgba(4,4,3,0.45)!important;border:0!important;box-shadow:inset 0 3px 9px rgba(0,0,0,0.75),inset 0 -1px 0 rgba(255,246,224,0.04)!important;padding:6px!important;gap:5px!important;border-radius:3px!important;}
-.rdisp .tile:not(.used){background:linear-gradient(90deg,color-mix(in srgb,var(--fc) 12%,#1a1814),#1a1814 88%)!important;border:0!important;transform:none!important;
-  box-shadow:0 1px 0 rgba(255,246,224,0.07) inset,0 3px 7px rgba(0,0,0,0.65)!important;}
-.rdisp .tile::before{top:0!important;bottom:0!important;width:2px!important;border-radius:0!important;background:color-mix(in srgb,var(--fc) 50%,transparent)!important;box-shadow:none!important;}
-.rdisp .tile::after{display:none!important;}
-.rdisp .tile .fam-name{opacity:.7;}
-.rdisp .tile:not(.used) .nm{color:rgba(240,235,222,0.82)!important;text-shadow:1.4px 0.5px 1.4px rgba(0,0,0,0.85);}
-/* la piastrina si accende quando la tocchi: compare il suo punto luce */
-.rdisp .tile:not(.used):hover{background:radial-gradient(70px 46px at 0 50%,color-mix(in srgb,var(--fc) 30%,transparent),transparent 100%),linear-gradient(90deg,color-mix(in srgb,var(--fc) 12%,#1a1814),#1a1814 88%)!important;transform:translateY(-1px)!important;}
-.rdisp .tile:not(.used):hover::after{display:block!important;content:''!important;inset:auto!important;left:0!important;top:50%!important;width:2px;height:2px;margin-top:-1px;border-radius:50%;background:#fff8e6!important;box-shadow:0 0 4px 1px rgba(255,240,205,0.85);}
-.rdisp .tile:not(.used):hover .nm{color:rgba(250,246,236,0.98)!important;}
-/* posata: resta l'incavo vuoto */
-.rdisp .tile.used{background:transparent!important;border:0!important;box-shadow:none!important;}
-.rdisp .tile.used .nm,.rdisp .tile.used .fam-name{opacity:.24!important;}
 /* CONFERMA: un tasto in rilievo sul piano, scuro e opaco, con un punto luce che respira finché aspetta */
 @keyframes confRespira{0%,100%{opacity:.25;}50%{opacity:1;}}
 .rconf.si:not(.ok){background:linear-gradient(180deg,#2b261d,#1c1914)!important;border:0!important;color:var(--gold-txt)!important;overflow:hidden!important;padding:0 16px 0 24px!important;
   box-shadow:0 1px 0 rgba(255,240,205,0.16) inset,0 5px 12px rgba(0,0,0,0.7),0 0 0 1px rgba(0,0,0,0.6)!important;text-shadow:1.5px 0.6px 1.5px rgba(0,0,0,0.85);}
-.rconf.si:not(.ok)::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(64px 40px at 10px 50%,rgba(240,205,130,0.34),transparent 100%);animation:confRespira 2.8s ease-in-out infinite;}
-.rconf.si:not(.ok)::after{content:''!important;}
 .rconf.si:not(.ok):hover{background:linear-gradient(180deg,#352e22,#221e17)!important;}
 .rconf.ok{text-shadow:1.2px 0.5px 1.2px rgba(0,0,0,0.8);}
 /* alla conferma: la riga si accende dall'alto in basso, blocco dopo blocco */
@@ -1038,33 +1016,46 @@ header .hdr-r{flex:none;}
 .warm-riga span{text-shadow:1.5px 0.6px 1.5px rgba(0,0,0,0.85);}
 .warm-riga input{font-size:15px!important;font-weight:500!important;color:rgba(244,232,204,0.94)!important;text-shadow:1.3px 0.5px 1.3px rgba(0,0,0,0.8);}
 
-/* ═════════ PROVA 25/11 · secondo giro: la zona alta del round è una sola, e serve prima a scegliere e poi a confermare ═════════ */
-.round{position:relative;gap:5px!important;}
-/* una striscia bassa: nome del round a sinistra, tastini a destra */
-.round-hd{min-height:20px!important;height:20px;gap:6px!important;}
-.round-hd .rname{font-size:11px!important;letter-spacing:4px!important;}
-.round-hd .skip2,.round-hd .clear{height:20px!important;min-width:22px!important;padding:0 5px!important;margin-left:0!important;font-size:0!important;gap:0!important;}
-.round-hd .skip2 .off-t,.round-hd .skip2 .on-t{display:none!important;}
-.round-hd .clear{margin-left:auto!important;margin-right:0!important;}
-.round-hd .skip2{order:5;}
-/* l'incavo: alto sempre uguale (i blocchi sotto non si spostano mai). Dentro ci sono solo le piastrine ancora da posare,
-   scritte grandi perché le legge anche il cliente. Quelle posate spariscono e le altre si allargano. */
-.rdisp{display:flex!important;flex-wrap:wrap;align-content:flex-start;height:83px;box-sizing:border-box;padding:6px!important;gap:5px!important;overflow:hidden;}
-.rdisp .tile{flex:1 1 30%;min-width:0;justify-content:flex-start!important;height:33px!important;min-height:0!important;padding:0 8px 0 12px!important;flex-direction:row!important;align-items:center!important;}
-.rdisp .tile.used{display:none!important;}
+
+/* ═════════ PROVA 25/11 · terzo giro ═════════
+   - niente scritta "Round 1 / Round 2": quella riga si toglie e lo spazio va alle carte
+   - le carte: cinque in fila, sempre nello stesso posto. Sono carte, non blocchi in piccolo: chiare e in rilievo quando sono da posare,
+     incavo vuoto quando sono già nel round (com'era prima), ma opache e con il colore solo su un filo in alto
+   - Conferma: compare sopra le carte quando il round è pieno; led rosso che lampeggia */
+.round{position:relative;gap:6px!important;}
+.round-hd{height:0!important;min-height:0!important;padding:0!important;border:0!important;margin:0!important;overflow:visible;}
+.round-hd .rname{display:none!important;}
+.rdisp{order:0;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:5px!important;height:86px;box-sizing:border-box;padding:6px 34px 6px 6px!important;
+  background:rgba(4,4,3,0.45)!important;border:0!important;border-radius:3px!important;box-shadow:inset 0 3px 9px rgba(0,0,0,0.75),inset 0 -1px 0 rgba(255,246,224,0.04)!important;}
+.rbody{order:1;}
+.rdisp .tile{height:auto!important;min-height:0!important;padding:9px 5px 5px 7px!important;flex-direction:column!important;align-items:flex-start!important;justify-content:flex-start!important;gap:0!important;overflow:hidden;}
 .rdisp .tile .fam-name{display:none!important;}
-.rdisp .tile .nm{font-size:15px!important;font-weight:500!important;line-height:1.1!important;white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis;display:block!important;}
-.rdisp .tile::before{width:3px!important;}
-/* quando il round è pieno l'incavo è vuoto, e lì compare il tasto CONFERMA: grande, dove hai appena finito di guardare */
-.rconf.si{position:absolute!important;left:20px;right:20px;top:37px;height:59px!important;margin:0!important;justify-content:center;gap:14px;font-size:13px!important;letter-spacing:4px!important;z-index:4;}
-.rconf.si:not(.ok){padding:0 18px!important;}
-.rconf.si:not(.ok)::before{display:none!important;}
-/* il led: rosso, come i tasti degli stereo. Lampeggia secco, acceso/spento, finché non confermi */
+.rdisp .tile .nm{font-size:14px!important;font-weight:500!important;line-height:1.18!important;white-space:normal!important;display:-webkit-box!important;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;overflow-wrap:anywhere;max-width:100%;}
+/* il colore è un filo in alto, non una fascia */
+.rdisp .tile::before{left:0!important;right:0!important;top:0!important;bottom:auto!important;width:auto!important;height:3px!important;border-radius:0!important;background:var(--fc)!important;box-shadow:none!important;opacity:.85;}
+.rdisp .tile::after{display:none!important;}
+/* da posare: carta chiara in rilievo */
+.rdisp .tile:not(.used){background:linear-gradient(180deg,#39342a,#231f18)!important;border:0!important;transform:none!important;
+  box-shadow:0 1px 0 rgba(255,246,224,0.14) inset,0 5px 11px rgba(0,0,0,0.65),0 0 0 1px rgba(0,0,0,0.55)!important;}
+.rdisp .tile:not(.used) .nm{color:rgba(250,246,236,0.96)!important;text-shadow:1.2px 0.5px 1.3px rgba(0,0,0,0.75);}
+.rdisp .tile:not(.used):hover{background:linear-gradient(180deg,#463f32,#2a251c)!important;transform:translateY(-2px)!important;box-shadow:0 1px 0 rgba(255,246,224,0.2) inset,0 9px 16px rgba(0,0,0,0.7),0 0 0 1px rgba(0,0,0,0.55)!important;}
+/* già nel round: resta l'incavo, con il nome appena leggibile */
+.rdisp .tile.used{background:rgba(0,0,0,0.35)!important;border:0!important;box-shadow:inset 0 2px 6px rgba(0,0,0,0.8)!important;}
+.rdisp .tile.used::before{opacity:.22;}
+.rdisp .tile.used .nm{color:rgba(190,196,204,0.34)!important;text-shadow:none;}
+/* i due tastini stanno in colonna a destra delle carte */
+.round-hd .clear,.round-hd .skip2{position:absolute!important;right:20px;z-index:3;width:22px;height:34px!important;min-width:0!important;padding:0!important;margin:0!important;font-size:0!important;gap:0!important;opacity:1!important;}
+.round-hd .clear{top:18px;} .round-hd .skip2{top:58px;}
+.round-hd .clear,.round-hd .skip2{display:flex!important;align-items:center!important;justify-content:center!important;}
+.round-hd .skip2 .off-t,.round-hd .skip2 .on-t{display:none!important;}
+/* CONFERMA sopra le carte, quando il round è pieno */
+.rconf.si{position:absolute!important;left:20px;right:48px;top:18px;height:74px!important;margin:0!important;justify-content:center;gap:14px;font-size:13px!important;letter-spacing:4px!important;z-index:4;}
+.rconf.si:not(.ok){padding:0 18px!important;background:linear-gradient(180deg,#2e2920,#1d1a14)!important;}
 @keyframes ledTic{0%,49%{background:#ff2d1f;box-shadow:0 0 4px 1px rgba(255,60,40,0.95),0 0 12px 3px rgba(255,40,20,0.55);}50%,100%{background:#3a0d09;box-shadow:inset 0 0 2px rgba(0,0,0,0.8);}}
-.rconf.si:not(.ok)::after{position:static!important;order:-1;flex:none;width:7px!important;height:7px!important;margin:0!important;border-radius:50%;transform:none!important;opacity:1!important;
+.rconf.si:not(.ok)::after{content:''!important;position:static!important;order:-1;flex:none;width:7px!important;height:7px!important;margin:0!important;border-radius:50%;transform:none!important;opacity:1!important;
   animation:ledTic 0.9s steps(1,end) infinite!important;}
-.rconf.ok{background:none!important;box-shadow:none!important;border:0!important;}
-body.dragging .rconf{pointer-events:none!important;opacity:.2;}
+.rconf.ok{background:rgba(8,8,7,0.82)!important;box-shadow:none!important;border:0!important;}
+body.dragging .rconf{pointer-events:none!important;opacity:.15;}
 </style>
 </head>
 <body>

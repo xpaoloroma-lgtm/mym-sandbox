@@ -21,7 +21,7 @@
   --text-lo:rgba(180,195,210,0.85); --text-xlo:rgba(180,195,210,0.62);
   --line:rgba(180,195,210,0.14); --line-soft:rgba(180,195,210,0.08);
   --panel:rgba(13,12,10,0.55); --card:rgba(26,24,21,0.62); --raised:rgba(30,28,24,0.72);
-  --f-upper:#408cff; --f-lower:#f28030; --f-buffer:#b266e8; --f-core:#ff6eb4; --f-tempo:#58d086;
+  --f-upper:#408cff; --f-lower:#f28030; --f-buffer:#b266e8; --f-core:#f0e846; --f-tempo:#58d086;
   --f-buffer-txt:#b266e8;
   --red:#e08a8a;
   --font:'Exo 2',sans-serif;
@@ -822,7 +822,7 @@ header .hdr-r{flex:none;}
    - riquadro           bordo 1px · angoli 2
    - percorso in alto   13px · lettere 3px · maiuscolo
    - colori famiglie    ufficiali, uguali ovunque (niente giallo, è il colore del sistema; niente rosso, è dei red flag): Upper 64,140,255 · Lower 242,128,48 ·
-                        Buffer 178,102,232 · Core 255,110,180 · Cardio 88,208,134 */
+                        Buffer 178,102,232 · Core 240,232,70 · Cardio 88,208,134 */
 
 .round-hd .rname{font-size:12px!important;font-weight:700!important;letter-spacing:3px!important}
 .lbl{font-size:12px!important;font-weight:700!important;letter-spacing:3px!important}
@@ -1025,7 +1025,7 @@ var FAMS = [
   {k:'U', short:'Upper', label:'Upper',        css:'var(--f-upper)',  txt:'var(--f-upper)',      hex:'#78cd9b', db:['row','push']},
   {k:'L', short:'Lower', label:'Lower',        css:'var(--f-lower)',  txt:'var(--f-lower)',      hex:'#f28030', db:['lower']},
   {k:'B', short:'Buffer', label:'Buffer',       css:'var(--f-buffer)', txt:'var(--f-buffer-txt)', hex:'#b266e8', db:['buffer']},
-  {k:'C', short:'Core', label:'Core',         css:'var(--f-core)',   txt:'var(--f-core)',       hex:'#ff6eb4', db:['core']},
+  {k:'C', short:'Core', label:'Core',         css:'var(--f-core)',   txt:'var(--f-core)',       hex:'#f0e846', db:['core']},
   {k:'T', short:'Cardio', label:'Cardio Tempo', css:'var(--f-tempo)',  txt:'var(--f-tempo)',      hex:'#58d086', db:['tempo']}
 ];
 var FAM = {}; FAMS.forEach(function(f){ FAM[f.k] = f; });

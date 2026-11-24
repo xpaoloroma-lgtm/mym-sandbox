@@ -428,7 +428,7 @@ var PILL={'Fondamentale':'p-fond','Complementare':'p-comp','Fond./Compl.':'p-fc'
 /* casella a menu: stessa per Info Filippo e Ruolo Ste */
 var STE=['Fondamentale','Complementare','Fond./Compl.'];
 var LISTE={ open:['Sì','No'], fam:['Upper','Lower','Buffer','Core','Cardio Tempo'], ste:STE };
-var FAMCOL={Upper:'#408cff',Lower:'#f28030',Buffer:'#b266e8',Core:'#ff6eb4','Cardio Tempo':'#58d086'};
+var FAMCOL={Upper:'#408cff',Lower:'#f28030',Buffer:'#b266e8',Core:'#f0e846','Cardio Tempo':'#58d086'};
 function pickCls(f,v,r){
   return 'ed-pos'+(v?' on':'')+(f==='ste'&&v?' '+PILL[v]:'')+(f==='open'&&v?(v==='Sì'?' o-si':' o-no'):'')
     +(f==='fam'&&(!r||r.open!=='Sì')?' off':'');

@@ -10492,7 +10492,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   <!-- ══ I CLIENTI ══ (solo sul monitor) Si cerca scrivendo; l'elenco è sempre
        aperto. Un clic su un cliente allarga la sua riga con la timeline. -->
   <div id="cl-zona">
-    <input id="cl-cerca" type="text" placeholder="cerca cliente" autocomplete="off" spellcheck="false">
+    <div id="cl-su"><input id="cl-cerca" type="text" placeholder="cerca cliente" autocomplete="off" spellcheck="false"><button type="button" id="nc-apri" onclick="ncApri()">+ Nuovo cliente</button></div>
     <div id="cl-filtri"></div>
     <div id="cl-testa"><span class="a">cliente</span><span class="b">ultimi tre allenamenti</span><span class="c">ultimo</span></div>
     <div id="cl-lista"></div>
@@ -13147,6 +13147,101 @@ function eseClose(){
 </div>
 
 <!-- ADMIN PASSWORD MODAL -->
+<!-- ══ NUOVO CLIENTE ══ una finestra piccola nella pagina protocolli: il nome e, se ci sono, i red flag.
+     Il cliente nasce senza protocollo: compare nell'elenco e da lì si entra. -->
+<div id="nc-velo" onclick="if(event.target===this)ncChiudi()">
+  <div id="nc-box">
+    <div class="nc-t">Nuovo cliente</div>
+    <input id="nc-nome" type="text" placeholder="Nome e cognome" autocomplete="off" spellcheck="false">
+    <div class="nc-err" id="nc-err"></div>
+    <div class="nc-k">Red flag</div>
+    <div id="nc-rf"></div>
+    <div class="nc-tasti"><button type="button" class="nc-b" onclick="ncChiudi()">Annulla</button><button type="button" class="nc-b nc-ok" id="nc-ok" onclick="ncSalva()">Crea cliente</button></div>
+  </div>
+</div>
+<style>
+#cl-su{display:flex;gap:10px;align-items:stretch;}
+#cl-su #cl-cerca{flex:1;min-width:0;}
+#nc-apri{flex:none;height:auto;padding:0 14px;background:rgba(200,175,90,0.05);border:1px solid rgba(212,168,74,0.55);border-radius:2px;cursor:pointer;
+  font-family:var(--font);font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(232,207,143,0.95);white-space:nowrap;}
+#nc-apri:hover{background:rgba(200,175,90,0.12);}
+#nc-velo{display:none;position:fixed;inset:0;z-index:100005;background:rgba(6,6,5,0.78);align-items:center;justify-content:center;font-family:var(--font);}
+#nc-velo.si{display:flex;}
+#nc-box{width:min(440px,92vw);background:rgba(20,19,16,1);border:1px solid rgba(180,195,210,0.18);border-radius:2px;padding:22px 22px 18px;box-sizing:border-box;}
+.nc-t{font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(225,232,240,.92);margin-bottom:16px;}
+#nc-nome{width:100%;height:44px;box-sizing:border-box;padding:0 14px;background:rgba(0,0,0,0.25);border:1px solid rgba(180,195,210,0.18);border-radius:2px;outline:none;
+  font-family:var(--font);font-size:17px;font-weight:300;color:rgba(240,235,220,1);}
+#nc-nome:focus{border-color:rgba(212,168,74,0.6);}
+.nc-err{min-height:18px;padding:5px 0 0;font-size:12px;color:rgba(229,100,100,0.95);}
+.nc-k{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(180,195,210,0.6);margin:10px 0 8px;}
+#nc-rf{display:flex;flex-wrap:wrap;gap:6px;}
+.nc-f{height:32px;padding:0 12px;background:none;border:1px solid rgba(180,195,210,0.18);border-radius:2px;cursor:pointer;font-family:var(--font);font-size:12px;color:rgba(190,204,218,0.85);}
+.nc-f:hover{border-color:rgba(220,100,100,0.5);}
+.nc-f.si{border-color:rgba(225,140,140,0.85);background:rgba(220,100,100,0.12);color:rgba(240,190,190,1);}
+.nc-tasti{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;}
+.nc-b{height:32px;padding:0 14px;background:none;border:1px solid rgba(180,195,210,0.25);border-radius:2px;cursor:pointer;font-family:var(--font);font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(215,226,236,0.9);}
+.nc-b.nc-ok{border-color:rgba(212,168,74,0.6);color:rgba(232,207,143,0.95);background:rgba(200,175,90,0.05);}
+.nc-b:disabled{opacity:.3;cursor:default;}
+</style>
+<script>
+/* ── Nuovo cliente ──
+   - Il nome non può essere doppio (stesso controllo del resto della Sandbox).
+   - I red flag scelti qui si accendono con la stessa regola di sempre: serve la password di accesso, una volta sola.
+   - Il cliente nasce senza protocollo e senza sedute: compare nell'elenco, aperto, e da lì si entra. */
+var _ncRf = {};
+function ncApri(){
+  _ncRf = {};
+  var n = document.getElementById('nc-nome'); n.value = (document.getElementById('cl-cerca').value || '').trim();
+  document.getElementById('nc-err').textContent = '';
+  ncDisegna();
+  document.getElementById('nc-velo').classList.add('si');
+  setTimeout(function(){ n.focus(); }, 30);
+}
+function ncChiudi(){ document.getElementById('nc-velo').classList.remove('si'); }
+function ncDisegna(){
+  document.getElementById('nc-rf').innerHTML = (window.RF_DATA || []).map(function(f){
+    return '<button type="button" class="nc-f' + (_ncRf[f.id] ? ' si' : '') + '" data-rf="' + f.id + '">' + clEsc(f.name) + '</button>';
+  }).join('');
+  ncControlla();
+}
+function ncControlla(){
+  var nome = document.getElementById('nc-nome').value.trim(), gia = nome ? csNomeGiaUsato(nome) : null;
+  document.getElementById('nc-err').textContent = gia ? 'Questo cliente esiste già: ' + gia.id : '';
+  document.getElementById('nc-ok').disabled = !nome || !!gia;
+  return nome && !gia ? nome : '';
+}
+function ncSalva(){
+  var nome = ncControlla(); if(!nome) return;
+  var scelti = Object.keys(_ncRf).filter(function(k){ return _ncRf[k]; });
+  function crea(){
+    var c = {id:nome, state:null, ts:Date.now()};
+    if(scelti.length){
+      c.state = {redFlags:{flags:{}, custom:null, ultimoAggiornamento:Date.now()}};
+      scelti.forEach(function(id){ c.state.redFlags.flags[id] = {attivo:true, note:'', dal:Date.now()}; });
+      try{ if(typeof migrateStateShape === 'function') migrateStateShape(c.state); }catch(e){}
+    }
+    _csList.push(c);
+    if(typeof _csSaveLocal === 'function') _csSaveLocal();
+    if(typeof sbSave === 'function') sbSave(c.id, c.state);
+    ncChiudi();
+    /* il cliente nuovo si vede subito: ricerca vuota, filtri tolti, riga aperta */
+    document.getElementById('cl-cerca').value = '';
+    _clProto = ''; _clRf = ''; _clAperto = c.id; _clPtScelto = null;
+    clDisegna();
+    var riga = document.querySelector('#cl-lista [data-cl="' + (window.CSS && CSS.escape ? CSS.escape(c.id) : c.id) + '"]');
+    if(riga && riga.scrollIntoView) riga.scrollIntoView({block:'nearest'});
+  }
+  if(scelti.length && typeof rfChiedi === 'function'){
+    rfChiedi(true, crea, nome + ' · ' + scelti.map(function(id){ return rfNomeScheda(id); }).join(', '));
+  } else crea();
+}
+document.getElementById('nc-nome').addEventListener('input', ncControlla);
+document.getElementById('nc-nome').addEventListener('keydown', function(e){ e.stopPropagation(); if(e.key === 'Enter') ncSalva(); if(e.key === 'Escape') ncChiudi(); });
+document.getElementById('nc-rf').addEventListener('click', function(e){
+  var b = e.target.closest('[data-rf]'); if(!b) return;
+  var id = b.getAttribute('data-rf'); _ncRf[id] = !_ncRf[id]; ncDisegna();
+});
+</script>
 <div id="admin-pw-modal" onclick="if(event.target===this)adminPwClose()">
   <div class="admin-pw-box">
     <div class="admin-pw-title">Accesso admin</div>

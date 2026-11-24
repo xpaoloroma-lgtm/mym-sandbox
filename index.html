@@ -10622,7 +10622,6 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   </div><!-- /home-lato -->
   </div><!-- /home-riga -->
   <div id="proto-actions" style="display:flex;align-items:center;gap:20px;">
-    <button class="proto-back" onclick="protoBack()">← esci</button>
     <button class="proto-back" id="ing-torna" onclick="ingressoOpen()">← ore e riunioni</button>
     <button id="proto-enter-btn" onclick="protoEnter()" style="opacity:0;pointer-events:none;background:none;border:1px solid rgba(200,175,90,0.78);border-radius:2px;cursor:pointer;font-family:var(--font);font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:rgba(200,175,90,0.90);padding:8px 28px;transition:opacity 0.35s ease, transform 0.35s ease;transform:translateY(4px);">Entra →</button>
     <div id="proto-tools">
@@ -11976,7 +11975,6 @@ window.addEventListener('DOMContentLoaded', function(){
     <!-- la parte operativa: da qui si va a lavorare (solo sul monitor) -->
     <button type="button" class="ing-carta ing-entra" onclick="ingressoClose()"><b>Protocolli</b></button>
   </div>
-  <button type="button" class="proto-back" onclick="protoBack()">← esci</button>
 </div>
 <script>
 function ingressoOpen(){ document.getElementById('ingresso').classList.remove('off'); }
@@ -13270,7 +13268,6 @@ function eseClose(){
   <div class="header-right">
     <span class="nv-sempre" id="nv-pt"></span>
     <button class="hdr-btn nv-sempre" id="demo-btn" onclick="demoCambia()" title="Clienti finti per vedere le pagine piene. Non salva niente.">demo</button>
-    <button class="hdr-btn nv-sempre" id="nv-esci" onclick="navVai('esci')">esci</button>
     <!-- la pagina Esercizi: stesso tasto, stesso posto, da dentro qualunque protocollo. Si apre sopra e chiudendola si torna dov'eri. -->
     <button class="hdr-btn nv-sempre nv-no" id="nv-ese" onclick="eseOpen()" title="Apri la pagina Esercizi">Esercizi</button>
     <button class="hdr-btn undo-btn" id="undo-btn" onclick="undoLast()" disabled>undo</button>
@@ -13549,7 +13546,6 @@ function eseClose(){
       <span class="skip-cfg-label">Clienti</span>
       <span class="skip-cfg-val empty" id="gg-cfg-count">—</span>
     </div>
-    <button id="gg-exit-btn" type="button" onclick="ggExit()" title="Torna alla selezione">↩ Esci</button>
   </div>
   <div id="gg-toolbar-host"></div>
   <!-- gg-headers e gg-grid-host vengono creati dinamicamente da ggBuildView -->

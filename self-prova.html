@@ -881,14 +881,6 @@ header .hdr-r{flex:none;}
 #rank .pr.lead .dot{background:var(--fc)!important;border-color:var(--fc)!important;box-shadow:0 0 10px 2px color-mix(in srgb,var(--fc) 60%,transparent)!important;}
 
 /* ═════════ PROVA GRAFICA — solo aspetto, il funzionamento è quello di self.html ═════════ */
-/* 1 · dietro il blocco l'OMBRA di quello che c'è scritto davanti: famiglia sopra, esercizio sotto. Scura, più grande, spostata. */
-.slot{container-type:size;}
-/* è un decoro, non un'informazione: una sagoma scura molto sfumata. Grandezza FISSA, uguale in ogni posto:
-   nel blocco basso se ne vede una fascia, in quello alto di più. */
-.block .ombra{position:absolute;left:30px;top:50%;transform:translateY(-50%);z-index:0;pointer-events:none;
-  font-family:'Exo 2',sans-serif;font-size:132px;line-height:1;white-space:nowrap;color:#000;opacity:.66;filter:blur(6px);}
-.block .ombra i{position:absolute;left:.04em;bottom:92%;font-style:normal;font-size:.34em;font-weight:800;letter-spacing:.28em;text-transform:uppercase;line-height:1;}
-.block .ombra b{display:block;font-weight:700;letter-spacing:-.01em;}
 /* 2 · niente righe: i blocchi li separa la luce */
 .slot .sep{display:none!important;}
 .blocks{right:0!important;}
@@ -1323,7 +1315,7 @@ function renderBlocks(r, anim){
       var box = '<button type="button" class="notebox' + (n ? '' : ' note-empty') + '" data-note="' + id + '" title="' + (n ? 'Modifica la nota' : 'Aggiungi una nota') + '">' +
                 '<span class="tx">' + (n ? esc(n) : '+ nota') + '</span><span class="pen">' + PEN + '</span></button>';
       inner += '<div class="block' + (p === 1 ? ' one' : '') + '" data-r="' + r + '" data-i="' + i + '" data-id="' + id + '" data-fam="' + f.short + '" data-key="' + r + '-' + id + '" style="--fc:' + f.css + ';--ft:' + f.txt + '">' +
-               '<div class="spill"></div><div class="neon"></div><div class="ombra" aria-hidden="true"><i>' + f.label + '</i><b>' + esc(ex.nome) + '</b></div>' +
+               '<div class="spill"></div><div class="neon"></div>' +
                '<button type="button" class="chg cg" data-chg="' + ex.fam + '" data-r="' + r + '" aria-label="Cambia ' + esc(ex.nome) + '" title="Cambia esercizio">' + CHG + '</button>' +
                '<button type="button" class="rm" data-rm="' + r + '-' + i + '" aria-label="Togli ' + esc(ex.nome) + ' dal round" title="Togli">' +
                '<svg aria-hidden="true" width="10" height="10" viewBox="0 0 10 10"><path d="M1.5 1.5l7 7M8.5 1.5l-7 7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>' +

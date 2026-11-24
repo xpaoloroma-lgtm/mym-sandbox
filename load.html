@@ -1898,8 +1898,13 @@ header{gap:16px}
 #rfh .rfh-f{padding-left:14px!important;border-left:1px solid rgba(220,100,100,.25)!important;}
 #rfh .rfh-f b{font-size:11px!important;font-weight:600!important;letter-spacing:.5px;}
 #rfh .rfh-apri{margin-left:auto;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(225,140,140,.75);flex:none;}
-#view-only-banner{margin:0 auto 0 16px!important;}
-@media (max-width:1300px){ #view-only-banner{margin:0 auto 0 10px!important;} }
+/* IL POSTO di Conferma sessione: l'angolo in alto a destra, ultima cosa della barra. Sempre lì, in tutti i protocolli.
+   Sempre nella forma stretta (orologio + tasto): la scritta "Modalità consultazione" non serve. */
+#view-only-banner{order:99!important;margin:0 0 0 12px!important;gap:5px!important;padding:0 4px 0 8px!important;}
+#view-only-banner .view-only-text,#view-only-banner .vo-text{font-size:0!important;letter-spacing:0!important;}
+#view-only-banner .view-only-text::before,#view-only-banner .vo-text::before{margin-right:0!important;}
+#view-only-banner .view-only-cta,#view-only-banner .vo-cta{padding:0 8px!important;letter-spacing:1.5px!important;}
+header > #breadcrumb, header > .bc{margin-right:auto!important;}
 #view-only-banner{display:none;}
 #view-only-banner.si{display:flex;}
 /* a destra resta solo la sessione aperta (ora e PT); in consultazione quel tasto non c'è: c'è il riquadro */

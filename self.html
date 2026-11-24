@@ -894,7 +894,7 @@ header .hdr-r{flex:none;}
 .slot .sep{display:none!important;}
 .blocks{right:0!important;}
 .block{inset:3px 0!important;border-radius:2px;background:
-  radial-gradient(120% 140% at 0% 50%,color-mix(in srgb,var(--fc) 15%,transparent) 0%,color-mix(in srgb,var(--fc) 5%,transparent) 34%,transparent 62%),
+  radial-gradient(120% 140% at 0% 50%,color-mix(in srgb,var(--fc) 24%,transparent) 0%,color-mix(in srgb,var(--fc) 10%,transparent) 34%,transparent 66%),
   linear-gradient(90deg,rgba(26,24,21,0.55) 0%,rgba(26,24,21,0.20) 60%,rgba(26,24,21,0) 100%)!important;}
 .block .spill{display:none;}
 .block .neon{top:0!important;bottom:0!important;width:3px!important;box-shadow:0 0 6px color-mix(in srgb,var(--fc) 55%,transparent),0 0 18px color-mix(in srgb,var(--fc) 28%,transparent)!important;}
@@ -946,6 +946,12 @@ header .hdr-r{flex:none;}
 .lane .filo.f5{animation:filoB 25s ease-in-out -28s infinite alternate;}
 .lane .filo.f6{animation:filoA 35s ease-in-out -5s infinite alternate;}
 .lane .filo.f7{animation:filoB 48s ease-in-out -48s infinite alternate;}
+/* ═══ PROPORZIONI DEL TESTO NEI BLOCCHI (24/11): numero grande e sottile, alto quanto il blocco; nome a peso normale ═══ */
+.block .card{grid-template-columns:44px minmax(0,1fr);}
+.block .card .pn{font-size:38px;font-weight:200;line-height:1;grid-row:1 / span 3;align-self:center;}
+.block .card .nm{font-size:22px;font-weight:400;}
+.block .card .fl{white-space:nowrap;}
+.block .nm .pa{white-space:nowrap;}
 </style>
 </head>
 <body>
@@ -1355,13 +1361,43 @@ function renderBlocks(r, anim){
                '<button type="button" class="chg cg" data-chg="' + ex.fam + '" data-r="' + r + '" aria-label="Cambia ' + esc(ex.nome) + '" title="Cambia esercizio">' + CHG + '</button>' +
                '<button type="button" class="rm" data-rm="' + r + '-' + i + '" aria-label="Togli ' + esc(ex.nome) + ' dal round" title="Togli">' +
                '<svg aria-hidden="true" width="10" height="10" viewBox="0 0 10 10"><path d="M1.5 1.5l7 7M8.5 1.5l-7 7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>' +
-               '<div class="card"><span class="fl">' + f.label + (ex.fam === 'T' ? '<b class="dur">' + durataTempo(p) + '</b>' : '') + '</span><span class="pn">' + p + '</span><span class="nm">' + esc(ex.nome) + '</span>' + box + '</div></div>';
+               '<div class="card"><span class="fl">' + f.label + (ex.fam === 'T' ? '<b class="dur">' + durataTempo(p) + '</b>' : '') + '</span><span class="pn">' + p + '</span><span class="nm">' + lettere(ex.nome) + '</span>' + box + '</div></div>';
     }
     h += '<div class="slot" data-drop="slot" data-r="' + r + '" data-i="' + i + '" style="' + st + '">' + inner + '</div>';
     top += HB[i];
   }
   el.innerHTML = h;
+  ombre(el);
 }
+/* ═══ OMBRA DEL TESTO ═══
+   Il testo è in rilievo sul blocco e la luce è la riga colorata sul bordo sinistro, poco sopra il piano.
+   Quindi l'ombra cade verso destra, e più una lettera è lontana dalla luce:
+     - più l'ombra è lunga   (luce radente: spostamento = rilievo × distanza / (altezza luce − rilievo))
+     - più è sfumata         (la penombra si allarga con la lunghezza)
+     - più è debole          (lontano arriva meno luce, quindi c'è meno contrasto da togliere)
+   Sotto ogni lettera resta anche un filo d'ombra stretta, quella di contatto col piano.
+   Numeri: OMBRA_LUCE = altezza della luce sul piano; il rilievo cambia per numero, nome, famiglia e nota. Sono scelte, non misure. */
+var OMBRA_LUCE = 46, OMBRA_META = 170;
+function lettere(t){ return String(t).split(' ').map(function(w){ return '<span class="pa">' + w.split('').map(function(c){ return '<span>' + esc(c) + '</span>'; }).join('') + '</span>'; }).join(' '); }
+function ombraDi(x, rilievo, forza){
+  x = Math.max(0, x);
+  var dx = rilievo * x / (OMBRA_LUCE - rilievo), sf = 0.6 + dx * 0.55, a = forza / (1 + x / OMBRA_META);
+  /* il fianco delle lettere che guarda la luce prende un filo del colore della famiglia: è quello che su un fondo scuro fa vedere il rilievo */
+  var bordo = Math.round(78 / (1 + x / OMBRA_META));
+  return '-0.8px 0 0.5px color-mix(in srgb,var(--fc) ' + bordo + '%,transparent),'
+       + '0 0.6px 0.6px rgba(0,0,0,' + Math.min(0.9, forza + 0.15).toFixed(2) + '),' + dx.toFixed(2) + 'px ' + (dx * 0.12).toFixed(2) + 'px ' + sf.toFixed(2) + 'px rgba(0,0,0,' + a.toFixed(2) + ')';
+}
+function ombre(root){
+  (root || document).querySelectorAll('.block').forEach(function(b){
+    var x0 = b.getBoundingClientRect().left;
+    function metti(el, rilievo, forza){ if(!el) return; var q = el.getBoundingClientRect(); if(!q.width) return; el.style.textShadow = ombraDi(q.left + q.width / 2 - x0, rilievo, forza); }
+    metti(b.querySelector('.pn'), 3.2, 0.85);
+    b.querySelectorAll('.nm .pa > span').forEach(function(c){ metti(c, 2.4, 0.85); });
+    metti(b.querySelector('.fl'), 1.2, 0.8);
+    metti(b.querySelector('.notebox .tx'), 1.2, 0.75);
+  });
+}
+window.addEventListener('resize', function(){ ombre(document); });
 
 /* ═══ ROUND: GRAFICO (con morph animato) ═══ */
 var laneVals = [null, null], laneAnim = [null, null];

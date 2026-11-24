@@ -895,7 +895,8 @@ header .hdr-r{flex:none;}
 .block .rm{right:calc(var(--lane) + 6px)!important;} .block .cg{right:calc(var(--lane) + 30px)!important;}
 .block .card{padding-right:calc(var(--lane) + 62px)!important;}
 /* 3 · il grafico dentro i blocchi: la curva passa dietro tutta la larghezza del round */
-.lane{left:0!important;right:0!important;width:100%!important;z-index:0;pointer-events:none;opacity:.9;}
+/* il grafico occupa la metà destra del round: parte da metà e arriva al bordo */
+.lane{left:50%!important;right:0!important;width:50%!important;z-index:0;pointer-events:none;opacity:.9;}
 .blocks{z-index:1;}
 .block .card,.block .row{z-index:2;}
 .ruler{display:none!important;}

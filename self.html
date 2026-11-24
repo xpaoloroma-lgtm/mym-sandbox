@@ -1312,13 +1312,21 @@ function drawLane(r, vals){
   var caldoLinea = '';
   var stops = [[0,'#c9a85c'],[0.25,'#e8cf8f'],[0.5,'#b8924a'],[0.75,'#dcc07c'],[1,'#a8843e']];
   if(hot){
-    var alti = smp.filter(function(q){ return q.v >= PICCO; });
-    var y1 = Math.max(0, alti[0].y / 1500), y2 = Math.min(1, alti[alti.length - 1].y / 1500), sf = 0.035, CALDO = '#f0704a';
-    var a1 = Math.max(0, y1 - sf), a2 = Math.min(1, y2 + sf);
-    stops = stops.filter(function(q){ return q[0] < a1 || q[0] > a2; })
-      .concat([[a1,'#d8bb78'],[y1,CALDO],[y2,CALDO],[a2,'#d8bb78']]).sort(function(m, n){ return m[0] - n[0]; });    /* nel tratto caldo la linea è anche più spessa e ha un alone, così si vede a colpo d'occhio */
-    defs += '<clipPath id="caldo' + r + '"><rect x="-10" y="' + (y1 * 1500 - 12) + '" width="120" height="' + ((y2 - y1) * 1500 + 24) + '"/></clipPath>';
-    var caldoLinea = '<path d="' + d + '" fill="none" stroke="' + CALDO + '" stroke-width="4" stroke-linecap="round" vector-effect="non-scaling-stroke" clip-path="url(#caldo' + r + ')" style="filter:drop-shadow(0 0 5px rgba(240,112,74,0.9))"/>';
+    /* sfumato: la linea scalda piano, da oro ad arancio mentre sale verso la soglia, e arriva al rosso solo sopra la soglia */
+    var SALITA = 1.6, CALDO = '#ee6a4a', TIEPIDO = '#f2a25a', ORO = '#dcc07c';
+    function primo(v){ for(var i = 0; i < smp.length; i++) if(smp[i].v >= v) return smp[i].y / 1500; return 1; }
+    function ultimo(v){ for(var i = smp.length - 1; i >= 0; i--) if(smp[i].v >= v) return smp[i].y / 1500; return 0; }
+    var y1 = primo(PICCO), y2 = ultimo(PICCO), a1 = Math.min(primo(PICCO - SALITA), y1 - 0.04), a2 = Math.max(ultimo(PICCO - SALITA), y2 + 0.04);
+    a1 = Math.max(0, a1); a2 = Math.min(1, a2);
+    var caldi = [[a1,ORO,0],[(a1 + y1) / 2,TIEPIDO,0.35],[y1,CALDO,0.9],[y2,CALDO,0.9],[(y2 + a2) / 2,TIEPIDO,0.35],[a2,ORO,0]]
+      .filter(function(q, i, A){ return i === 0 || q[0] > A[i-1][0]; });
+    stops = stops.filter(function(q){ return q[0] < a1 || q[0] > a2; }).concat(caldi).sort(function(m, n){ return m[0] - n[0]; });
+    /* un alone morbido dietro, che cresce e cala insieme al colore */
+    defs += '<linearGradient id="alone' + r + '" x1="0" y1="0" x2="0" y2="1500" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="' + CALDO + '" stop-opacity="0"/>'
+      + caldi.map(function(q){ return '<stop offset="' + q[0].toFixed(4) + '" stop-color="' + (q[2] > 0.5 ? CALDO : TIEPIDO) + '" stop-opacity="' + q[2] + '"/>'; }).join('')
+      + '<stop offset="1" stop-color="' + CALDO + '" stop-opacity="' + (a2 >= 1 ? 0.9 : 0) + '"/></linearGradient>'
+      + '<filter id="morbido' + r + '" x="-300%" y="-10%" width="700%" height="120%"><feGaussianBlur stdDeviation="1.6 14"/></filter>';
+    caldoLinea = '<path d="' + d + '" fill="none" stroke="url(#alone' + r + ')" stroke-width="9" stroke-linecap="round" vector-effect="non-scaling-stroke" filter="url(#morbido' + r + ')" opacity="0.75"/>';
   }
   defs += '<linearGradient id="oro' + r + '" x1="0" y1="0" x2="0" y2="1500" gradientUnits="userSpaceOnUse">'
     + stops.map(function(q){ return '<stop offset="' + q[0].toFixed(4) + '" stop-color="' + q[1] + '"/>'; }).join('') + '</linearGradient>';
@@ -1334,8 +1342,8 @@ function drawLane(r, vals){
     top += HB[j];
   }
   defs += '<linearGradient id="area' + r + '" x1="0" x2="100" y1="0" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#c9a860" stop-opacity="0"/><stop offset="0.7" stop-color="#c9a860" stop-opacity="0.10"/><stop offset="1" stop-color="#d9bd7a" stop-opacity="0.30"/></linearGradient>';
-  svg.innerHTML = '<defs>' + defs + '</defs>' + ghostSvg(r) + g +
-    '<g style="filter:drop-shadow(0 0 3px rgba(200,170,100,0.35))">' + line + '</g>' + (hot ? caldoLinea : '');
+  svg.innerHTML = '<defs>' + defs + '</defs>' + ghostSvg(r) + g + caldoLinea +
+    '<g style="filter:drop-shadow(0 0 3px rgba(200,170,100,0.35))">' + line + '</g>';
 }
 function animateLane(r, dur){
   var target = curveVals(shown()[r]);

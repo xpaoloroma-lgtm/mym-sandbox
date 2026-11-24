@@ -2162,8 +2162,14 @@ function checkRule(res){
   if(b && !breaksRule(S.today)) return {ok:false, why:'first', id:b.id};
   return res;
 }
-function applyMove(src, tgt){ return checkRule(applyMove0(src, tgt)); }
-function applyMove0(src, tgt){
+function applyMove(src, tgt){
+  var res = checkRule(applyMove0(src, tgt, false));
+  /* Se scalando gli altri finisce in prima posizione un esercizio che lì non può stare (ha aperto il round prima),
+     non blocco la mossa: provo lo scambio secco tra i due posti, che lascia fermi tutti gli altri. */
+  if(res && res.ok === false && res.why === 'first'){ var alt = checkRule(applyMove0(src, tgt, true)); if(alt && alt.ok) return alt; }
+  return res;
+}
+function applyMove0(src, tgt, scambio){
   if(src.kind === 'block' && (!tgt || tgt.r !== src.r)) tgt = {kind:'disp', r:src.r};
   var rs = S.today.map(function(r){ return r.slice(); });
   var cp = JSON.parse(JSON.stringify(S.copies));
@@ -2187,6 +2193,7 @@ function applyMove0(src, tgt){
        verso il posto lasciato libero, come quando si riordina un elenco. Prima era uno scambio secco tra i due posti:
        portando il 2 al 4 il 3 restava fermo e il 4 saltava al 2, e trascinando oltre i blocchi lontani si scambiavano a salti. */
     if(rs[R][j] == null){ rs[R][j] = id; rs[R][src.i] = null; }
+    else if(scambio){ var tmp = rs[R][j]; rs[R][j] = id; rs[R][src.i] = tmp; }
     else { rs[R].splice(src.i, 1); rs[R].splice(j, 0, id); }
     return {ok:true, rounds:rs, copies:syncCopies(rs, cp)};
   }

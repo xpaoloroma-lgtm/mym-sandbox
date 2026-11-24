@@ -7720,13 +7720,11 @@ body::after{
 </filter>\
 <rect width='150' height='150' filter='url(%23g)'/></svg>");
   background-size:150px 150px;
-  animation:granaVelo 34s linear infinite;
+  animation:granaVelo 700ms steps(1) infinite;
   will-change:transform;
 }
-@keyframes granaVelo{
-  from{ transform:translate3d(0,0,0); }
-  to  { transform:translate3d(150px,-150px,0); }   /* una piastrella esatta */
-}
+/* La grana non scorre più in una direzione (si vedeva andare in alto a destra): salta di posto, come la grana di una pellicola. Come in Load. */
+@keyframes granaVelo{0%{transform:translate3d(0,0,0)}12.5%{transform:translate3d(-63px,41px,0)}25%{transform:translate3d(48px,-77px,0)}37.5%{transform:translate3d(-29px,88px,0)}50%{transform:translate3d(71px,36px,0)}62.5%{transform:translate3d(-84px,-52px,0)}75%{transform:translate3d(33px,67px,0)}87.5%{transform:translate3d(-57px,-24px,0)}100%{transform:translate3d(0,0,0)}}
 
 /* La grana del fondo, sotto i pannelli. Fine quanto quella di sopra —
    una grana grossa sembra sporco, non profondità — ma molto più marcata,
@@ -7743,15 +7741,10 @@ body::after{
 </filter>\
 <rect width='170' height='170' filter='url(%23h)'/></svg>");
   background-size:170px 170px;
-  animation:granaFondo 52s linear infinite;
+  animation:granaFondo 1100ms steps(1) infinite;
   will-change:transform;
 }
-/* verso opposto e passo più lento: i due piani non si muovono mai
-   insieme, ed è quello che dà la sensazione di due profondità */
-@keyframes granaFondo{
-  from{ transform:translate3d(0,0,0); }
-  to  { transform:translate3d(-170px,170px,0); }
-}
+@keyframes granaFondo{0%{transform:translate3d(0,0,0)}14%{transform:translate3d(58px,-91px,0)}28%{transform:translate3d(-77px,34px,0)}43%{transform:translate3d(96px,62px,0)}57%{transform:translate3d(-41px,-83px,0)}71%{transform:translate3d(-88px,71px,0)}86%{transform:translate3d(52px,19px,0)}100%{transform:translate3d(0,0,0)}}
 
 /* NIENTE z-index sul contenuto, e c'è un motivo che mi è costato caro.
    Avevo messo z-index:1 su .ore-wrap per farla stare sopra la grana. Ma

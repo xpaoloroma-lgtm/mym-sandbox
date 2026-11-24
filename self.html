@@ -21,8 +21,8 @@
   --text-lo:rgba(180,195,210,0.85); --text-xlo:rgba(180,195,210,0.62);
   --line:rgba(180,195,210,0.14); --line-soft:rgba(180,195,210,0.08);
   --panel:rgba(13,12,10,0.55); --card:rgba(26,24,21,0.62); --raised:rgba(30,28,24,0.72);
-  --f-upper:#e2dc5a; --f-lower:#d4566c; --f-buffer:#8e63d6; --f-core:#3f88e0; --f-tempo:#95b547;
-  --f-buffer-txt:#ad8fe6;
+  --f-upper:#d29b50; --f-lower:#cdb97d; --f-buffer:#d27d7d; --f-core:#78cd9b; --f-tempo:#78a5e1;
+  --f-buffer-txt:#d27d7d;
   --red:#e08a8a;
   --font:'Exo 2',sans-serif;
   --lane:100px;
@@ -590,6 +590,23 @@ body.view-only #view-only-banner{display:flex;}
 #tl-panel::after{content:'Storico';position:absolute;left:1px;top:18px;width:12px;writing-mode:vertical-rl;transform:rotate(180deg);
   font-size:8px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:rgba(212,168,74,0.85);pointer-events:none;}
 </style>
+<style id="sbx-comune">
+/* ══ MISURE COMUNI AI PROTOCOLLI ══
+   Stesse in Load, Self e Move (Open viene dopo). Ogni protocollo tiene la sua forma,
+   ma queste cose sono uguali dappertutto:
+   - titolo di zona     12px · 700 · lettere 3px · maiuscolo
+   - etichetta piccola  10px · 600 · lettere 2px · maiuscolo
+   - tasto              alto 32 · 10px · 600 · lettere 2px · angoli 2
+   - riquadro           bordo 1px · angoli 2
+   - percorso in alto   13px · lettere 3px · maiuscolo
+   - colori famiglie    quelli di Open: Upper 210,155,80 · Lower 205,185,125 ·
+                        Buffer 210,125,125 · Core 120,205,155 · Cardio 120,165,225 */
+
+.round-hd .rname{font-size:12px!important;font-weight:700!important;letter-spacing:3px!important}
+.lbl{font-size:12px!important;font-weight:700!important;letter-spacing:3px!important}
+.round-hd .rmeta b,.round-hd .rmeta span{font-size:10px!important;letter-spacing:2px!important}
+.btn,.btn-sm{height:32px!important;font-size:10px!important;font-weight:600!important;letter-spacing:2px!important;border-radius:2px!important}
+</style>
 </head>
 <body>
 <div id="view-only-banner"><span class="vo-text">Modalità consultazione</span><button type="button" class="vo-cta" id="vo-confirm">Conferma sessione</button></div>
@@ -775,11 +792,11 @@ var DB_RAW = [
 
 /* ═══ FAMIGLIE ═══ */
 var FAMS = [
-  {k:'U', short:'Upper', label:'Upper',        css:'var(--f-upper)',  txt:'var(--f-upper)',      hex:'#e2dc5a', db:['row','push']},
-  {k:'L', short:'Lower', label:'Lower',        css:'var(--f-lower)',  txt:'var(--f-lower)',      hex:'#d4566c', db:['lower']},
-  {k:'B', short:'Buffer', label:'Buffer',       css:'var(--f-buffer)', txt:'var(--f-buffer-txt)', hex:'#8e63d6', db:['buffer']},
-  {k:'C', short:'Core', label:'Core',         css:'var(--f-core)',   txt:'var(--f-core)',       hex:'#3f88e0', db:['core']},
-  {k:'T', short:'Cardio', label:'Cardio Tempo', css:'var(--f-tempo)',  txt:'var(--f-tempo)',      hex:'#95b547', db:['tempo']}
+  {k:'U', short:'Upper', label:'Upper',        css:'var(--f-upper)',  txt:'var(--f-upper)',      hex:'#d29b50', db:['row','push']},
+  {k:'L', short:'Lower', label:'Lower',        css:'var(--f-lower)',  txt:'var(--f-lower)',      hex:'#cdb97d', db:['lower']},
+  {k:'B', short:'Buffer', label:'Buffer',       css:'var(--f-buffer)', txt:'var(--f-buffer-txt)', hex:'#d27d7d', db:['buffer']},
+  {k:'C', short:'Core', label:'Core',         css:'var(--f-core)',   txt:'var(--f-core)',       hex:'#78cd9b', db:['core']},
+  {k:'T', short:'Cardio', label:'Cardio Tempo', css:'var(--f-tempo)',  txt:'var(--f-tempo)',      hex:'#78a5e1', db:['tempo']}
 ];
 var FAM = {}; FAMS.forEach(function(f){ FAM[f.k] = f; });
 var DB = {};

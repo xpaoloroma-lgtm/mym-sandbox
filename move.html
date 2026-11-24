@@ -169,6 +169,24 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
 #tl-panel::after{content:'Storico';position:absolute;left:1px;top:18px;width:12px;writing-mode:vertical-rl;transform:rotate(180deg);
   font-size:8px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:rgba(212,168,74,0.85);pointer-events:none;}
 </style>
+<style id="sbx-comune">
+/* ══ MISURE COMUNI AI PROTOCOLLI ══
+   Stesse in Load, Self e Move (Open viene dopo). Ogni protocollo tiene la sua forma,
+   ma queste cose sono uguali dappertutto:
+   - titolo di zona     12px · 700 · lettere 3px · maiuscolo
+   - etichetta piccola  10px · 600 · lettere 2px · maiuscolo
+   - tasto              alto 32 · 10px · 600 · lettere 2px · angoli 2
+   - riquadro           bordo 1px · angoli 2
+   - percorso in alto   13px · lettere 3px · maiuscolo
+   - colori famiglie    quelli di Open: Upper 210,155,80 · Lower 205,185,125 ·
+                        Buffer 210,125,125 · Core 120,205,155 · Cardio 120,165,225 */
+
+.lbl{font-size:12px!important;font-weight:700!important;letter-spacing:3px!important}
+.posto-t,.e-th,.e-pos,.bk-r i{font-size:10px!important;font-weight:600!important;letter-spacing:2px!important}
+.btn,.e-f{height:32px!important;font-size:10px!important;font-weight:600!important;letter-spacing:2px!important;border-radius:2px!important}
+.b-riga > .btn{height:auto!important}
+#e-cerca{height:32px!important}
+</style>
 </head>
 <body>
 <header>

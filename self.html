@@ -2218,7 +2218,6 @@ function closeSession(){
   if(!S.conf) S.conf = [null, null];
   var date = S.sess.date, pt = S.sess.pt, ph = phase(), at = S.rounds.length, n = 0;
   var full = function(r){ return !!S.conf[r] && S.today[r].every(function(x){ return x != null; }); };   /* fatto = pieno E confermato */
-  var resta = [0, 1].filter(function(r){ return !full(r) && S.today[r].some(function(x){ return x != null; }); }).map(function(r){ return S.today[r].slice(); });
   if(full(0)){ S.rounds.push({date:date, pt:pt, o:S.today[0].slice()}); n++; }
   if(!S.skip2 && full(1)){
     if(ph === 'straddle' && S.pend && n === 1){
@@ -2228,8 +2227,8 @@ function closeSession(){
     S.rounds.push({date:date, pt:pt, o:S.today[1].slice()}); n++;
   }
   if(n) S.sessions.push({date:date, pt:pt, at:at, n:n});
-  /* i round preparati e non confermati non si buttano: restano lì, da fare */
-  S.today = [resta[0] || [null,null,null,null,null], resta[1] || [null,null,null,null,null]]; S.conf = [null, null];
+  /* al cambio di giorno si svuota tutto: anche i round preparati e non confermati */
+  S.today = [[null,null,null,null,null],[null,null,null,null,null]]; S.conf = [null, null];
   S.skip2 = false; S.pend = null; S.sess = null;
   S.copies = syncCopies(S.today, {});
   return {date:date, n:n};
@@ -2239,11 +2238,14 @@ function openDay(){
   var closed = null, dropped = false;
   /* cambio di giorno: la sessione confermata si chiude e conta; quello fatto in sola consultazione non conta e si svuota */
   if(S.sess && S.sess.date !== S.simDate){ closed = closeSession(); save(); }
+  else if(!S.sess && S.dayOf && S.dayOf !== S.simDate && S.today.some(function(r){ return r.some(function(x){ return x != null; }); })){
+    /* giorno nuovo senza niente di confermato: i blocchi tornano vuoti */
+    S.today = [[null,null,null,null,null],[null,null,null,null,null]]; S.conf = [null, null]; S.skip2 = false; S.pend = null; S.copies = syncCopies(S.today, {});
+  }
 
   if(S.dayOf !== S.simDate){ S.dayOf = S.simDate; save(); }
   laneVals = [null, null]; renderAll();
   if(closed && closed.n) toast('Sessione del ' + formatDate(closed.date) + ' · ' + closed.n + ' round salvati');
-  else if(dropped) toast('Il giorno prima era solo consultazione: non contato');
   clearTimeout(splashTimer);
   if(!S.sess) splashTimer = setTimeout(splashOpen, closed ? 1400 : 700);   /* in Open: 5 secondi */
 }

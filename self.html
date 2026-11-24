@@ -395,7 +395,7 @@ body.dragging,body.dragging *{cursor:grabbing !important;}
 .tl-badge-dot{width:4px;height:4px;border-radius:50%;background:currentColor;flex-shrink:0;}
 
 /* ═══ CLASSIFICA STRETTA — una linea sola, come la timeline; in cima quello che va al cambio ═══ */
-#rk-col{position:relative;z-index:1;width:164px;flex:none;display:flex;flex-direction:column;gap:14px;padding:18px 10px 14px 12px;min-height:0;background:var(--panel);border-left:1px solid var(--line);}
+#rk-col{position:relative;z-index:1;width:184px;flex:none;display:flex;flex-direction:column;gap:14px;padding:18px 10px 14px 12px;min-height:0;background:var(--panel);border-left:1px solid var(--line);}
 #tl-panel{position:relative;z-index:1;}
 .rk-top{display:flex;flex-direction:column;gap:6px;padding-bottom:12px;border-bottom:1px solid var(--line);}
 .rk-top .lbl{color:var(--gold-txt);font-size:8px;letter-spacing:3px;line-height:1.5;}
@@ -833,6 +833,9 @@ header .hdr-r{flex:none;}
 .lbl{font-size:12px!important;font-weight:700!important;letter-spacing:3px!important}
 .round-hd .rmeta b,.round-hd .rmeta span{font-size:10px!important;letter-spacing:2px!important}
 .btn,.btn-sm{height:32px!important;font-size:10px!important;font-weight:600!important;letter-spacing:2px!important;border-radius:2px!important}
+/* chi è al cambio resta del colore della sua famiglia: più grande e acceso, ma non dorato */
+#rank .pr.lead .fm{color:var(--fc)!important;text-shadow:0 0 12px color-mix(in srgb,var(--fc) 45%,transparent)!important;}
+#rank .pr.lead .dot{background:var(--fc)!important;border-color:var(--fc)!important;box-shadow:0 0 10px 2px color-mix(in srgb,var(--fc) 60%,transparent)!important;}
 </style>
 </head>
 <body>
@@ -1382,15 +1385,15 @@ function animateLane(r, dur){
 /* ═══ CLASSIFICA PER POSIZIONE MEDIA ═══
    Per ogni esercizio: in che posizione è finito in ogni round del ciclo (oggi compreso, se messo).
    Più la media è bassa, più l'esercizio sta in alto: il più basso a fine ciclo si cambia. */
-/* Pesi: i round più recenti contano di più (peso 1 al primo round del ciclo, 2 al secondo, …).
-   Così la classifica segue la tendenza di adesso e due esercizi che si alternano in testa
-   (A primo, poi B, poi A…) non finiscono mai pari: pesa di più chi ha aperto per ultimo. Scelta, non misura. */
+/* Tutti i round contano uguale: è la media semplice delle posizioni.
+   Se due famiglie si scambiano i posti (A primo e B secondo, poi B primo e A secondo) sono PARI,
+   e restano tutte e due in cima, al cambio: non c'è un dato per preferirne una. */
 /* Conta la FAMIGLIA, non l'esercizio: se il PT cambia l'esercizio a metà ciclo, la storia della famiglia resta. */
 function famIdx(r, fk){ for(var i = 0; i < r.length; i++){ if(r[i] != null && DB[r[i]].fam === fk) return i; } return -1; }
 function positions(fk){
   var out = [], k = 0;
-  S.rounds.slice(cycStart()).forEach(function(rd){ k++; var i = famIdx(rd.o, fk); if(i !== -1) out.push({p:i + 1, w:k, today:false}); });
-  if(phase() !== 'closed') shown().forEach(function(r, R){ if(!todayInCycle(R)) return; k++; var i = famIdx(r, fk); if(i !== -1) out.push({p:i + 1, w:k, today:true}); });
+  S.rounds.slice(cycStart()).forEach(function(rd){ k++; var i = famIdx(rd.o, fk); if(i !== -1) out.push({p:i + 1, w:1, today:false}); });
+  if(phase() !== 'closed') shown().forEach(function(r, R){ if(!todayInCycle(R)) return; k++; var i = famIdx(r, fk); if(i !== -1) out.push({p:i + 1, w:1, today:true}); });
   return out;
 }
 function standings(){
@@ -1413,9 +1416,9 @@ function reachability(){
   if(phase() === 'closed' || cycLen() === 0) return null;
   var keys = FAMS.map(function(f){ return f.k; });
   var SP = {}; keys.forEach(function(k){ SP[k] = 0; });
-  S.rounds.slice(cycStart()).forEach(function(rd, i){ keys.forEach(function(k){ var p = famIdx(rd.o, k); if(p !== -1) SP[k] += (p + 1) * (i + 1); }); });
+  S.rounds.slice(cycStart()).forEach(function(rd, i){ keys.forEach(function(k){ var p = famIdx(rd.o, k); if(p !== -1) SP[k] += (p + 1); }); });
   var done = cycLen(), m = CICLO - done, W = [];
-  for(var j = 1; j <= m; j++) W.push(done + j);
+  for(var j = 1; j <= m; j++) W.push(1);
   var prev0 = lastFirstFam(), budget = {n:400000}, can = {};
   keys.forEach(function(F){ can[F] = m === 0 ? null : canWin(F, keys.filter(function(k){ return k !== F; }), SP, W, prev0, budget); });
   if(m === 0){   /* ciclo finito: dentro solo chi è in cima (o pari) */
@@ -1504,7 +1507,7 @@ function renderSide(){
     }
     row.style.setProperty('--fc', f.txt);
     row.querySelector('.avg').textContent = x.avg == null ? '—' : pct(x) + '%';
-    row.classList.toggle('lead', x === st[0] && x.avg != null);
+    row.classList.toggle('lead', x.avg != null && Math.abs(x.avg - st[0].avg) < 1e-9);
     row.classList.toggle('out', !!(RCH && !RCH.can[x.fam]));
     row.classList.toggle('sure', !!(RCH && RCH.can[x.fam] && FAMS.every(function(g){ return g.k === x.fam || !RCH.can[g.k]; })));
     box.appendChild(row);
@@ -1693,7 +1696,7 @@ function placeRank(box, st, pct){
 /* Tendenza: la media della famiglia adesso contro com'era prima dell'ultima seduta. ▲ sale verso il cambio, ▼ scende verso l'adattamento.
    Sotto 0,25 di posizione non segno niente (scelta). */
 function avgUpTo(fk, n){
-  var sw = 0, sp = 0; S.rounds.slice(cycStart(), cycStart() + n).forEach(function(rd, j){ var p = famIdx(rd.o, fk); if(p === -1) return; sw += j + 1; sp += (p + 1) * (j + 1); });
+  var sw = 0, sp = 0; S.rounds.slice(cycStart(), cycStart() + n).forEach(function(rd, j){ var p = famIdx(rd.o, fk); if(p === -1) return; sw += 1; sp += (p + 1); });
   return sw ? sp / sw : null;
 }
 function trendOf(fk){

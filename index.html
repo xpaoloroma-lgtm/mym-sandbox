@@ -10952,14 +10952,15 @@ function clGiu(c, proto){
 function clTimeline(c, dalGiorno){
   var oggi = clOggi(), inizio = new Date(oggi); inizio.setFullYear(inizio.getFullYear() - 1);
   if(dalGiorno && dalGiorno < inizio) inizio = new Date(dalGiorno);
-  var fine = new Date(oggi); fine.setMonth(fine.getMonth() + 1);
+  /* un po' di futuro resta visibile, ma corto: così i nomi a destra stanno vicini a oggi */
+  var fine = new Date(oggi); fine.setDate(fine.getDate() + 15);
   var durata = fine - inizio, ETI = 86, RH = 17, TOP = 22;
   var tratti = c.state ? clTratti(c) : [], segni = c.state ? clSegni(c) : [];
   var corsie = ['lift','load','self','open','move','grid'];
   tratti.forEach(function(t){ if(corsie.indexOf(t.proto) === -1 && t.a > inizio) corsie.push(t.proto); });
   function x(d){ return Math.max(0, Math.min(100, (d - inizio) / durata * 100)); }
   function yy(p){ return TOP + corsie.indexOf(p) * RH + Math.floor(RH / 2); }
-  var h = '<div class="cl-tl" style="height:' + (TOP + corsie.length * RH + 4) + 'px"><div style="position:absolute;left:' + ETI + 'px;right:0;top:0;bottom:0">';
+  var h = '<div class="cl-tl" style="height:' + (TOP + corsie.length * RH + 4) + 'px"><div style="position:absolute;left:0;right:' + ETI + 'px;top:0;bottom:0">';
   /* i mesi */
   var m = new Date(inizio.getFullYear(), inizio.getMonth() + 1, 1, 12);
   while(m < fine){
@@ -11772,7 +11773,7 @@ window.addEventListener('load', function(){
   .cl-tl-mese.dopo{color:rgba(190,204,218,0.28);}
   .cl-tl-oggi{position:absolute;top:0;width:0;border-left:1px solid rgba(240,235,220,0.75);}
   .cl-tl-oggi span{position:absolute;left:5px;bottom:-2px;font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:#f0ebdc;}
-  .cl-tl-nome{position:absolute;left:0;display:flex;align-items:center;gap:9px;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#f0ebdc;white-space:nowrap;}
+  .cl-tl-nome{position:absolute;right:0;width:76px;display:flex;align-items:center;gap:9px;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#f0ebdc;white-space:nowrap;}
   .cl-tl-nome i{width:3px;height:11px;background:var(--lc);}
   .cl-tl-nome.tratt i{background:none;border-left:3px dashed rgba(200,214,228,0.7);box-sizing:border-box;}
   .cl-tl-nome.tratt,.cl-tl-nome.spento{color:#b4c3d2;}

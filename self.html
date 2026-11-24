@@ -1438,7 +1438,10 @@ function famIdx(r, fk){ for(var i = 0; i < r.length; i++){ if(r[i] != null && DB
 function positions(fk){
   var out = [], k = 0;
   S.rounds.slice(cycStart()).forEach(function(rd){ k++; var i = famIdx(rd.o, fk); if(i !== -1) out.push({p:i + 1, w:1, today:false}); });
-  if(phase() !== 'closed') shown().forEach(function(r, R){ if(!todayInCycle(R)) return; k++; var i = famIdx(r, fk); if(i !== -1) out.push({p:i + 1, w:1, today:true}); });
+  /* un round di oggi entra nella media solo quando è COMPLETO (5 posti su 5).
+     Con un round a metà alcune famiglie avrebbero un dato in più delle altre, e il confronto sarebbe falso:
+     ne uscivano pari e doppi cambi che non esistono. */
+  if(phase() !== 'closed') shown().forEach(function(r, R){ if(!todayInCycle(R)) return; if(!r.every(function(x){ return x != null; })) return; k++; var i = famIdx(r, fk); if(i !== -1) out.push({p:i + 1, w:1, today:true}); });
   return out;
 }
 function standings(){

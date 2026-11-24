@@ -11999,9 +11999,10 @@ window.addEventListener('load', function(){
   /* ── La barra in alto ──
      Il percorso si ricava da quello che c'è sullo schermo in quel momento. */
   var _navProtoNome = '';
+  /* Esercizi si apre SOPRA la pagina dove sei: il percorso resta quello di sotto, con "Esercizi" in fondo */
+  function navEse(){ return vis('ese-screen') && !vis('login-splash'); }
   function navDove(){
     if(vis('login-splash')) return 'login';
-    if(vis('ese-screen')) return 'ese';   /* Esercizi può aprirsi sopra un prototipo (da Move): vince lui */
     if(vis('load-screen')) return 'load';
     if(vis('rfp-screen')) return 'rfp';
     if(vis('cd-screen')) return 'cd';
@@ -12019,12 +12020,10 @@ window.addEventListener('load', function(){
     else if(d === 'riu') l1 = 'Riunioni';
     else if(d !== 'sandbox' && d !== 'login') l1 = 'Protocolli';
     /* Esercizi aperto da dentro un prototipo (da Move): il prototipo resta nel percorso, e ci si torna */
-    var sopra = (d === 'ese' && vis('load-screen')), l3 = '';
-    if(d === 'ese') l2 = 'Esercizi';
-    if(sopra){ l2 = _navProtoNome; l3 = 'Esercizi'; }
+    var l3 = '', ese = navEse();
     if(d === 'rfp') l2 = 'Red Flags';
     if(d === 'cd') l2 = 'Dettagli cliente';
-    if(d === 'load') l2 = _navProtoNome + ' · prototipo, non salva';
+    if(d === 'load') l2 = _navProtoNome + (ese ? '' : ' · prototipo, non salva');
     var conProto = (d === 'elenco' || d === 'dentro');
     $('nv-l1').textContent = l1;
     $('nv-l2').textContent = l2;
@@ -12040,7 +12039,12 @@ window.addEventListener('load', function(){
     $('bc-sep-0').style.display = conProto ? '' : 'none';
     ['bc-client','bc-sep-1','bc-focus','bc-sep-2','bc-rf-indicator'].forEach(function(i){ var e=$(i); if(e) e.classList.toggle('nv-no', !conProto); });
     /* l'ultimo pezzo visibile è dove si è: non è un tasto */
-    var pezzi = ['nv-sb','nv-l1','nv-l2','nv-l3','bc-proto','bc-client','bc-focus'].map($).filter(function(e){
+    $('nv-fine').textContent = ese ? 'Esercizi' : '';
+    $('nv-fine').classList.toggle('nv-no', !ese);
+    $('nv-sf').classList.toggle('nv-no', !ese);
+    /* il tasto Esercizi c'è dentro i protocolli (non quando Esercizi è già aperto) */
+    $('nv-ese').classList.toggle('nv-no', ese || !(d === 'dentro' || d === 'elenco' || d === 'load'));
+    var pezzi = ['nv-sb','nv-l1','nv-l2','nv-l3','bc-proto','bc-client','bc-focus','nv-fine'].map($).filter(function(e){
       return e && !e.classList.contains('nv-no') && e.style.display !== 'none';
     });
     pezzi.forEach(function(e, i){
@@ -12070,10 +12074,9 @@ window.addEventListener('load', function(){
     var d = navDove();
     if(dove === 'sandbox'){ navChiudiFinestre(); navFuoriDalCliente(); ingressoOpen(); }
     else if(dove === 'l1'){
-      if(d === 'ese' || d === 'load' || d === 'rfp' || d === 'cd'){ navChiudiFinestre(); }
+      if(d === 'load' || d === 'rfp' || d === 'cd'){ navChiudiFinestre(); }
       else if(d === 'elenco' || d === 'dentro'){ navFuoriDalCliente(); }
     }
-    else if(dove === 'l2'){ if(d === 'ese' && vis('load-screen')) eseClose(); }
     else if(dove === 'proto'){
       var p = (typeof _currentProto !== 'undefined') ? _currentProto : null;
       if(d === 'dentro' && window._csId && (p === 'open' || p === 'grid') && typeof bcGoClient === 'function') bcGoClient();
@@ -12081,6 +12084,15 @@ window.addEventListener('load', function(){
     else if(dove === 'esci'){ navChiudiFinestre(); navFuoriDalCliente(); protoBack(); }
     navAggiorna();
   };
+  /* Con Esercizi aperto, un clic sul percorso prima lo chiude. Se hai cliccato il pezzo dove eri già
+     (l'ultimo prima di "Esercizi"), finisce lì: sei tornato dov'eri. Altrimenti il clic fa il suo giro normale. */
+  document.getElementById('breadcrumb').addEventListener('click', function(ev){
+    if(!navEse()) return;
+    var pezzo = ev.target.closest('.bc-item'); if(!pezzo || pezzo.id === 'nv-fine') return;
+    var visibili = [].filter.call(this.querySelectorAll('.bc-item'), function(e){ return e.id !== 'nv-fine' && !e.classList.contains('nv-no') && e.style.display !== 'none' && e.offsetParent; });
+    eseClose();
+    if(pezzo === visibili[visibili.length - 1]){ ev.stopPropagation(); ev.preventDefault(); navAggiorna(); }
+  }, true);
   if(typeof bcUpdate === 'function'){
     var _bc = bcUpdate;
     bcUpdate = function(){ _bc.apply(this, arguments); navAggiorna(); };
@@ -13252,12 +13264,15 @@ function eseClose(){
     <span class="bc-rf-slot" id="bc-rf-indicator" style="display:none" onclick="rfOpenForCurrent()" title="Red Flags attivi su questo cliente"></span>
     <span class="bc-sep" id="bc-sep-2" style="display:none">›</span>
     <span class="bc-item bc-active" id="bc-focus" style="display:none"></span>
+    <span class="bc-sep nv-no" id="nv-sf">›</span>
+    <span class="bc-item nv-no" id="nv-fine"></span>
   </nav>
   <div class="header-right">
     <span class="nv-sempre" id="nv-pt"></span>
     <button class="hdr-btn nv-sempre" id="demo-btn" onclick="demoCambia()" title="Clienti finti per vedere le pagine piene. Non salva niente.">demo</button>
     <button class="hdr-btn nv-sempre" id="nv-esci" onclick="navVai('esci')">esci</button>
-    <button class="hdr-btn" onclick="openDB()">Esercizi</button>
+    <!-- la pagina Esercizi: stesso tasto, stesso posto, da dentro qualunque protocollo. Si apre sopra e chiudendola si torna dov'eri. -->
+    <button class="hdr-btn nv-sempre nv-no" id="nv-ese" onclick="eseOpen()" title="Apri la pagina Esercizi">Esercizi</button>
     <button class="hdr-btn undo-btn" id="undo-btn" onclick="undoLast()" disabled>undo</button>
     <button class="reset-btn" id="hdr-reset-btn" onclick="resetSplashOpen()" style="display:none">reset</button>
     <span class="progress-label" id="progress-text">0 / 0</span>

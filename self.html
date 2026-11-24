@@ -953,8 +953,8 @@ header .hdr-r{flex:none;}
 .block .luci{position:absolute;left:0;top:0;width:0;height:0;z-index:3;pointer-events:none;}
 /* punti luce: piccoli, un paio di pixel, con un filo di alone */
 /* i punti luce: bianco caldo */
-.block .luci i{position:absolute;left:0;top:-1.5px;width:3px;height:3px;border-radius:50%;background:#fff8e6;
-  box-shadow:0 0 4px 1px rgba(255,240,205,0.9),0 0 11px 3px rgba(255,232,180,0.45);}
+.block .luci i{position:absolute;left:0.5px;top:-1px;width:2px;height:2px;border-radius:50%;background:#fff8e6;
+  box-shadow:0 0 3px 0.5px rgba(255,240,205,0.85);}
 /* il trattino della nota è un oggetto: quello vero è colorato, la sua copia sotto fa solo l'ombra */
 .block .card .notebox{border-left-color:transparent!important;}
 .block .card .notebox:not(.note-empty)::before{content:'';position:absolute;left:0;top:2px;bottom:2px;width:2px;border-radius:1px;background:var(--tkc,color-mix(in srgb,var(--fc) 60%,transparent));}
@@ -1417,7 +1417,7 @@ function renderBlocks(r, anim){
    Più la lettera è lontana dalla luce, più l'ombra è lunga, sfumata e debole. Con più luci ogni ombra è più leggera,
    perché le altre luci la rischiarano. Sotto ogni lettera resta un filo d'ombra di contatto.
    Anche il chiarore colorato del blocco viene dagli stessi punti. Tutti i numeri qui sono scelte, non misure. */
-var OMBRA_LUCE = 70, OMBRA_META = 240, OMBRA_MAX = 9, LUCE_FORZA = 13, LUCE_BUIO = 70;   /* LUCE_BUIO: quanto resta luminosa (in %) una scritta lontana da ogni luce */
+var OMBRA_LUCE = 70, OMBRA_META = 240, OMBRA_MAX = 9, LUCE_FORZA = 13, LUCE_BUIO = 70, LUCE_PUNTO_H = 16, LUCE_PUNTO = 30;   /* LUCE_BUIO: quanto resta luminosa (in %) una scritta lontana da ogni luce */
 function lettere(t){ return String(t).split(' ').map(function(w){ return '<span class="pa">' + w.split('').map(function(c){ return '<span>' + esc(c) + '</span>'; }).join('') + '</span>'; }).join(' '); }
 function ombraDi(x, y, luci, rilievo, forza){
   /* il fianco della lettera che guarda le luci prende un filo del colore della famiglia */
@@ -1435,7 +1435,9 @@ function ombraDi(x, y, luci, rilievo, forza){
   });
   return out.join(',');
 }
-function luciFerme(n, H){ var o = []; for(var i = 0; i < n; i++) o.push({x:0, y:H * (i + 0.5) / n}); return o; }
+/* i punti luce stanno vicini tra loro, in fila al centro del blocco: uno nel posto 1, due nel 2, … cinque nel 5 */
+var LUCE_PASSO_PX = 15;
+function luciFerme(n, H){ var o = [], y0 = H / 2 - (n - 1) * LUCE_PASSO_PX / 2; for(var i = 0; i < n; i++) o.push({x:0, y:y0 + i * LUCE_PASSO_PX}); return o; }
 function ombraApplica(b){
   var g = b._geo; if(!g) return;
   var luci = g.luci, n = luci.length, box = b.querySelector('.luci');
@@ -1443,16 +1445,17 @@ function ombraApplica(b){
     if(box.children.length !== n) box.innerHTML = luci.map(function(){ return '<i></i>'; }).join('');
     luci.forEach(function(l, i){ box.children[i].style.transform = 'translate(' + l.x.toFixed(1) + 'px,' + l.y.toFixed(1) + 'px)'; });
   }
-  /* CHIARORE DEL PIANO, calcolato e non disegnato a occhio.
-     Il blocco è una superficie opaca e ruvida (come dice la grana): rimanda la luce uguale in tutte le direzioni, senza riflessi lucidi.
-     Per un punto luce alto H sul piano, la luce che arriva a distanza d dal suo piede è  1 / (1 + (d/H)²)^1,5  di quella che arriva sotto la luce:
-     a d = H ne arriva il 35%, a 2H il 9%, a 3H il 3%. H è la stessa altezza usata per le ombre (OMBRA_LUCE), così luce e ombra dicono la stessa cosa.
-     Ogni punto luce ha la stessa forza: un blocco con più punti è più illuminato. */
-  var H = OMBRA_LUCE, passi = [0, 0.35, 0.7, 1, 1.4, 1.9, 2.5, 3.2, 4.2, 5.5], fine = passi[passi.length - 1] * H;
-  var stops = passi.map(function(q){ var e = 1 / Math.pow(1 + q * q, 1.5); return 'color-mix(in srgb,var(--fc) ' + (LUCE_FORZA * e).toFixed(2) + '%,transparent) ' + (q * H / fine * 100).toFixed(1) + '%'; }).join(',') + ',transparent 100%';
+  /* CHIARORE DEL PIANO. Due luci diverse, due impronte diverse:
+     - la riga a sinistra è una luce lunga: dà un chiarore largo e uniforme, che cala allontanandosi dalla riga;
+     - ogni punto luce è un punto: sul piano lascia un cerchio, forte al centro e che cala in fretta
+       (per una superficie opaca: 1 / (1 + (d/H)²)^1,5, con H = LUCE_PUNTO_H). Con più punti vicini i cerchi si sommano e si vede il bordo a festone. */
+  var H = LUCE_PUNTO_H, passi = [0, 0.4, 0.8, 1.2, 1.7, 2.3, 3.0], fine = passi[passi.length - 1] * H;
+  var stops = passi.map(function(q){ var e = 1 / Math.pow(1 + q * q, 1.5); return 'color-mix(in srgb,var(--fc) ' + (LUCE_PUNTO * e).toFixed(2) + '%,transparent) ' + (q * H / fine * 100).toFixed(1) + '%'; }).join(',') + ',transparent 100%';
   b.style.setProperty('background', luci.map(function(l){
     return 'radial-gradient(circle ' + Math.round(fine) + 'px at ' + l.x.toFixed(1) + 'px ' + l.y.toFixed(1) + 'px,' + stops + ')';
-  }).concat(['linear-gradient(90deg,rgba(26,24,21,0.55) 0%,rgba(26,24,21,0.20) 60%,rgba(26,24,21,0) 100%)']).join(','), 'important');
+  }).concat([
+    'linear-gradient(90deg,color-mix(in srgb,var(--fc) ' + LUCE_FORZA + '%,transparent) 0%,color-mix(in srgb,var(--fc) ' + (LUCE_FORZA * 0.45).toFixed(1) + '%,transparent) 30%,color-mix(in srgb,var(--fc) ' + (LUCE_FORZA * 0.12).toFixed(1) + '%,transparent) 58%,transparent 80%)',
+    'linear-gradient(90deg,rgba(26,24,21,0.55) 0%,rgba(26,24,21,0.20) 60%,rgba(26,24,21,0) 100%)']).join(','), 'important');
   g.pezzi.forEach(function(q){ q.el.style.textShadow = ombraDi(q.x, q.y, luci, q.h, q.f); });
 }
 function ombre(root){

@@ -847,6 +847,12 @@ header .hdr-r{flex:none;}
 #rank .pr.salvo .fm,#rank .pr.salvo .ex{opacity:.62!important;}
 /* la zona del cambio conta: un filo più larga e staccata dal resto */
 @media (min-width:861px){ #rk-col{background:linear-gradient(180deg,rgba(222,190,120,0.045),rgba(13,12,10,0.55) 220px)!important;border-left:1px solid rgba(222,190,120,0.28)!important;padding-left:16px!important;} }
+/* in Self niente "Conferma sessione" in alto: si conferma il round */
+#view-only-banner{display:none!important;}
+#pt-pop{position:fixed;z-index:60;display:flex;align-items:center;gap:6px;padding:8px 10px;background:#0d0c0a;border:1px solid rgba(222,190,120,0.55);border-radius:2px;box-shadow:0 8px 28px rgba(0,0,0,0.6),0 0 14px rgba(222,190,120,0.18);}
+#pt-pop span{font-size:10px;font-weight:600;letter-spacing:2px;color:var(--text-lo);margin-right:4px;}
+#pt-pop button{height:32px;padding:0 12px;background:none;border:1px solid var(--line);border-radius:2px;cursor:pointer;font-family:var(--font);font-size:12px;font-weight:600;letter-spacing:1px;color:var(--text-hi);}
+#pt-pop button:hover{border-color:#f0d28c;color:var(--gold-txt);background:rgba(212,168,74,0.10);}
 /* ═══ CONFERMA DEL ROUND ═══
    Finché non è confermato il round è una preparazione: si vede tratteggiato. Confermato = fatto e salvato. */
 .rconf{display:none;flex:none;height:28px;padding:0 12px;margin-left:10px;border-radius:2px;cursor:pointer;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;white-space:nowrap;
@@ -2248,6 +2254,7 @@ function openDay(){
   if(!S.sess) splashTimer = setTimeout(splashOpen, closed ? 1400 : 700);   /* in Open: 5 secondi */
 }
 function splashOpen(){
+  return;   /* in Self lo splash non serve più: la giornata conta quando si conferma un round, e il PT si sceglie lì */
   if(S.sess) return;
   splashPT = null; renderPtStrip();
   $('ss-date').textContent = formatDate(S.simDate);
@@ -2260,9 +2267,25 @@ function renderPtStrip(){
 }
 $('ss-pt').addEventListener('click', function(e){ var b = e.target.closest('[data-pt]'); if(!b) return; splashPT = b.dataset.pt; renderPtStrip(); $('ss-ok').disabled = false; });
 var daConfermare = null;   /* il round che aspetta il PT per essere confermato */
+/* chi sei: si chiede una volta sola, lì dove si conferma il primo round. Scegliere il nome conferma il round. */
+function ptChiudi(){ var p = $('pt-pop'); if(p) p.remove(); daConfermare = null; }
+function ptChiedi(r){
+  ptChiudi(); daConfermare = r;
+  var bt = document.querySelector('.rconf[data-conf="' + r + '"]'), q = bt.getBoundingClientRect();
+  var p = document.createElement('div'); p.id = 'pt-pop';
+  p.innerHTML = '<span>PT</span>' + PT_LIST.map(function(n){ return '<button type="button" data-ptc="' + n + '">' + n + '</button>'; }).join('');
+  document.body.appendChild(p);
+  var w = p.offsetWidth;
+  p.style.left = Math.max(8, Math.min(window.innerWidth - w - 8, q.right - w)) + 'px'; p.style.top = (q.bottom + 6) + 'px';
+}
+document.addEventListener('click', function(e){
+  var b = e.target.closest('[data-ptc]');
+  if(b){ var r = daConfermare; S.sess = {date:S.simDate, pt:b.dataset.ptc}; ptChiudi(); save(); if(r != null) confermaRound(r); return; }
+  if($('pt-pop') && !e.target.closest('#pt-pop') && !e.target.closest('.rconf')) ptChiudi();
+});
 function confermaRound(r){
   if(!S.today[r].every(function(x){ return x != null; })) return;
-  if(!S.sess){ daConfermare = r; splashOpen(); return; }
+  if(!S.sess){ ptChiedi(r); return; }
   if(!S.conf) S.conf = [null, null];
   S.conf[r] = S.today[r].join(','); save(); renderAll(); toast('Round ' + (r + 1) + ' confermato');
 }

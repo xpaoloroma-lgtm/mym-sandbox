@@ -1044,15 +1044,14 @@ body.dragging .rconf{pointer-events:none!important;opacity:.15;}
 .slot.hot .estrip{background:rgba(212,168,74,0.75)!important;}
 
 /* ═════════ PROVA 25/11 · quinto giro ═════════ */
-/* I DUE TASTI (svuota, non fatto): tasti veri, fuori dal riquadro delle carte, in colonna a destra, alti metà riquadro ciascuno. Il cestino è sempre nello stesso posto. */
-.rdisp{margin-right:46px!important;padding-right:5px!important;}
-.round-hd .clear,.round-hd .skip2{right:9px!important;width:40px!important;height:41px!important;border-color:rgba(180,195,210,0.26)!important;background:var(--raised)!important;color:rgba(222,230,238,0.88)!important;}
-.round-hd .clear{top:9px!important;} .round-hd .skip2{top:54px!important;}
-.round-hd .clear svg,.round-hd .skip2 svg{width:25px!important;height:25px!important;}
-.round-hd .skip2 svg{width:16px!important;height:16px!important;}
+/* I DUE TASTI (svuota, non fatto): la cella di prima (26×35, dentro il riquadro, a destra). L'icona è centrata nella cella con le coordinate,
+   non col testo nascosto: "svuota" a grandezza zero aveva ancora la spaziatura delle lettere e spingeva il cestino a sinistra. */
+.round-hd .clear,.round-hd .skip2{letter-spacing:0!important;word-spacing:0!important;text-indent:0!important;line-height:0!important;}
+.round-hd .clear svg,.round-hd .skip2 svg{position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;margin:0!important;}
+.round-hd .clear svg{width:17px!important;height:17px!important;}
+.round-hd .skip2 svg{width:13px!important;height:13px!important;}
 .round-hd .clear:not(.has){opacity:.35!important;}
-.round-hd .skip2[aria-pressed="true"]{border-color:rgba(212,168,74,0.80)!important;color:var(--gold-txt)!important;}
-.rconf.si{left:15px!important;right:61px!important;top:15px!important;}
+.rdisp{padding-right:42px!important;}   /* le carte non finiscono sotto i due tasti */
 /* LA BARRA COLORATA A SINISTRA DEI BLOCCHI: un filo (1px), senza alone. In preparazione il filo è tratteggiato. */
 .block .neon{width:1px!important;border-radius:0!important;box-shadow:none!important;}
 .round.prep .block .neon{background:repeating-linear-gradient(180deg,color-mix(in srgb,var(--fc) 85%,transparent) 0 2px,transparent 2px 5px)!important;}

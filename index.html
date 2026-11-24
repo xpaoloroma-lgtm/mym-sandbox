@@ -11815,6 +11815,7 @@ window.addEventListener('load', function(){
 .warm-riga input:focus{border-bottom-color:rgba(212,168,74,.6);}
 
 #open-warm{margin:8px 28px 8px 12px;}
+#open-testa{margin-right:14px;justify-content:flex-start !important;gap:20px;}
 /* testata della scheda: titolo di zona e un tasto vero per cambiare gli esercizi (prima era una scritta da 7, quasi invisibile) */
 .scheda-header{padding:0 12px 0 16px !important;height:52px;box-sizing:border-box;}
 .scheda-header > span{font-size:12px !important;font-weight:700 !important;letter-spacing:3px !important;color:rgba(225,232,240,.92);}
@@ -13280,15 +13281,16 @@ function eseClose(){
 
 <!-- MAIN LAYOUT -->
 <div id="main-layout">
-  <!-- warm-up: la stessa riga di Load, lunga quanto tutta la pagina, sopra tutto -->
+  <!-- dall'alto in basso: la testata della scheda, poi il warm-up (che è già scheda), poi esercizi a sinistra e obiettivo a destra.
+       Testata e warm-up sono lunghi quanto la pagina: la parte di destra parte sotto. -->
+  <div class="scheda-header" id="open-testa">
+    <span>Scheda</span>
+    <button class="scheda-edit-btn" onclick="editScheda()" title="Torna alla scelta degli esercizi della scheda">Cambia esercizi</button>
+  </div>
   <div class="warm-riga" id="open-warm"><span>Warm-up</span><input type="text" id="open-warm-txt" spellcheck="false" autocomplete="off" placeholder="cosa fa prima di iniziare" aria-label="Warm-up"></div>
   <div class="top-area">
     <!-- col 1: scheda -->
     <div id="scheda-panel">
-      <div class="scheda-header">
-        <span>Scheda</span>
-        <button class="scheda-edit-btn" onclick="editScheda()" title="Torna alla scelta degli esercizi della scheda">Cambia esercizi</button>
-      </div>
       <div class="scheda-scroll">
         <div id="scheda-slots"></div>
       </div>

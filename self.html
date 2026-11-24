@@ -879,6 +879,37 @@ header .hdr-r{flex:none;}
 /* chi è al cambio resta del colore della sua famiglia: più grande e acceso, ma non dorato */
 #rank .pr.lead .fm{color:var(--fc)!important;text-shadow:0 0 12px color-mix(in srgb,var(--fc) 45%,transparent)!important;}
 #rank .pr.lead .dot{background:var(--fc)!important;border-color:var(--fc)!important;box-shadow:0 0 10px 2px color-mix(in srgb,var(--fc) 60%,transparent)!important;}
+/* ═════════ ASPETTO DEI ROUND (24/11): niente righe tra i blocchi, luce del colore della famiglia, grafico nella metà destra del round, carte in rilievo o incassate ═════════ */
+/* 2 · niente righe: i blocchi li separa la luce */
+.slot .sep{display:none!important;}
+.blocks{right:0!important;}
+.block{inset:3px 0!important;border-radius:2px;background:
+  radial-gradient(120% 140% at 0% 50%,color-mix(in srgb,var(--fc) 15%,transparent) 0%,color-mix(in srgb,var(--fc) 5%,transparent) 34%,transparent 62%),
+  linear-gradient(90deg,rgba(26,24,21,0.55) 0%,rgba(26,24,21,0.20) 60%,rgba(26,24,21,0) 100%)!important;}
+.block .spill{display:none;}
+.block .neon{top:0!important;bottom:0!important;width:3px!important;box-shadow:0 0 6px color-mix(in srgb,var(--fc) 55%,transparent),0 0 18px color-mix(in srgb,var(--fc) 28%,transparent)!important;}
+.round.prep .block .neon{box-shadow:none!important;}
+.block .rm,.block .cg{opacity:0!important;}
+.block:hover .rm,.block:hover .cg{opacity:1!important;}
+.block .rm{right:calc(var(--lane) + 6px)!important;} .block .cg{right:calc(var(--lane) + 30px)!important;}
+.block .card{padding-right:calc(var(--lane) + 62px)!important;}
+/* 3 · il grafico dentro i blocchi: la curva passa dietro tutta la larghezza del round */
+/* il grafico occupa la metà destra del round: parte da metà e arriva al bordo */
+.lane{left:50%!important;right:0!important;width:50%!important;z-index:0;pointer-events:none;opacity:.9;}
+.blocks{z-index:1;}
+.block .card,.block .row{z-index:2;}
+.ruler{display:none!important;}
+/* 4 · le carte in alto: in rilievo se libere, incassate se già nel round; il posto vuoto ha la forma della carta */
+.rdisp{background:none!important;border-color:transparent!important;padding:8px 0!important;}
+.rdisp .tile:not(.used){background:linear-gradient(180deg,rgba(58,53,44,0.95),rgba(30,27,22,0.95))!important;border:1px solid rgba(240,225,190,0.34)!important;
+  box-shadow:0 1px 0 rgba(255,246,224,0.16) inset,0 6px 14px rgba(0,0,0,0.55),0 0 0 1px rgba(0,0,0,0.5);transform:translateY(-1px);}
+.rdisp .tile:not(.used):hover{transform:translateY(-3px);box-shadow:0 1px 0 rgba(255,246,224,0.22) inset,0 10px 20px rgba(0,0,0,0.6),0 0 16px color-mix(in srgb,var(--fc) 30%,transparent);}
+.rdisp .tile.used{background:rgba(4,4,3,0.55)!important;border:1px solid rgba(0,0,0,0.6)!important;box-shadow:inset 0 3px 8px rgba(0,0,0,0.75),inset 0 -1px 0 rgba(255,246,224,0.05);transform:none;}
+.rdisp .tile.used .nm,.rdisp .tile.used .fam-name{opacity:.38;}
+.slot .estrip{display:none!important;}
+.slot .empty{inset:3px 0!important;border-radius:2px;background:rgba(4,4,3,0.45)!important;border:1px solid rgba(0,0,0,0.55);
+  box-shadow:inset 0 3px 10px rgba(0,0,0,0.7),inset 0 -1px 0 rgba(255,246,224,0.05);}
+.slot.hot .empty{background:linear-gradient(90deg,rgba(212,168,74,0.16),rgba(4,4,3,0.45) 70%)!important;border-color:rgba(212,168,74,0.6);}
 </style>
 </head>
 <body>

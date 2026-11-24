@@ -882,7 +882,7 @@ header .hdr-r{flex:none;}
 .round.prep .block .neon{background:repeating-linear-gradient(180deg,var(--fc) 0 6px,transparent 6px 11px)!important;box-shadow:none!important;}
 /* (24/11) l'aspetto giusto è quello meno acceso, e vale sempre: in preparazione e dopo la conferma. Tra i due cambia solo la riga, tratteggiata o piena. */
 .block .card:not(.omb) .nm,.block .card:not(.omb) .pn{opacity:.72;}
-.block .luci i{opacity:.6;}
+
 .block .neon{box-shadow:none!important;}
 /* con il tasto di conferma nella riga, svuota e non fatto restano solo come icona: la riga deve stare a metà monitor */
 .round-hd:has(.rconf.si) .clear{font-size:0!important;gap:0!important;margin-left:6px!important;padding:0 5px!important;}
@@ -953,9 +953,8 @@ header .hdr-r{flex:none;}
 .lane .filo.f7{animation:filoB 48s ease-in-out -48s infinite alternate;}
 .block .luci{position:absolute;left:0;top:0;width:0;height:0;z-index:3;pointer-events:none;}
 /* punti luce: piccoli, un paio di pixel, con un filo di alone */
-.block .luci i{position:absolute;left:-1px;top:-1px;width:2px;height:2px;border-radius:50%;will-change:transform;background:color-mix(in srgb,var(--fc) 35%,#fff);
-  box-shadow:0 0 3px 0.5px color-mix(in srgb,var(--fc) 80%,transparent);}
-
+.block .luci i{position:absolute;left:0;top:-1.5px;width:3px;height:3px;border-radius:50%;background:#fff;
+  box-shadow:0 0 4px 1px color-mix(in srgb,var(--fc) 60%,#fff),0 0 10px 2px color-mix(in srgb,var(--fc) 70%,transparent);}
 /* la copia per le ombre: stesso testo, stesso posto, invisibile; sta sotto il testo vero */
 .block .card.omb{z-index:1!important;pointer-events:none!important;}
 .block .card.omb,.block .card.omb *{color:transparent!important;-webkit-text-fill-color:transparent!important;border-color:transparent!important;}
@@ -1414,7 +1413,7 @@ function renderBlocks(r, anim){
    Più la lettera è lontana dalla luce, più l'ombra è lunga, sfumata e debole. Con più luci ogni ombra è più leggera,
    perché le altre luci la rischiarano. Sotto ogni lettera resta un filo d'ombra di contatto.
    Anche il chiarore colorato del blocco viene dagli stessi punti. Tutti i numeri qui sono scelte, non misure. */
-var OMBRA_LUCE = 70, OMBRA_META = 240, OMBRA_MAX = 16, LUCE_FORZA = 17;
+var OMBRA_LUCE = 70, OMBRA_META = 240, OMBRA_MAX = 9, LUCE_FORZA = 13;
 function lettere(t){ return String(t).split(' ').map(function(w){ return '<span class="pa">' + w.split('').map(function(c){ return '<span>' + esc(c) + '</span>'; }).join('') + '</span>'; }).join(' '); }
 function ombraDi(x, y, luci, rilievo, forza){
   /* il fianco della lettera che guarda le luci prende un filo del colore della famiglia */
@@ -1427,7 +1426,7 @@ function ombraDi(x, y, luci, rilievo, forza){
     var dx = k * (x - l.x), dy = k * (y - l.y), len = Math.sqrt(dx * dx + dy * dy);
     if(len > OMBRA_MAX){ dx *= OMBRA_MAX / len; dy *= OMBRA_MAX / len; len = OMBRA_MAX; }
     var dist = Math.sqrt((x - l.x) * (x - l.x) + (y - l.y) * (y - l.y)), a = forza * peso / (1 + dist / OMBRA_META);
-    out.push((dx * 0.5).toFixed(2) + 'px ' + (dy * 0.5).toFixed(2) + 'px ' + (0.3 + len * 0.10).toFixed(2) + 'px rgba(0,0,0,' + Math.min(0.95, a + 0.18 * peso).toFixed(2) + ')');   /* nucleo */
+    out.push((dx * 0.5).toFixed(2) + 'px ' + (dy * 0.5).toFixed(2) + 'px ' + (0.3 + len * 0.10).toFixed(2) + 'px rgba(0,0,0,' + Math.min(0.9, a + 0.08 * peso).toFixed(2) + ')');   /* nucleo */
     out.push(dx.toFixed(2) + 'px ' + dy.toFixed(2) + 'px ' + (0.6 + len * 0.32).toFixed(2) + 'px rgba(0,0,0,' + a.toFixed(2) + ')');                                            /* penombra */
   });
   return out.join(',');
@@ -1464,10 +1463,10 @@ function ombre(root){
     if(!omb) return;
     var pezzi = [];
     function metti(el, h, f){ if(!el) return; var q = el.getBoundingClientRect(); if(!q.width) return; pezzi.push({el:el, x:q.left + q.width / 2 - R.left, y:q.top + q.height / 2 - R.top, h:h, f:f}); }
-    metti(omb.querySelector('.pn'), 8, 1);
-    omb.querySelectorAll('.nm .pa > span').forEach(function(c){ metti(c, 6, 1); });
-    metti(omb.querySelector('.fl'), 3.2, 0.95);
-    metti(omb.querySelector('.notebox .tx'), 3.2, 0.9);
+    metti(omb.querySelector('.pn'), 4.5, 0.7);
+    omb.querySelectorAll('.nm .pa > span').forEach(function(c){ metti(c, 3.4, 0.7); });
+    metti(omb.querySelector('.fl'), 1.7, 0.6);
+    metti(omb.querySelector('.notebox .tx'), 1.7, 0.6);
     b._geo = {W:R.width, H:R.height, luci:luci, pezzi:pezzi};
     ombraApplica(b);
   });

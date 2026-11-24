@@ -1850,6 +1850,28 @@ header{gap:16px}
   font-size:8px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:rgba(212,168,74,0.85);pointer-events:none;}
 </style>
 <style id="sbx-comune">
+/* ══ CONSULTAZIONE: un solo riquadro, uguale in tutti i protocolli, sempre nella barra in alto subito dopo il percorso ══
+   orologio · "Modalità consultazione" · tasto verde "Conferma sessione". A finestra stretta restano orologio e tasto. */
+#view-only-banner{position:static!important;transform:none!important;flex:none!important;height:34px!important;box-sizing:border-box;align-items:center;
+  gap:14px!important;padding:0 6px 0 14px!important;margin:0 16px!important;background:none!important;backdrop-filter:none!important;
+  border:1px solid rgba(180,195,210,.15)!important;border-radius:2px!important;white-space:nowrap;font-family:var(--font);}
+#view-only-banner .view-only-text,#view-only-banner .vo-text{font-size:10px!important;font-weight:300!important;letter-spacing:2px!important;text-transform:uppercase;color:rgba(180,195,210,.85)!important;}
+#view-only-banner .view-only-text::before,#view-only-banner .vo-text::before{content:'\25F7'!important;font-size:13px!important;margin-right:8px!important;color:rgba(180,195,210,.86)!important;letter-spacing:0;}
+#view-only-banner .view-only-cta,#view-only-banner .vo-cta{background:none!important;border:1px solid rgba(120,200,150,.45)!important;border-radius:2px!important;height:24px;padding:0 12px!important;
+  font-family:var(--font);font-size:9px!important;font-weight:700!important;letter-spacing:2px!important;text-transform:uppercase;color:rgba(120,200,150,.9)!important;cursor:pointer;}
+#view-only-banner .view-only-cta:hover,#view-only-banner .vo-cta:hover{background:rgba(120,200,150,.08)!important;border-color:rgba(120,200,150,.7)!important;}
+@media (max-width:1300px){
+  #view-only-banner{gap:5px!important;padding:0 4px 0 8px!important;margin:0 8px!important;}
+  #view-only-banner .view-only-text,#view-only-banner .vo-text{font-size:0!important;letter-spacing:0!important;}
+  #view-only-banner .view-only-text::before,#view-only-banner .vo-text::before{margin-right:0!important;}
+  #view-only-banner .view-only-cta,#view-only-banner .vo-cta{padding:0 8px!important;letter-spacing:1.5px!important;}
+}
+/* ══ fine CONSULTAZIONE ══ */
+#view-only-banner{display:none;}
+#view-only-banner.si{display:flex;}
+/* a destra resta solo la sessione aperta (ora e PT); in consultazione quel tasto non c'è: c'è il riquadro */
+.sess.cons{display:none!important;}
+
 /* ══ MISURE COMUNI AI PROTOCOLLI ══
    Stesse in Load, Self e Move (Open viene dopo). Ogni protocollo tiene la sua forma,
    ma queste cose sono uguali dappertutto:
@@ -1894,6 +1916,7 @@ header{gap:16px}
     <span class="bc-item">LOAD</span><span class="bc-sep">›</span>
     <span class="bc-item bc-active">Timeline</span>
   </div>
+  <div id="view-only-banner"><span class="vo-text">Modalità consultazione</span><button type="button" class="vo-cta" id="vo-confirm">Conferma sessione</button></div>
   <button id="rfh" class="rfh" title="Red Flags del cliente"></button>
   <button id="sess" class="sess" title="Apri la sessione o cambia PT"></button>
 </header>
@@ -3526,8 +3549,12 @@ function sessRender(){
   var g = (typeof sessioneDiOggi === 'function') ? sessioneDiOggi() : null;
   el.innerHTML = g
     ? '<i class="on"></i><span>Sessione ' + g.ora + '</span><b>' + (ptCorrente || g.pt) + '</b><em>cambia</em>'
-    : '<i></i><span>Solo consultazione</span><em>apri sessione</em>';
+    : '';
+  /* in consultazione: il riquadro ufficiale nella barra, uguale agli altri protocolli */
+  el.classList.toggle('cons', !g);
+  var vb = document.getElementById('view-only-banner'); if (vb) vb.classList.toggle('si', !g);
 }
+document.getElementById('vo-confirm').onclick = function(){ ssApri(); };
 document.getElementById('sess').onclick = function(){ ssApri(); };
 
 function prRender(){

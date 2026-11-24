@@ -11876,10 +11876,23 @@ window.addEventListener('load', function(){
 }
 </style>
 <style>
-/* L'avviso "modalità consultazione" non è più una riga sua sotto la barra:
-   sta dentro la barra in alto, al centro, come in Self. Una riga in meno prima della sostanza. */
-#view-only-banner{position:static !important;flex:none;backdrop-filter:none !important;height:34px;padding:0 6px 0 14px !important;
-  background:none !important;border:1px solid rgba(180,195,210,0.15) !important;border-radius:2px;gap:14px !important;white-space:nowrap;margin:0 16px;}
+/* ══ CONSULTAZIONE: un solo riquadro, uguale in tutti i protocolli, sempre nella barra in alto subito dopo il percorso ══
+   orologio · "Modalità consultazione" · tasto verde "Conferma sessione". A finestra stretta restano orologio e tasto. */
+#view-only-banner{position:static!important;transform:none!important;flex:none!important;height:34px!important;box-sizing:border-box;align-items:center;
+  gap:14px!important;padding:0 6px 0 14px!important;margin:0 16px!important;background:none!important;backdrop-filter:none!important;
+  border:1px solid rgba(180,195,210,.15)!important;border-radius:2px!important;white-space:nowrap;font-family:var(--font);}
+#view-only-banner .view-only-text,#view-only-banner .vo-text{font-size:10px!important;font-weight:300!important;letter-spacing:2px!important;text-transform:uppercase;color:rgba(180,195,210,.85)!important;}
+#view-only-banner .view-only-text::before,#view-only-banner .vo-text::before{content:'\25F7'!important;font-size:13px!important;margin-right:8px!important;color:rgba(180,195,210,.86)!important;letter-spacing:0;}
+#view-only-banner .view-only-cta,#view-only-banner .vo-cta{background:none!important;border:1px solid rgba(120,200,150,.45)!important;border-radius:2px!important;height:24px;padding:0 12px!important;
+  font-family:var(--font);font-size:9px!important;font-weight:700!important;letter-spacing:2px!important;text-transform:uppercase;color:rgba(120,200,150,.9)!important;cursor:pointer;}
+#view-only-banner .view-only-cta:hover,#view-only-banner .vo-cta:hover{background:rgba(120,200,150,.08)!important;border-color:rgba(120,200,150,.7)!important;}
+@media (max-width:1300px){
+  #view-only-banner{gap:5px!important;padding:0 4px 0 8px!important;margin:0 8px!important;}
+  #view-only-banner .view-only-text,#view-only-banner .vo-text{font-size:0!important;letter-spacing:0!important;}
+  #view-only-banner .view-only-text::before,#view-only-banner .vo-text::before{margin-right:0!important;}
+  #view-only-banner .view-only-cta,#view-only-banner .vo-cta{padding:0 8px!important;letter-spacing:1.5px!important;}
+}
+/* ══ fine CONSULTAZIONE ══ */
 body.view-only #main-layout, body.view-only #grid-layout{margin-top:0 !important;}
 /* La Sandbox si usa a metà monitor (Full HD, due finestre affiancate: circa 960).
    Lì la barra è stretta: l'avviso di consultazione resta solo il segno e il tasto,
@@ -11904,10 +11917,6 @@ header .header-right{flex:none;}
   #demo-btn::after{content:'demo';font-size:9px;letter-spacing:1.5px;}
   /* in consultazione non si scrive: undo e reset non servono */
   body.view-only #undo-btn, body.view-only #hdr-reset-btn{display:none !important;}
-  #view-only-banner{padding:0 4px 0 8px !important;gap:5px !important;margin:0 8px !important;}
-  #view-only-banner .view-only-cta{padding:4px 8px !important;letter-spacing:1.5px !important;}
-  #view-only-banner .view-only-text{font-size:0;letter-spacing:0;}
-  #view-only-banner .view-only-text::before{font-size:13px;margin-right:0;}
 }
 
 </style>

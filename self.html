@@ -405,18 +405,21 @@ body.dragging,body.dragging *{cursor:grabbing !important;}
 #rank.horiz .tick{left:auto;top:2px !important;width:1px;height:7px;}
 #rank.horiz .tick.half{top:1px !important;height:9px;width:1px;}
 #rank.horiz .pr{right:auto;top:0 !important;transition:left .55s cubic-bezier(.2,.8,.2,1);max-width:130px;}
-@media (max-width:1300px){
-  :root{--lane:66px;}
+/* "Verso il cambio" va sotto solo quando la finestra è davvero stretta (sotto 860), non a metà monitor */
+@media (max-width:860px){
   #main{display:grid;grid-template-columns:minmax(0,1fr) 230px;grid-template-rows:minmax(0,1fr) auto;}
-  #work{grid-column:1;grid-row:1;min-height:0;padding:10px 10px 8px;gap:10px;}
-  #rounds{gap:8px;}
-  .round{padding:8px 8px 10px;}
   #rk-col{grid-column:1;grid-row:2;width:auto;flex-direction:row;align-items:stretch;gap:18px;height:104px;padding:14px 16px 12px;border-left:0;border-top:1px solid var(--line);}
   #rk-col .rk-top{width:112px;flex:none;padding:0 16px 0 0;border-bottom:0;border-right:1px solid var(--line);justify-content:flex-start;}
   #rank{flex:1;min-width:0;}
   #rk-col .v-act{width:130px;flex:none;justify-content:center;}
   #rk-col .side-foot{width:116px;flex:none;padding:0 0 0 16px;border-top:0;border-left:1px solid var(--line);justify-content:center;}
   #tl-panel{grid-column:2;grid-row:1 / span 2;}
+}
+@media (max-width:1300px){
+  :root{--lane:66px;}
+  #work{grid-column:1;grid-row:1;min-height:0;padding:10px 10px 8px;gap:10px;}
+  #rounds{gap:8px;}
+  .round{padding:8px 8px 10px;}
   .rdisp{gap:4px;padding:5px;}
   .rdisp .tile{height:46px;padding:0 4px 0 9px;}
   .rdisp .tile .nm{font-size:12px;white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-height:1.1;}
@@ -475,7 +478,7 @@ body.dragging,body.dragging *{cursor:grabbing !important;}
 .vp-bar i.done::after{content:'';position:absolute;right:-3px;top:-2.5px;width:6px;height:6px;border-radius:50%;background:#f0d28c;box-shadow:0 0 8px rgba(240,210,140,0.8);}
 #rk-col .rk-top{gap:10px;}
 #rk-col .rk-top .lbl{font-size:10px;letter-spacing:2.5px;line-height:1.4;color:var(--gold-txt);white-space:nowrap;}
-@media (max-width:1300px){
+@media (max-width:860px){
   #rk-col{height:124px;padding:0 24px 0 20px;gap:28px;align-items:stretch;}
   #rk-col .rk-top{order:3;width:190px;flex:none;flex-direction:column;align-items:stretch;justify-content:center;gap:10px;padding:0 0 0 24px;border-right:0;border-left:1px solid var(--line);text-align:left;}
   #rk-col .rk-top .lbl{width:auto;font-size:12px;letter-spacing:4px;}
@@ -591,18 +594,26 @@ body.view-only #view-only-banner{display:flex;}
   font-size:8px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:rgba(212,168,74,0.85);pointer-events:none;}
 </style>
 <style id="sbx-comune">
-/* a metà monitor (circa 960): l'avviso di consultazione sta in fila nella barra, non sopra gli altri tasti */
-#view-only-banner{position:static!important;transform:none!important;flex:none;margin:0 12px;white-space:nowrap;}
+/* ══ CONSULTAZIONE: un solo riquadro, uguale in tutti i protocolli, sempre nella barra in alto subito dopo il percorso ══
+   orologio · "Modalità consultazione" · tasto verde "Conferma sessione". A finestra stretta restano orologio e tasto. */
+#view-only-banner{position:static!important;transform:none!important;flex:none!important;height:34px!important;box-sizing:border-box;align-items:center;
+  gap:14px!important;padding:0 6px 0 14px!important;margin:0 16px!important;background:none!important;backdrop-filter:none!important;
+  border:1px solid rgba(180,195,210,.15)!important;border-radius:2px!important;white-space:nowrap;font-family:var(--font);}
+#view-only-banner .view-only-text,#view-only-banner .vo-text{font-size:10px!important;font-weight:300!important;letter-spacing:2px!important;text-transform:uppercase;color:rgba(180,195,210,.85)!important;}
+#view-only-banner .view-only-text::before,#view-only-banner .vo-text::before{content:'\25F7'!important;font-size:13px!important;margin-right:8px!important;color:rgba(180,195,210,.86)!important;letter-spacing:0;}
+#view-only-banner .view-only-cta,#view-only-banner .vo-cta{background:none!important;border:1px solid rgba(120,200,150,.45)!important;border-radius:2px!important;height:24px;padding:0 12px!important;
+  font-family:var(--font);font-size:9px!important;font-weight:700!important;letter-spacing:2px!important;text-transform:uppercase;color:rgba(120,200,150,.9)!important;cursor:pointer;}
+#view-only-banner .view-only-cta:hover,#view-only-banner .vo-cta:hover{background:rgba(120,200,150,.08)!important;border-color:rgba(120,200,150,.7)!important;}
+@media (max-width:1300px){
+  #view-only-banner{gap:5px!important;padding:0 4px 0 8px!important;margin:0 8px!important;}
+  #view-only-banner .view-only-text,#view-only-banner .vo-text{font-size:0!important;letter-spacing:0!important;}
+  #view-only-banner .view-only-text::before,#view-only-banner .vo-text::before{margin-right:0!important;}
+  #view-only-banner .view-only-cta,#view-only-banner .vo-cta{padding:0 8px!important;letter-spacing:1.5px!important;}
+}
+/* ══ fine CONSULTAZIONE ══ */
 header .bc{flex:0 1 auto;min-width:0;overflow:hidden;white-space:nowrap;}
 header .hdr-r{flex:none;}
-@media (max-width:1300px){
-  #view-only-banner{gap:6px!important;padding:5px 5px 5px 10px!important;margin:0 8px;}
-  .vo-text{font-size:0!important;letter-spacing:0!important;}
-  .vo-text::before{content:'\25F7';font-size:13px;}
-  .sim-lbl,.sim-date{display:none!important;}
-  .hdr-r .btn{padding:0 9px!important;letter-spacing:1.5px!important;}
-}
-
+@media (max-width:1300px){ .sim-lbl,.sim-date{display:none!important;} .hdr-r .btn{padding:0 9px!important;letter-spacing:1.5px!important;} }
 /* ══ WARM-UP: una riga sola in alto, uguale in tutti i protocolli (il modello è Load) ══ */
 .warm-riga{flex:none;height:46px;display:flex;align-items:center;gap:14px;padding:0 16px;box-sizing:border-box;
   background:rgba(180,195,210,.024);border:1px solid rgba(180,195,210,.14);border-left:3px solid rgba(180,195,210,.45);border-radius:2px;}
@@ -635,7 +646,7 @@ header .hdr-r{flex:none;}
   <div class="bc"><span>Paolo</span><span class="sep">›</span><span class="proto">Self</span><span class="sep">›</span><span class="cli">Mario Rossi</span></div>
   <div id="view-only-banner"><span class="vo-text">Modalità consultazione</span><button type="button" class="vo-cta" id="vo-confirm">Conferma sessione</button></div>
   <div class="hdr-r">
-    <button type="button" class="btn btn-sm hbtn" id="undo" disabled title="Annulla l'ultima azione (Ctrl/Cmd+Z)"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 12 12"><path d="M4.5 2.5L2 5l2.5 2.5M2.3 5h5.2a2.6 2.6 0 0 1 0 5.2H5.5" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Annulla</button>
+    <button type="button" class="btn btn-sm hbtn" id="undo" disabled title="Undo: annulla l'ultima azione (Ctrl/Cmd+Z)"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 12 12"><path d="M4.5 2.5L2 5l2.5 2.5M2.3 5h5.2a2.6 2.6 0 0 1 0 5.2H5.5" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Undo</button>
     <div class="sim" aria-label="Simulazione">
       <span class="sim-lbl">simulazione</span>
       <span class="sim-date" id="sim-date"></span>

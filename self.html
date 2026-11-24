@@ -880,7 +880,10 @@ header .hdr-r{flex:none;}
 .rconf.si{display:inline-flex;align-items:center;}
 .rconf.ok{background:none;border-color:transparent;box-shadow:none;color:rgba(120,200,150,0.9);cursor:default;padding:0 4px;}
 .round.prep .block .neon{background:repeating-linear-gradient(180deg,var(--fc) 0 6px,transparent 6px 11px)!important;box-shadow:none!important;}
-/* (24/11) in preparazione il testo NON si spegne più: alla conferma tutto diventava di colpo più forte. La differenza è solo la riga tratteggiata. */
+/* (24/11) l'aspetto giusto è quello meno acceso, e vale sempre: in preparazione e dopo la conferma. Tra i due cambia solo la riga, tratteggiata o piena. */
+.block .card:not(.omb) .nm,.block .card:not(.omb) .pn{opacity:.72;}
+.block .luci i{opacity:.6;}
+.block .neon{box-shadow:none!important;}
 /* con il tasto di conferma nella riga, svuota e non fatto restano solo come icona: la riga deve stare a metà monitor */
 .round-hd:has(.rconf.si) .clear{font-size:0!important;gap:0!important;margin-left:6px!important;padding:0 5px!important;}
 .round-hd:has(.rconf.si) .skip2 .off-t,.round-hd:has(.rconf.si) .skip2 .on-t{display:none!important;}

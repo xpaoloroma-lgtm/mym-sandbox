@@ -2413,10 +2413,7 @@ PROG.forEach(function(p){ p.gate = GATE[p.fam + p.to]; });
 LANES.forEach(function(L){ if (ST[L.id] && L.segs.length) ST[L.id].ex = L.segs[L.segs.length-1].x; });
 
 /* carichi già registrati, per vedere la colonna "volta scorsa" */
-ST.row.storico = [{g:96,val:'55kg'},{g:124,val:'60kg'},{g:145,val:'62,5kg'}];
-ST.row.kgSalvato = ST.row.kg = '62,5kg';
-ST.row.c.storico = [{g:124,val:'12kg'},{g:145,val:'14kg'}];
-ST.row.c.kgSalvato = ST.row.c.kg = '14kg';
+/* nessun carico di esempio: fondamentale e complementare partono vuoti */
 
 var progStep = 3;               /* indice della tappa corrente: Core, Buffer, Cardio già a L2 nei dati di esempio */
 var progCongelata = false;      /* si congela quando cambia la configurazione */
@@ -3340,7 +3337,7 @@ function rfHeader(){
     + a.map(function(f){
         return '<span class="rfh-f" style="--c:' + f.color.replace('0.85','1').replace('0.88','1') + '"><b>' + f.name + '</b>'
           + '</span>';
-      }).join('') + '<span class="rfh-apri">Apri →</span>';
+      }).join('');   /* niente "Apri": si clicca la striscia */
   el.title = 'Red Flags attive: ' + a.map(function(f){ return f.name; }).join(', ');
 }
 function rfLista(){

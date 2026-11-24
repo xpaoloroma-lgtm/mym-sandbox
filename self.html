@@ -1377,24 +1377,27 @@ function renderBlocks(r, anim){
      - più è debole          (lontano arriva meno luce, quindi c'è meno contrasto da togliere)
    Sotto ogni lettera resta anche un filo d'ombra stretta, quella di contatto col piano.
    Numeri: OMBRA_LUCE = altezza della luce sul piano; il rilievo cambia per numero, nome, famiglia e nota. Sono scelte, non misure. */
-var OMBRA_LUCE = 46, OMBRA_META = 170;
+var OMBRA_LUCE = 70, OMBRA_META = 230, OMBRA_MAX = 10;
 function lettere(t){ return String(t).split(' ').map(function(w){ return '<span class="pa">' + w.split('').map(function(c){ return '<span>' + esc(c) + '</span>'; }).join('') + '</span>'; }).join(' '); }
 function ombraDi(x, rilievo, forza){
   x = Math.max(0, x);
-  var dx = rilievo * x / (OMBRA_LUCE - rilievo), sf = 0.6 + dx * 0.55, a = forza / (1 + x / OMBRA_META);
+  var dx = Math.min(OMBRA_MAX, rilievo * x / (OMBRA_LUCE - rilievo)), sf = 0.5 + dx * 0.30, a = forza / (1 + x / OMBRA_META);
   /* il fianco delle lettere che guarda la luce prende un filo del colore della famiglia: è quello che su un fondo scuro fa vedere il rilievo */
-  var bordo = Math.round(78 / (1 + x / OMBRA_META));
+  var bordo = Math.round(95 / (1 + x / OMBRA_META));
   return '-0.8px 0 0.5px color-mix(in srgb,var(--fc) ' + bordo + '%,transparent),'
-       + '0 0.6px 0.6px rgba(0,0,0,' + Math.min(0.9, forza + 0.15).toFixed(2) + '),' + dx.toFixed(2) + 'px ' + (dx * 0.12).toFixed(2) + 'px ' + sf.toFixed(2) + 'px rgba(0,0,0,' + a.toFixed(2) + ')';
+       + '0 0.6px 0.6px rgba(0,0,0,0.9),'
+       /* due strati: vicino alla lettera l'ombra è stretta e scura (il nucleo), più in là si allarga e sfuma (la penombra) */
+       + (dx * 0.5).toFixed(2) + 'px ' + (dx * 0.06).toFixed(2) + 'px ' + (0.3 + dx * 0.10).toFixed(2) + 'px rgba(0,0,0,' + Math.min(0.95, a + 0.2).toFixed(2) + '),'
+       + dx.toFixed(2) + 'px ' + (dx * 0.12).toFixed(2) + 'px ' + sf.toFixed(2) + 'px rgba(0,0,0,' + a.toFixed(2) + ')';
 }
 function ombre(root){
   (root || document).querySelectorAll('.block').forEach(function(b){
     var x0 = b.getBoundingClientRect().left;
     function metti(el, rilievo, forza){ if(!el) return; var q = el.getBoundingClientRect(); if(!q.width) return; el.style.textShadow = ombraDi(q.left + q.width / 2 - x0, rilievo, forza); }
-    metti(b.querySelector('.pn'), 3.2, 0.85);
-    b.querySelectorAll('.nm .pa > span').forEach(function(c){ metti(c, 2.4, 0.85); });
-    metti(b.querySelector('.fl'), 1.2, 0.8);
-    metti(b.querySelector('.notebox .tx'), 1.2, 0.75);
+    metti(b.querySelector('.pn'), 5, 0.95);
+    b.querySelectorAll('.nm .pa > span').forEach(function(c){ metti(c, 3.8, 0.95); });
+    metti(b.querySelector('.fl'), 1.9, 0.9);
+    metti(b.querySelector('.notebox .tx'), 1.9, 0.85);
   });
 }
 window.addEventListener('resize', function(){ ombre(document); });

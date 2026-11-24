@@ -870,6 +870,8 @@ header .hdr-r{flex:none;}
 .rconf.si:not(.ok)::after{content:'';position:absolute;top:0;bottom:0;left:0;width:38%;pointer-events:none;
   background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,0.75),rgba(255,255,255,0));animation:confRiflesso 3.6s ease-in-out infinite;}
 .rconf.ok{cursor:pointer!important;}
+/* stessa altezza prima e dopo la conferma: altrimenti alla conferma tutto il round si spostava di due pixel */
+.rconf.si{height:30px!important;font-size:11px!important;}
 #pt-pop button.sel{border-color:#f0d28c;color:var(--gold-txt);}
 /* ═══ CONFERMA DEL ROUND ═══
    Finché non è confermato il round è una preparazione: si vede tratteggiato. Confermato = fatto e salvato. */
@@ -878,7 +880,7 @@ header .hdr-r{flex:none;}
 .rconf.si{display:inline-flex;align-items:center;}
 .rconf.ok{background:none;border-color:transparent;box-shadow:none;color:rgba(120,200,150,0.9);cursor:default;padding:0 4px;}
 .round.prep .block .neon{background:repeating-linear-gradient(180deg,var(--fc) 0 6px,transparent 6px 11px)!important;box-shadow:none!important;}
-.round.prep .block .nm,.round.prep .block .pn{opacity:.72;}
+/* (24/11) in preparazione il testo NON si spegne più: alla conferma tutto diventava di colpo più forte. La differenza è solo la riga tratteggiata. */
 /* con il tasto di conferma nella riga, svuota e non fatto restano solo come icona: la riga deve stare a metà monitor */
 .round-hd:has(.rconf.si) .clear{font-size:0!important;gap:0!important;margin-left:6px!important;padding:0 5px!important;}
 .round-hd:has(.rconf.si) .skip2 .off-t,.round-hd:has(.rconf.si) .skip2 .on-t{display:none!important;}
@@ -898,13 +900,13 @@ header .hdr-r{flex:none;}
   linear-gradient(90deg,rgba(26,24,21,0.55) 0%,rgba(26,24,21,0.20) 60%,rgba(26,24,21,0) 100%)!important;}
 .block .spill{display:none;}
 .block .neon{top:0!important;bottom:0!important;width:3px!important;box-shadow:0 0 6px color-mix(in srgb,var(--fc) 55%,transparent),0 0 18px color-mix(in srgb,var(--fc) 28%,transparent)!important;}
-.round.prep .block .neon{box-shadow:none!important;}
+
 .block .rm,.block .cg{opacity:0!important;}
 .block:hover .rm,.block:hover .cg{opacity:1!important;}
 .block .rm{right:calc(var(--lane) + 6px)!important;} .block .cg{right:calc(var(--lane) + 30px)!important;}
 .block .card{padding-right:calc(var(--lane) + 62px)!important;}
 /* 3 · il grafico dentro i blocchi: la curva passa dietro tutta la larghezza del round */
-/* il grafico occupa la metà destra del round: parte da metà e arriva al bordo */
+/* il grafico occupa la parte destra del round (vedi più sotto: parte dal 57%) */
 .lane{left:50%!important;right:0!important;width:50%!important;z-index:0;pointer-events:none;opacity:.9;}
 .blocks{z-index:1;}
 .block .card,.block .row{z-index:2;}
@@ -950,12 +952,34 @@ header .hdr-r{flex:none;}
 /* punti luce: piccoli, un paio di pixel, con un filo di alone */
 .block .luci i{position:absolute;left:-1px;top:-1px;width:2px;height:2px;border-radius:50%;will-change:transform;background:color-mix(in srgb,var(--fc) 35%,#fff);
   box-shadow:0 0 3px 0.5px color-mix(in srgb,var(--fc) 80%,transparent);}
-.round.prep .block .luci i{opacity:.6;}
+
 /* la copia per le ombre: stesso testo, stesso posto, invisibile; sta sotto il testo vero */
 .block .card.omb{z-index:1!important;pointer-events:none!important;}
 .block .card.omb,.block .card.omb *{color:transparent!important;-webkit-text-fill-color:transparent!important;border-color:transparent!important;}
 .block .card.omb svg,.block .card.omb .pen{visibility:hidden!important;}
 .block .card:not(.omb){z-index:2;}
+/* ═══ LE NOTE (24/11): si usano tutto il giorno, quasi ogni esercizio ne ha una. Devono leggersi.
+   - più grandi e più piene del resto, in un bianco caldo
+   - rientrate di un passo rispetto al nome, con un trattino del colore della famiglia
+   - non vanno mai sopra il grafico: si fermano prima di metà blocco e vanno a capo
+   - righe: quante ne tiene il blocco (due nell'1, di più negli altri); se la nota è più lunga sfuma in fondo, e passandoci sopra si legge tutta */
+.block .card .notebox{font-size:15px!important;font-weight:500!important;line-height:1.35!important;color:rgba(244,232,204,0.96)!important;
+  width:auto!important;max-width:max(130px,calc(62cqw - 74px))!important;margin-left:8px!important;padding:0 0 0 9px!important;
+  max-height:max(1.35em,round(down, calc(100cqh - 47px), 1.35em))!important;border-left:2px solid color-mix(in srgb,var(--fc) 55%,transparent)!important;}
+.block .card .notebox .tx{white-space:normal!important;display:block!important;overflow:visible!important;text-overflow:clip!important;}
+.block .card .notebox.clipped{-webkit-mask-image:linear-gradient(180deg,#000 calc(100% - 1.1em),transparent)!important;mask-image:linear-gradient(180deg,#000 calc(100% - 1.1em),transparent)!important;}
+.block .card .notebox .pen{right:-16px!important;}
+.block .card .notebox.note-empty{border-left-color:transparent!important;}
+.block .card .notebox.note-empty .tx{font-size:11px!important;font-weight:400!important;}
+.block .card.omb .notebox{border-left-color:transparent!important;}
+/* per farci stare due righe di nota anche nell'1: meno aria sopra e sotto, e il grafico parte un po' più a destra */
+.block .card{padding-top:3px!important;padding-bottom:3px!important;row-gap:2px!important;}
+.lane{left:57%!important;width:43%!important;}
+@media (max-width:860px){ .block .card .nm{font-size:19px;} .block .card .pn{font-size:31px;} .block .card{grid-template-columns:36px minmax(0,1fr);} .block .card .notebox{font-size:14px!important;} }
+/* la finestrina della nota: scritta più grande e barra di scorrimento sottile */
+#pop{width:340px!important;}
+#pop textarea{height:120px!important;font-size:15px!important;line-height:1.4!important;scrollbar-width:thin;scrollbar-color:rgba(212,168,74,0.55) transparent;}
+#pop textarea::-webkit-scrollbar{width:6px;} #pop textarea::-webkit-scrollbar-thumb{background:rgba(212,168,74,0.5);border-radius:3px;} #pop textarea::-webkit-scrollbar-track{background:transparent;}
 /* ═══ PROPORZIONI DEL TESTO NEI BLOCCHI (24/11): numero grande e sottile, alto quanto il blocco; nome a peso normale ═══ */
 .block .card{grid-template-columns:44px minmax(0,1fr);}
 .block .card .pn{font-size:38px;font-weight:200;line-height:1;grid-row:1 / span 3;align-self:center;}
@@ -1342,7 +1366,7 @@ function renderDisp(){
 
 /* Altezze dei blocchi (in quindicesimi): crescono con la posizione ma non in proporzione alle serie.
    L'1 deve essere comodo come gli altri, il 5 deve vedersi più grande. Scelta grafica, non misura. */
-var HB = [1.5, 2.2, 2.9, 3.6, 4.8];
+var HB = [2.0, 2.4, 2.9, 3.4, 4.3];   /* 24/11: l'1 un po' più alto, così ci stanno due righe di nota */
 
 /* Cardio Tempo: la durata dipende solo dal posto nel round. 1 minuto e mezzo per posto:
    1 → 1′30″, 2 → 3′, 3 → 4′30″, 4 → 6′, 5 → 7′30″. */
@@ -1364,7 +1388,7 @@ function renderBlocks(r, anim){
       inner += '<div class="estrip"></div><div class="empty"></div><div class="erow"><span class="pnum">' + p + '</span><span class="hint">' + hint + '</span></div>';
     } else {
       var ex = DB[id], f = FAM[ex.fam], n = S.notes[id] || '';
-      var box = '<button type="button" class="notebox' + (n ? '' : ' note-empty') + '" data-note="' + id + '" title="' + (n ? 'Modifica la nota' : 'Aggiungi una nota') + '">' +
+      var box = '<button type="button" class="notebox' + (n ? '' : ' note-empty') + '" data-note="' + id + '" title="' + (n ? esc(n).replace(/"/g, '&quot;') : 'Aggiungi una nota') + '">' +
                 '<span class="tx">' + (n ? esc(n) : '+ nota') + '</span><span class="pen">' + PEN + '</span></button>';
       inner += '<div class="block' + (p === 1 ? ' one' : '') + '" data-r="' + r + '" data-i="' + i + '" data-id="' + id + '" data-key="' + r + '-' + id + '" style="--fc:' + f.css + ';--ft:' + f.txt + '">' +
                '<div class="spill"></div><div class="neon"></div>' +

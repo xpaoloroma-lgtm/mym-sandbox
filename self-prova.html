@@ -881,14 +881,12 @@ header .hdr-r{flex:none;}
 #rank .pr.lead .dot{background:var(--fc)!important;border-color:var(--fc)!important;box-shadow:0 0 10px 2px color-mix(in srgb,var(--fc) 60%,transparent)!important;}
 
 /* ═════════ PROVA GRAFICA — solo aspetto, il funzionamento è quello di self.html ═════════ */
-/* 1 · la famiglia in ombra dietro il blocco */
+/* 1 · dietro il blocco l'OMBRA di quello che c'è scritto davanti: famiglia sopra, esercizio sotto. Scura, più grande, spostata. */
 .slot{container-type:size;}
-.block::before{content:attr(data-fam);position:absolute;right:calc(var(--lane) * 0.25);bottom:-0.14em;z-index:0;pointer-events:none;
-  font-family:'Exo 2',sans-serif;font-weight:800;font-size:min(78cqh,27cqw);line-height:.8;letter-spacing:-0.02em;text-transform:uppercase;white-space:nowrap;
-  color:var(--fc);opacity:.10;-webkit-mask-image:linear-gradient(180deg,#000 20%,transparent 105%);mask-image:linear-gradient(180deg,#000 20%,transparent 105%);
-  transition:opacity .4s;}
-.block:hover::before{opacity:.17;}
-.round.prep .block::before{opacity:.06;}
+.block .ombra{position:absolute;left:44px;right:0;top:50%;transform:translateY(-38%);z-index:0;pointer-events:none;display:flex;flex-direction:column;gap:.06em;
+  font-family:'Exo 2',sans-serif;font-size:min(50cqh,62px);line-height:.9;white-space:nowrap;color:#000;opacity:.62;filter:blur(1.2px);overflow:hidden;}
+.block .ombra i{font-style:normal;font-size:.36em;font-weight:700;letter-spacing:.3em;text-transform:uppercase;line-height:1;}
+.block .ombra b{font-weight:500;letter-spacing:.01em;}
 /* 2 · niente righe: i blocchi li separa la luce */
 .slot .sep{display:none!important;}
 .blocks{right:0!important;}
@@ -1323,7 +1321,7 @@ function renderBlocks(r, anim){
       var box = '<button type="button" class="notebox' + (n ? '' : ' note-empty') + '" data-note="' + id + '" title="' + (n ? 'Modifica la nota' : 'Aggiungi una nota') + '">' +
                 '<span class="tx">' + (n ? esc(n) : '+ nota') + '</span><span class="pen">' + PEN + '</span></button>';
       inner += '<div class="block' + (p === 1 ? ' one' : '') + '" data-r="' + r + '" data-i="' + i + '" data-id="' + id + '" data-fam="' + f.short + '" data-key="' + r + '-' + id + '" style="--fc:' + f.css + ';--ft:' + f.txt + '">' +
-               '<div class="spill"></div><div class="neon"></div>' +
+               '<div class="spill"></div><div class="neon"></div><div class="ombra" aria-hidden="true"><i>' + f.label + '</i><b>' + esc(ex.nome) + '</b></div>' +
                '<button type="button" class="chg cg" data-chg="' + ex.fam + '" data-r="' + r + '" aria-label="Cambia ' + esc(ex.nome) + '" title="Cambia esercizio">' + CHG + '</button>' +
                '<button type="button" class="rm" data-rm="' + r + '-' + i + '" aria-label="Togli ' + esc(ex.nome) + ' dal round" title="Togli">' +
                '<svg aria-hidden="true" width="10" height="10" viewBox="0 0 10 10"><path d="M1.5 1.5l7 7M8.5 1.5l-7 7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>' +

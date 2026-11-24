@@ -11857,6 +11857,20 @@ window.addEventListener('load', function(){
 #view-only-banner{position:static !important;flex:none;backdrop-filter:none !important;height:34px;padding:0 6px 0 14px !important;
   background:none !important;border:1px solid rgba(180,195,210,0.15) !important;border-radius:2px;gap:14px !important;white-space:nowrap;margin:0 16px;}
 body.view-only #main-layout, body.view-only #grid-layout{margin-top:0 !important;}
+/* La Sandbox si usa a metà monitor (Full HD, due finestre affiancate: circa 960).
+   Lì la barra è stretta: l'avviso di consultazione resta solo il segno e il tasto,
+   e il percorso, se non ci sta, accorcia il nome del cliente e il focus con i puntini.
+   Niente si infila sotto niente. */
+header #breadcrumb{flex:0 1 auto;min-width:0;overflow:hidden;}
+header #breadcrumb .bc-item, header #breadcrumb .bc-sep{flex:none;}
+header #breadcrumb #bc-client, header #breadcrumb #bc-focus{flex:0 1 auto;min-width:40px;overflow:hidden;text-overflow:ellipsis;display:block;}
+header .header-right{flex:none;}
+@media (max-width:1300px){
+  #view-only-banner{padding:0 5px 0 10px !important;gap:6px !important;margin:0 10px !important;}
+  #view-only-banner .view-only-text{font-size:0;letter-spacing:0;}
+  #view-only-banner .view-only-text::before{font-size:13px;margin-right:0;}
+}
+
 </style>
 <script>
 window.addEventListener('DOMContentLoaded', function(){

@@ -11814,8 +11814,12 @@ window.addEventListener('load', function(){
 .warm-riga input::placeholder{color:rgba(190,204,218,.4);}
 .warm-riga input:focus{border-bottom-color:rgba(212,168,74,.6);}
 
-#scheda-slots > .warm-riga{margin:10px 12px 8px;}
-#scheda-slots > .warm-riga input.scheda-note-inp{min-height:0 !important;height:28px !important;padding:0 !important;background:none !important;border:0 !important;border-bottom:1px solid transparent !important;resize:none;}
+#open-warm{margin:8px 28px 8px 12px;}
+/* testata della scheda: titolo di zona e un tasto vero per cambiare gli esercizi (prima era una scritta da 7, quasi invisibile) */
+.scheda-header{padding:0 12px 0 16px !important;height:52px;box-sizing:border-box;}
+.scheda-header > span{font-size:12px !important;font-weight:700 !important;letter-spacing:3px !important;color:rgba(225,232,240,.92);}
+.scheda-edit-btn{height:32px;padding:0 14px !important;border:1px solid rgba(180,195,210,0.25) !important;border-radius:2px;font-size:10px !important;font-weight:600 !important;letter-spacing:2px !important;color:var(--text-hi) !important;}
+.scheda-edit-btn:hover{border-color:rgba(200,175,90,0.66) !important;color:var(--text-hi) !important;}
 </style>
 <style>
 /* Il grafico "Utilizzo per PT" non sta più nella pagina protocolli: lo stesso
@@ -11857,6 +11861,14 @@ window.addEventListener('DOMContentLoaded', function(){
   var b = document.getElementById('view-only-banner'), s = document.getElementById('rf-alert-strip');
   if(b && s && s.parentNode) s.parentNode.insertBefore(b, s.nextSibling);
 });
+</script>
+<script>
+/* warm-up di Open: si salva dove stava prima (state.notes._warmup) */
+(function(){
+  var w = document.getElementById('open-warm-txt'); if(!w) return;
+  w.addEventListener('input', function(){ if(typeof state === 'undefined' || !state) return; if(!state.notes) state.notes = {}; state.notes['_warmup'] = this.value; if(typeof save === 'function') save(); });
+  ['keydown','keyup','keypress'].forEach(function(t){ w.addEventListener(t, function(e){ e.stopPropagation(); }); });
+})();
 </script>
 <script id="sbx-storico-js">
 /* Lo storico a scomparsa segue il mouse con una regola sola, senza scatti:
@@ -13268,12 +13280,14 @@ function eseClose(){
 
 <!-- MAIN LAYOUT -->
 <div id="main-layout">
+  <!-- warm-up: la stessa riga di Load, lunga quanto tutta la pagina, sopra tutto -->
+  <div class="warm-riga" id="open-warm"><span>Warm-up</span><input type="text" id="open-warm-txt" spellcheck="false" autocomplete="off" placeholder="cosa fa prima di iniziare" aria-label="Warm-up"></div>
   <div class="top-area">
     <!-- col 1: scheda -->
     <div id="scheda-panel">
       <div class="scheda-header">
         <span>Scheda</span>
-        <button class="scheda-edit-btn" onclick="editScheda()">modifica</button>
+        <button class="scheda-edit-btn" onclick="editScheda()" title="Torna alla scelta degli esercizi della scheda">Cambia esercizi</button>
       </div>
       <div class="scheda-scroll">
         <div id="scheda-slots"></div>
@@ -15440,20 +15454,11 @@ function renderScheda(flashFam){
   }
   var container = document.getElementById('scheda-slots');
   container.innerHTML = '';
-  // ── WARM-UP slot ──
+  // ── WARM-UP ── non è più dentro la scheda: è la riga lunga in cima a Open (#open-warm), come in Load.
   (function(){
     if(!state.notes) state.notes={};
-    var wu = document.createElement('div');
-    /* la stessa riga di Load, Self: etichetta e una riga di testo. Il testo resta quello di prima (state.notes._warmup). */
-    wu.className = 'warm-riga';
-    wu.innerHTML = '<span>Warm-up</span>'+
-      '<input type="text" class="scheda-note-inp" spellcheck="false" autocomplete="off" placeholder="cosa fa prima di iniziare" aria-label="Warm-up" data-key="_warmup">';
-    wu.querySelector('input').value = String(state.notes['_warmup']||'').replace(/\s*\n\s*/g, ' · ');
-    container.appendChild(wu);
-    var ta=wu.querySelector('.scheda-note-inp');
-    ta.addEventListener('input',function(){ state.notes['_warmup']=this.value; save(); });
-    ta.addEventListener('keydown',function(e){ e.stopPropagation(); });
-    ta.addEventListener('click',function(e){ e.stopPropagation(); });
+    var w = document.getElementById('open-warm-txt');
+    if(w && document.activeElement !== w) w.value = String(state.notes['_warmup']||'').replace(/\s*\n\s*/g, ' · ');
   })();
   slots.forEach(function(slot){
     var ch = state.scheda[slot.key];

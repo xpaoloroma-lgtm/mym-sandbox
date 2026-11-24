@@ -953,8 +953,8 @@ header .hdr-r{flex:none;}
 .block .luci{position:absolute;left:0;top:0;width:0;height:0;z-index:3;pointer-events:none;}
 /* punti luce: piccoli, un paio di pixel, con un filo di alone */
 /* i punti luce: bianco caldo */
-.block .luci i{position:absolute;left:0.5px;top:-1px;width:2px;height:2px;border-radius:50%;background:#fff8e6;
-  box-shadow:0 0 3px 0.5px rgba(255,240,205,0.85);}
+/* i punti luce si devono appena percepire: un puntino del colore della famiglia schiarito, senza alone, uguale su tutti i colori */
+.block .luci i{position:absolute;left:0.5px;top:-1px;width:2px;height:2px;border-radius:50%;background:color-mix(in srgb,var(--fc) 45%,#fff);opacity:.6;}
 /* il trattino della nota è un oggetto: quello vero è colorato, la sua copia sotto fa solo l'ombra */
 .block .card .notebox{border-left-color:transparent!important;}
 .block .card .notebox:not(.note-empty)::before{content:'';position:absolute;left:0;top:2px;bottom:2px;width:2px;border-radius:1px;background:var(--tkc,color-mix(in srgb,var(--fc) 60%,transparent));}
@@ -1437,9 +1437,13 @@ function ombraDi(x, y, luci, rilievo, forza, soloSfumata){
   if(soloSfumata) out = out.filter(function(v, i){ return i >= 2 && i % 2 === 1; });
   return out.join(',');
 }
-/* i punti luce stanno vicini tra loro, in fila al centro del blocco: uno nel posto 1, due nel 2, … cinque nel 5 */
-var LUCE_PASSO_PX = 15;
-function luciFerme(n, H){ var o = [], y0 = H / 2 - (n - 1) * LUCE_PASSO_PX / 2; for(var i = 0; i < n; i++) o.push({x:0, y:y0 + i * LUCE_PASSO_PX}); return o; }
+/* i punti luce stanno in fila al centro del blocco: uno nel posto 1, … cinque nel 5.
+   Più sono, più sono distanti tra loro: così coprono più altezza e illuminano una superficie più grande. */
+function luciFerme(n, H){
+  var passo = Math.min(10 + 4 * n, n > 1 ? H * 0.72 / (n - 1) : 0), o = [], y0 = H / 2 - (n - 1) * passo / 2;
+  for(var i = 0; i < n; i++) o.push({x:0, y:y0 + i * passo});
+  return o;
+}
 function ombraApplica(b){
   var g = b._geo; if(!g) return;
   var luci = g.luci, n = luci.length, box = b.querySelector('.luci');

@@ -1490,7 +1490,7 @@ function renderBlocks(r, anim){
    Più la lettera è lontana dalla luce, più l'ombra è lunga, sfumata e debole. Con più luci ogni ombra è più leggera,
    perché le altre luci la rischiarano. Sotto ogni lettera resta un filo d'ombra di contatto.
    Anche il chiarore colorato del blocco viene dagli stessi punti. Tutti i numeri qui sono scelte, non misure. */
-var OMBRA_LUCE = 95, OMBRA_META = 240, OMBRA_MAX = 9, LUCE_FORZA = 3, LUCE_BUIO = 70, LUCE_PUNTO_H = OMBRA_LUCE, LUCE_PUNTO = 14;   /* una sola altezza della luce, per il cerchio sul piano e per le ombre */   /* LUCE_BUIO: quanto resta luminosa (in %) una scritta lontana da ogni luce */
+var OMBRA_LUCE = 95, OMBRA_META = 240, OMBRA_MAX = 9, LUCE_FORZA = 2.1, LUCE_BUIO = 70, LUCE_PUNTO_H = OMBRA_LUCE, LUCE_PUNTO = 9.8;   /* una sola altezza della luce, per il cerchio sul piano e per le ombre */   /* LUCE_BUIO: quanto resta luminosa (in %) una scritta lontana da ogni luce */
 function lettere(t){ return String(t).split(' ').map(function(w){ return '<span class="pa">' + w.split('').map(function(c){ return '<span>' + esc(c) + '</span>'; }).join('') + '</span>'; }).join(' '); }
 function ombraDi(x, y, luci, rilievo, forza, soloSfumata){
   /* il fianco della lettera che guarda le luci prende un filo del colore della famiglia */

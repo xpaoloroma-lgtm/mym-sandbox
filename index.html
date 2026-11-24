@@ -1270,7 +1270,7 @@ header{height:57px;flex-shrink:0;padding:0 28px;border-bottom:1px solid var(--bo
    PORTRAIT  ≤768px
    header(42px) | timer-strip(58px) | scheda(flex) | drawer(44→220px)
    ═══════════════════════════════════════════ */
-@media (max-width: 768px) {
+@media (max-width: 768px) and (pointer:coarse) {
 
   /* ── HEADER ── */
   header {
@@ -1613,7 +1613,7 @@ header{height:57px;flex-shrink:0;padding:0 28px;border-bottom:1px solid var(--bo
    LANDSCAPE  ≤900px + orientation landscape
    header+timer(36px) | scheda(left) | tabs(right)
    ═══════════════════════════════════════════ */
-@media (max-width: 900px) and (orientation: landscape) {
+@media (max-width: 900px) and (orientation: landscape) and (pointer:coarse) {
 
   header {
     height: 36px !important;
@@ -6093,7 +6093,7 @@ body.view-only #grid-toolbar{opacity:0.45;pointer-events:none;}
 }
 .ore-casc-riga.sotto-voce .v{font-size:13px;color:rgba(226,150,150,0.8);}
 .ore-casc-riga .h{white-space:nowrap;}
-@media (max-width:899px){
+@media (max-width:899px) and (pointer:coarse){
   .ore-tre{grid-template-columns:1fr;gap:12px;}
   .ore-tre-fra{text-align:left;}
 }
@@ -6139,7 +6139,7 @@ body.view-only #grid-toolbar{opacity:0.45;pointer-events:none;}
 .ore-casc-riga.fine .e{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--text-xlo);}
 .ore-casc-riga.fine .v{font-size:22px;color:rgba(226,192,110,1);}
 .ore-mon-tab td.eur.manca{color:rgba(226,150,150,0.86);}
-@media (max-width:899px){
+@media (max-width:899px) and (pointer:coarse){
   .ore-g-due{grid-template-columns:1fr;}
   .ore-mon-nav{align-items:stretch;}
   .ore-mon-eti-mese{text-align:left;}
@@ -6181,7 +6181,7 @@ body.view-only #grid-toolbar{opacity:0.45;pointer-events:none;}
   border-bottom:none;border-top:1px solid var(--border-faint);
   color:var(--text-hi);padding-top:11px;
 }
-@media (max-width:899px){
+@media (max-width:899px) and (pointer:coarse){
   .ore-mon-danno-righe{grid-template-columns:1fr;gap:14px;}
   .ore-mon-tab th,.ore-mon-tab td{padding:8px 6px;font-size:11px;}
 }
@@ -6205,7 +6205,7 @@ body.view-only #grid-toolbar{opacity:0.45;pointer-events:none;}
   font-family:var(--font);font-size:13px;font-weight:300;letter-spacing:0.5px;
   color:var(--text-hi);padding:8px 2px;
 }
-@media (max-width:899px){
+@media (max-width:899px) and (pointer:coarse){
   .ore-mon-righe{grid-template-columns:repeat(2,1fr);gap:10px;}
   .ore-mon-num{font-size:22px;}
   .ore-mon-testa{flex-direction:column;gap:12px;}
@@ -6215,7 +6215,7 @@ body.view-only #grid-toolbar{opacity:0.45;pointer-events:none;}
 .ore-adm-manut{background:transparent;border-style:dashed;}
 .ore-adm-manut .ore-azioni{margin-top:0;}
 
-@media (min-width:900px){
+@media (min-width:900px), (pointer:fine){
   /* Larga, al centro, non più incollata in fondo. */
   #p-trainer{
     width:min(1240px,95vw);max-height:90vh;
@@ -6233,7 +6233,7 @@ body.view-only #grid-toolbar{opacity:0.45;pointer-events:none;}
   .ore-adm-col.sx{flex:1 1 57%;}
   .ore-adm-col.dx{flex:1 1 43%;}
 }
-@media (max-width:899px){
+@media (max-width:899px) and (pointer:coarse){
   .ore-adm-head{flex-direction:column;gap:14px;}
   /* Lo stato della serratura a sinistra, il chiudi a destra, su una riga
      sola: a capo sembravano tre tasti scollegati. */
@@ -6328,7 +6328,7 @@ body.view-only #grid-toolbar{opacity:0.45;pointer-events:none;}
 .ore-griglia{display:grid;grid-template-columns:minmax(0,1fr);gap:0;}
 
 
-@media (min-width:900px){
+@media (min-width:900px), (pointer:fine){
   .ore-wrap{max-width:1680px;}
   /* A sinistra le tre sezioni che si usano in sequenza — guardo come sto,
      vedo se qualcuno ha corretto, segno la giornata — impilate e larghe uguali.
@@ -6367,7 +6367,7 @@ body.view-only #grid-toolbar{opacity:0.45;pointer-events:none;}
 .ore-numeri.aperto .ore-numeri-apri{border-bottom-color:transparent;
   border-radius:2px 2px 0 0;}
 .solo-largo{display:none;}
-@media (min-width:900px){ .solo-largo{display:inline;} }
+@media (min-width:900px), (pointer:fine){ .solo-largo{display:inline;} }
 .ore-numeri-apri .eti{
   font-size:9px;font-weight:600;letter-spacing:3px;text-transform:uppercase;
   color:rgba(200,175,90,0.80);flex:0 0 auto;
@@ -6597,7 +6597,7 @@ body.view-only #grid-toolbar{opacity:0.45;pointer-events:none;}
   letter-spacing:0.3px;margin-top:5px;line-height:1.45;}
 .ore-and-pop .pt{width:7px;height:7px;border-radius:50%;flex:0 0 auto;}
 
-@media (max-width:899px){
+@media (max-width:899px) and (pointer:coarse){
   .ore-and-graf{height:320px;}
   .ore-and-leg{width:100%;margin-top:8px;}
   /* i quattro tasti devono stare su una riga sola: andando a capo la
@@ -7325,7 +7325,7 @@ body.view-only #grid-toolbar{opacity:0.45;pointer-events:none;}
 }
 .ore-mese-tot .num i{font-style:normal;font-size:15px;opacity:0.6;margin-left:3px;}
 
-@media (max-width:899px){
+@media (max-width:899px) and (pointer:coarse){
   #ore-mese-box{
     left:0;right:0;top:auto;bottom:0;width:100%;max-height:92vh;
     transform:translateY(102%);border-radius:3px 3px 0 0;
@@ -8307,7 +8307,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
 
 /* Questo blocco DEVE restare in fondo al foglio: un @media non aggiunge
    peso alle regole, quindi qualunque regola scritta dopo lo annullerebbe. */
-@media (max-width:899px){
+@media (max-width:899px) and (pointer:coarse){
 
   /* ══════════════════════════════════════════════════════════════
      L'IMPAGINAZIONE SUL TELEFONO
@@ -8784,7 +8784,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
    fondo: non tocca nessuna regola di sopra, e per tornare indietro
    basta cancellarlo tutto.
    ══════════════════════════════════════════════════════════════ */
-@media (max-width:899px){
+@media (max-width:899px) and (pointer:coarse){
 
   /* IL BLOCCO "CHI LA RIFÀ" USCIVA DALLA COLONNA.
      Sul telefono .ore-sch-chiusa diventa una colonna, ma si porta dietro
@@ -8871,7 +8871,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   opacity:0;pointer-events:none;transition:opacity .22s;display:none;
 }
 
-@media (max-width:899px){
+@media (max-width:899px) and (pointer:coarse){
   /* Sul telefono il passaggio del mouse non esiste e 340px non ci stanno:
      diventa un foglio che sale dal basso, come il pannello Trainer e
      "come si conta". Si apre col dito e si chiude toccando fuori. */
@@ -8980,7 +8980,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   color:rgba(214,228,242,0.9);
 }
 
-@media (max-width:899px){
+@media (max-width:899px) and (pointer:coarse){
   /* Sul telefono la tabella non c'è: valgono le schede, e lì l'altezza
      fissa non serve perché ogni scheda ha il suo spazio. */
   .ore-tab tbody td{height:auto;}
@@ -9054,7 +9054,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
 }
 #riu-screen.off{display:none;}
 .riu-wrap{max-width:1120px;margin:0 auto;}
-@media (min-width:900px){ .riu-wrap{max-width:1280px;} }
+@media (min-width:900px), (pointer:fine){ .riu-wrap{max-width:1280px;} }
 
 /* la grana del fondo, come nelle altre schermate */
 #riu-screen::before{
@@ -9279,7 +9279,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
 }
 #riu-screen-btn:hover{border-color:rgba(200,175,90,0.837);color:rgba(200,175,90,0.898);}
 
-@media (max-width:899px){
+@media (max-width:899px) and (pointer:coarse){
   #riu-screen{padding:0 16px 40px;}
   .riu-head{padding:20px 0 16px;margin:0 0 16px;}
   .riu-title{font-size:19px;letter-spacing:7px;}
@@ -9377,7 +9377,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
 }
 .riu-vuoto b{font-weight:400;font-style:normal;color:var(--text-hi);}
 
-@media (max-width:899px){
+@media (max-width:899px) and (pointer:coarse){
   .riu-riga.riu-prop{flex-wrap:wrap;}
   .riu-riga.riu-prop .nome{flex:1 1 100%;}
   .riu-mini{min-height:44px;padding:12px 14px;}
@@ -9487,7 +9487,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   background-color:rgba(200,175,90,0.08);
 }
 
-@media (max-width:899px){
+@media (max-width:899px) and (pointer:coarse){
   /* Dodici ore non ci stanno in 390 px: la griglia scorre di lato e le
      ore restano larghe abbastanza da centrarle col dito. */
   .riu-griglia{
@@ -9580,7 +9580,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   font-variant-numeric:tabular-nums;
 }
 .riu-riga .stato.si{color:rgba(120,205,155,0.98);}
-@media (max-width:899px){
+@media (max-width:899px) and (pointer:coarse){
   .riu-log-riga{flex-wrap:wrap;}
   .riu-log-riga .cosa{flex:1 1 100%;order:3;}
 }
@@ -9686,7 +9686,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
    Finché c'è una risposta non confermata, il tasto sta sempre lì col
    pollice sopra. Sparisce appena conferma. */
 #riu-barra{display:none;}
-@media (max-width:899px){
+@media (max-width:899px) and (pointer:coarse){
   #riu-barra{
     display:flex;align-items:center;gap:12px;
     position:fixed;left:0;right:0;bottom:0;z-index:10000;
@@ -9744,7 +9744,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   vertical-align:middle;
 }
-@media (max-width:899px){
+@media (max-width:899px) and (pointer:coarse){
   #riu-screen-btn .riu-badge{display:block;margin:8px 0 0;max-width:100%;}
 }
 
@@ -9789,7 +9789,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   border-left:2px solid rgba(226,140,140,0.55);
   background:rgba(226,140,140,0.05);
 }
-@media (max-width:899px){
+@media (max-width:899px) and (pointer:coarse){
   .riu-durata-nota{flex:1 1 100%;margin:4px 0 0;}
 }
 
@@ -9830,7 +9830,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   transition:all .16s;
 }
 .riu-riapri:hover{border-color:rgba(200,175,90,0.75);color:var(--text-hi);}
-@media (max-width:899px){
+@media (max-width:899px) and (pointer:coarse){
   .riu-conf{padding:11px 12px;}
   .riu-riapri{padding:8px 10px;}
 }
@@ -9912,7 +9912,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
    uno: con un po' di spazio in meno uscivano dallo schermo. Adesso sono un
    gruppo che si allinea da solo. Sul telefono le schede stanno nello schermo
    e Riunioni e Ore sono affiancate in fondo, senza coprire niente. */
-@media (min-width:900px){
+@media (min-width:900px), (pointer:fine){
   #proto-tools{
     position:absolute;right:32px;bottom:28px;
     display:flex;align-items:center;gap:10px;
@@ -9923,7 +9923,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   #proto-tools > #ese-screen-btn{order:4;}
   #proto-tools > #admin-btn{order:5;}
 }
-@media (max-width:899px){
+@media (max-width:899px) and (pointer:coarse){
   #proto-select{
     justify-content:flex-start;overflow-y:auto;overflow-x:hidden;
     gap:22px;padding:16px 14px calc(96px + env(safe-area-inset-bottom,0px));
@@ -9970,7 +9970,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
    di sei schermate: adesso c'è un menù in basso e si vede una sezione per
    volta, con uno scorrimento laterale nel verso della voce scelta. */
 #ore-tabs{display:none;}
-@media (max-width:899px){
+@media (max-width:899px) and (pointer:coarse){
   #ore-screen{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px)) !important;}
   #ore-screen.ore-a-schede .ore-griglia > .ore-panel:not(.ore-attivo){display:none !important;}
   #ore-screen.ore-a-schede .ore-griglia > .ore-panel.ore-attivo{display:block;margin-bottom:0;}
@@ -10019,7 +10019,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   #ore-screen .ore-griglia > .ore-panel{animation:none !important;}
 }
 
-@media (max-width:899px){
+@media (max-width:899px) and (pointer:coarse){
   #ore-tabs button .ic{width:20px;height:20px;font-size:inherit;}
   /* intestazione su una riga sola: indietro, titolo, admin */
   #ore-screen .ore-head{
@@ -10040,7 +10040,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
    Regole da telefono: niente testo sotto i 9 px, niente campo sotto i 16 px
    (sotto quella misura l'iPhone ingrandisce la pagina da solo), niente tasto
    più basso di 44 px, niente trasparenze dove ci passa sotto del testo. */
-@media (max-width:899px){
+@media (max-width:899px) and (pointer:coarse){
   /* ── accesso ── */
   .login-inp{font-size:16px;}
   .login-title{font-size:10px;}
@@ -10136,7 +10136,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   .ore-lista li .chi, .ore-sch-chi{max-width:110px;}
 }
 
-@media (max-width:899px){
+@media (max-width:899px) and (pointer:coarse){
   /* i nomi in tre colonne: con cinque o sei trainer le righe restano pari */
   .ore-strip{grid-template-columns:repeat(3,1fr) !important;}
   /* le sottoscritte delle schede alte uguali, così OPEN e PACE restano allineati */
@@ -10153,7 +10153,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   #ore-sch-lista li > .ore-btn-plain.mini{position:absolute;top:16px;right:0;min-height:44px;}
 }
 
-@media (max-width:899px){
+@media (max-width:899px) and (pointer:coarse){
   /* i quattro periodi del grafico in una fila di colonne uguali */
   .ore-and-scale{display:grid;grid-template-columns:repeat(4,1fr);gap:0;width:100%;}
   .ore-and-scale .eti{grid-column:1 / -1;margin:0 0 6px;}
@@ -10167,7 +10167,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   .ore-and-scale button{font-size:9.5px;}
 }
 
-@media (max-width:899px){
+@media (max-width:899px) and (pointer:coarse){
   /* Entra: sul telefono sale dal basso appena scegli un protocollo,
      sopra Riunioni e Ore, così non si deve scorrere per trovarlo. */
   #proto-select{padding-bottom:calc(166px + env(safe-area-inset-bottom,0px));}
@@ -10230,7 +10230,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
 #home-riga,#home-lato{display:contents;}
 #mappa,#mp-leg{display:none;}
 #ing-torna{display:none;}
-@media (min-width:900px){
+@media (min-width:900px), (pointer:fine){
   #ing-torna{display:inline-block;}
   #home-riga{display:flex;flex-direction:column;align-items:stretch;gap:14px;}
   /* la griglia riempie la colonna: caselle in percentuale, così si allarga e
@@ -10347,7 +10347,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
 }
 /* Sul telefono questa è l'unica pagina, con Ore e Riunioni: i protocolli
    si usano solo dal monitor, quindi il tasto per entrarci qui non c'è. */
-@media (max-width:899px){
+@media (max-width:899px) and (pointer:coarse){
   #ing-torna,.ing-entra{display:none !important;}
   #ingresso{
     justify-content:center;gap:22px;overflow-y:auto;
@@ -10404,7 +10404,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
 }
 #load-frame{flex:1 1 auto;width:100%;border:0;background:var(--bg);}
 .proto-card-proto{border-style:dashed;}
-@media (max-width:899px){
+@media (max-width:899px) and (pointer:coarse){
   #ese-screen-btn,#ese-screen{display:none !important;}
   .proto-card-proto,#load-screen{display:none !important;}
 }
@@ -10663,9 +10663,9 @@ tr.ore-scala td{border-top:1px solid var(--border);}
 #nv-esci{order:99;}
 #demo-btn{order:98;}
 #demo-btn.acceso{border-color:rgba(225,120,120,0.75);color:rgba(240,170,170,1);background:rgba(200,90,90,0.10);}
-@media (max-width:899px){ #demo-btn{display:none !important;} }
+@media (max-width:899px) and (pointer:coarse){ #demo-btn{display:none !important;} }
 body:not(.nv-dentro) .header-right > :not(.nv-sempre){display:none !important;}
-@media (min-width:900px){
+@media (min-width:900px), (pointer:fine){
   body #ingresso, body #proto-select, body #cs, body #ore-screen, body #riu-screen,
   body #ese-screen, body #load-screen{top:57px;}
   #proto-actions .proto-back, #ingresso .proto-back, #proto-enter-btn,
@@ -10708,8 +10708,8 @@ body:not(.nv-dentro) .header-right > :not(.nv-sempre){display:none !important;}
 .cd-rf-fai{margin-top:7px;font-size:12px;line-height:1.45;color:#e8c878;}
 .cd-match{max-width:640px;margin:0;}
 .cd-tl{border:1px solid rgba(180,195,210,0.12);border-radius:3px;background:rgba(0,0,0,0.18);padding:16px 20px 14px;}
-@media (max-width:899px){ #cd-screen{display:none !important;} }
-@media (min-width:900px){ body #cd-screen{top:57px;} }
+@media (max-width:899px) and (pointer:coarse){ #cd-screen{display:none !important;} }
+@media (min-width:900px), (pointer:fine){ body #cd-screen{top:57px;} }
 #rfp-screen{position:fixed;inset:0;z-index:9999;background:var(--bg);overflow-y:auto;font-family:var(--font);}
 #rfp-screen.off{display:none;}
 .rfp-wrap{max-width:1200px;margin:0 auto;padding:34px 32px 70px;display:flex;gap:32px;align-items:flex-start;}
@@ -10796,8 +10796,8 @@ body:not(.nv-dentro) .header-right > :not(.nv-sempre){display:none !important;}
 .admin-pw-cosa{font-family:var(--font);font-size:13px;font-weight:500;letter-spacing:1.5px;color:rgba(235,170,170,0.98);margin:0;}
 .admin-pw-spiega{font-family:var(--font);font-size:12px;font-weight:300;line-height:1.55;color:rgba(200,214,228,0.88);margin:-6px 0 4px;}
 .admin-pw-cosa:empty,.admin-pw-spiega:empty{display:none;}
-@media (max-width:899px){ #rfp-btn,#rfp-screen{display:none !important;} }
-@media (min-width:900px){
+@media (max-width:899px) and (pointer:coarse){ #rfp-btn,#rfp-screen{display:none !important;} }
+@media (min-width:900px), (pointer:fine){
   body #rfp-screen{top:57px;}
   /* Ore e Riunioni si raggiungono dalla pagina Sandbox: qui non servono */
   #proto-tools > #ore-screen-btn, #proto-tools > #riu-screen-btn{display:none !important;}
@@ -11699,7 +11699,7 @@ window.addEventListener('load', function(){
    destra i protocolli, 40. Sul telefono resta tutto com'era. */
 #cl-zona{display:none;}
 #pr-zona{display:contents;}   /* sul telefono è come se non ci fosse */
-@media (min-width:900px){
+@media (min-width:900px), (pointer:fine){
   body #proto-select{
     display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);grid-template-rows:minmax(0,1fr) auto;
     gap:0 40px;padding:24px 40px 0;box-sizing:border-box;align-items:stretch;justify-content:stretch;
@@ -11817,8 +11817,16 @@ window.addEventListener('load', function(){
 #open-warm{margin:8px 28px 8px 12px;}
 #scheda-piede{padding:14px 16px 18px;}
 /* finestra stretta (metà monitor e anche meno): la scheda si stringe un po', il testo del perché è più piccolo */
-@media (min-width:900px) and (max-width:1300px){
-  .top-area{grid-template-columns:minmax(330px,40%) 1fr !important;}
+/* finestra del computer strettissima: la scheda sopra, il perché sotto, e si scorre. Niente sparisce. */
+@media (max-width:759px) and (pointer:fine){
+  #main-layout .top-area{grid-template-columns:1fr !important;grid-template-rows:auto auto;overflow-y:auto !important;align-content:start;}
+  #scheda-panel{border-right:0 !important;overflow:visible !important;}
+  #scheda-panel .scheda-scroll{overflow:visible !important;flex:none !important;}
+  #obj-panel{min-height:560px;border-top:1px solid var(--border);}
+  #main-layout #tl-panel{position:fixed !important;top:57px !important;}
+}
+@media (min-width:760px) and (max-width:1300px){
+  #main-layout .top-area{grid-template-columns:minmax(300px,40%) 1fr !important;}
   .rationale-block{padding:44px 22px 20px 22px !important;}
   .rationale-text{font-size:18px !important;line-height:1.6 !important;}
   .obj-hero{padding:16px 22px 14px !important;}
@@ -11828,7 +11836,7 @@ window.addEventListener('load', function(){
 #scheda-gate .gate-block{position:relative !important;right:auto !important;bottom:auto !important;width:auto !important;box-shadow:none !important;backdrop-filter:none !important;}
 /* "Perché adesso": il testo prende tutta la larghezza. Prima teneva 420 di vuoto a destra per il numerone
    e per il gate; il numerone resta solo come sfondo dietro al testo. */
-@media (min-width:769px){
+@media (min-width:769px), (pointer:fine){
   .rationale-block{padding:48px 32px 24px 32px !important;}
   .rationale-step-bg{right:8px !important;top:auto !important;bottom:-20px;z-index:0 !important;}
 }
@@ -11847,7 +11855,7 @@ window.addEventListener('load', function(){
 /* ══ LO STORICO A SCOMPARSA ══ uguale in tutti i protocolli.
    Sta nascosto a destra: si vede solo una barretta. Con il mouse sulla
    barretta scivola fuori sopra la pagina; togliendo il mouse rientra. */
-@media (min-width:900px){
+@media (min-width:900px), (pointer:fine){
   .top-area{grid-template-columns:440px 1fr !important;position:relative;overflow:hidden;padding-right:14px;box-sizing:border-box;}
   .skip-top-area{grid-template-columns:1fr !important;position:relative;overflow:hidden;padding-right:14px;box-sizing:border-box;}
   .skip-single-area{grid-template-columns:1fr 2fr !important;position:relative;overflow:hidden;padding-right:14px;box-sizing:border-box;}
@@ -12198,7 +12206,7 @@ window.addEventListener('load', function(){
       _ps(proto);
       var scelto = (typeof _currentProto !== 'undefined') ? _currentProto : null;
       /* un clic entra subito: il tasto "Entra" non serve più (sul monitor) */
-      if(scelto && window.matchMedia && window.matchMedia('(min-width:900px)').matches && typeof protoEnter === 'function'){ protoEnter(); return; }
+      if(scelto && window.matchMedia && window.matchMedia('(min-width:900px), (pointer:fine)').matches && typeof protoEnter === 'function'){ protoEnter(); return; }
       var sk = document.querySelector('#home-riga .proto-card[onclick*="skip"]');
       if(sk) sk.classList.toggle('selected', scelto === 'skip');
       [].forEach.call(document.querySelectorAll('#home-riga [data-p]'), function(b){
@@ -14483,7 +14491,7 @@ function csRender(){
       '<div class="cs-list-head-cell"></div>'+
       '<div class="cs-list-head-cell"></div>'+
     '</div>';
-  var mob = window.innerWidth <= 768;
+  var mob = window.innerWidth <= 768 && sbxTocco();
   var lastLetter = null;
   sorted.forEach(function(c){
     if(c.state) migrateStateShape(c.state);
@@ -15851,7 +15859,7 @@ function renderObj(){
     var casa = document.getElementById('scheda-gate'), g = panel.querySelector('.gate-block');
     if(!casa) return;
     casa.innerHTML = '';
-    if(g && window.innerWidth > 768) casa.appendChild(g);
+    if(g && !(window.innerWidth <= 768 && sbxTocco())) casa.appendChild(g);
   })();
   updateProgress();
   mobileLayout();
@@ -18554,10 +18562,13 @@ function _lsRender(){
   }
 }
 
+/* Telefono o tablet = si tocca. Una finestra stretta sul computer NON è un telefono: lì la pagina resta quella del computer. */
+function sbxTocco(){ try{ return window.matchMedia('(pointer:coarse)').matches; }catch(e){ return false; } }
 function mobileLayout(){
   var W = window.innerWidth, H = window.innerHeight;
-  var ls  = W <= 900 && W > H;
-  var mob = W <= 768 && !ls;
+  var tocco = sbxTocco();
+  var ls  = tocco && W <= 900 && W > H;
+  var mob = tocco && W <= 768 && !ls;
   /* landscape: show header timer, ls-tabs, ls-content */
   var htl = document.getElementById('header-timer-ls');
   if(htl) htl.style.display = ls ? 'flex' : 'none';
@@ -31875,7 +31886,7 @@ function oreLungoApri(bot){
   _oreLungoDa = Date.now();
 
   /* Sul telefono è un foglio dal basso e la posizione la fa il CSS. */
-  if(window.innerWidth <= 899){ box.style.left = ''; box.style.top = ''; return; }
+  if(window.innerWidth <= 899 && sbxTocco()){ box.style.left = ''; box.style.top = ''; return; }
 
   /* Si aggancia alla CELLA del nome, non alla parola: così comincia dopo
      la colonna e la riga di cui parla resta leggibile sotto il mouse. */
@@ -31899,11 +31910,11 @@ function oreLungoApri(bot){
     return (e.target && e.target.closest) ? e.target.closest('.ore-lungo') : null;
   }
   document.addEventListener('mouseover', function(e){
-    if(window.innerWidth <= 899) return;         /* sul telefono si tocca */
+    if(window.innerWidth <= 899 && sbxTocco()) return;         /* sul telefono si tocca */
     var b = bersaglio(e); if(b) oreLungoApri(b);
   });
   document.addEventListener('mouseout', function(e){
-    if(window.innerWidth <= 899) return;
+    if(window.innerWidth <= 899 && sbxTocco()) return;
     var b = bersaglio(e); if(!b) return;
     var vai = e.relatedTarget;
     if(vai && vai.closest && vai.closest('.ore-lungo')) return;
@@ -31912,7 +31923,7 @@ function oreLungoApri(bot){
   document.addEventListener('focusin', function(e){
     /* Solo con la tastiera, cioè sul computer. Sul telefono toccare dà il
        fuoco al tasto e aprirebbe due volte. */
-    if(window.innerWidth <= 899) return;
+    if(window.innerWidth <= 899 && sbxTocco()) return;
     var b = bersaglio(e);
     if(b) oreLungoApri(b); else if(_oreLungoAperto) oreLungoChiudi();
   });
@@ -34337,7 +34348,7 @@ document.addEventListener('visibilitychange', function(){
 (function(){
   var ORDINE = ['p-segna','p-recap','p-schede','p-corr'];
   var attiva = 'p-segna';
-  var mq = window.matchMedia('(max-width:899px)');
+  var mq = window.matchMedia('(max-width:899px) and (pointer:coarse)');
   function el(id){ return document.getElementById(id); }
   function applica(dir){
     var scr = el('ore-screen'); if(!scr) return;

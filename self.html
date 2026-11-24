@@ -946,6 +946,10 @@ header .hdr-r{flex:none;}
 .lane .filo.f5{animation:filoB 25s ease-in-out -28s infinite alternate;}
 .lane .filo.f6{animation:filoA 35s ease-in-out -5s infinite alternate;}
 .lane .filo.f7{animation:filoB 48s ease-in-out -48s infinite alternate;}
+.block .luci{position:absolute;left:0;top:0;bottom:0;width:0;z-index:3;pointer-events:none;}
+.block .luci i{position:absolute;left:-1px;width:5px;height:5px;margin-top:-2.5px;border-radius:50%;background:color-mix(in srgb,var(--fc) 45%,#fff);
+  box-shadow:0 0 6px 1px color-mix(in srgb,var(--fc) 85%,transparent),0 0 16px 4px color-mix(in srgb,var(--fc) 40%,transparent);}
+.round.prep .block .luci i{opacity:.55;}
 /* ═══ PROPORZIONI DEL TESTO NEI BLOCCHI (24/11): numero grande e sottile, alto quanto il blocco; nome a peso normale ═══ */
 .block .card{grid-template-columns:44px minmax(0,1fr);}
 .block .card .pn{font-size:38px;font-weight:200;line-height:1;grid-row:1 / span 3;align-self:center;}
@@ -1370,34 +1374,46 @@ function renderBlocks(r, anim){
   ombre(el);
 }
 /* ═══ OMBRA DEL TESTO ═══
-   Il testo è in rilievo sul blocco e la luce è la riga colorata sul bordo sinistro, poco sopra il piano.
-   Quindi l'ombra cade verso destra, e più una lettera è lontana dalla luce:
-     - più l'ombra è lunga   (luce radente: spostamento = rilievo × distanza / (altezza luce − rilievo))
-     - più è sfumata         (la penombra si allarga con la lunghezza)
-     - più è debole          (lontano arriva meno luce, quindi c'è meno contrasto da togliere)
-   Sotto ogni lettera resta anche un filo d'ombra stretta, quella di contatto col piano.
-   Numeri: OMBRA_LUCE = altezza della luce sul piano; il rilievo cambia per numero, nome, famiglia e nota. Sono scelte, non misure. */
-var OMBRA_LUCE = 70, OMBRA_META = 230, OMBRA_MAX = 10;
+   Il testo è in rilievo sul blocco. Le luci sono PUNTI sulla riga colorata del bordo sinistro, poco sopra il piano:
+   il blocco al posto 1 ne ha una (al centro), quello al posto 2 ne ha due, … quello al posto 5 ne ha cinque, distribuite lungo la riga.
+   Ogni luce fa la sua ombra, che parte dalla lettera e va nella direzione opposta alla luce (quindi a destra, e un po' in su o in giù
+   secondo dove sta la luce):  spostamento = rilievo / (altezza luce − rilievo) × (distanza dalla luce).
+   Più la lettera è lontana dalla luce, più l'ombra è lunga, sfumata e debole. Con più luci ogni ombra è più leggera,
+   perché le altre luci la rischiarano. Sotto ogni lettera resta un filo d'ombra di contatto.
+   Anche il chiarore colorato del blocco viene dagli stessi punti. Tutti i numeri qui sono scelte, non misure. */
+var OMBRA_LUCE = 46, OMBRA_META = 240, OMBRA_MAX = 16;
 function lettere(t){ return String(t).split(' ').map(function(w){ return '<span class="pa">' + w.split('').map(function(c){ return '<span>' + esc(c) + '</span>'; }).join('') + '</span>'; }).join(' '); }
-function ombraDi(x, rilievo, forza){
+function ombraDi(x, y, luci, rilievo, forza){
   x = Math.max(0, x);
-  var dx = Math.min(OMBRA_MAX, rilievo * x / (OMBRA_LUCE - rilievo)), sf = 0.5 + dx * 0.30, a = forza / (1 + x / OMBRA_META);
-  /* il fianco delle lettere che guarda la luce prende un filo del colore della famiglia: è quello che su un fondo scuro fa vedere il rilievo */
   var bordo = Math.round(95 / (1 + x / OMBRA_META));
-  return '-0.8px 0 0.5px color-mix(in srgb,var(--fc) ' + bordo + '%,transparent),'
-       + '0 0.6px 0.6px rgba(0,0,0,0.9),'
-       /* due strati: vicino alla lettera l'ombra è stretta e scura (il nucleo), più in là si allarga e sfuma (la penombra) */
-       + (dx * 0.5).toFixed(2) + 'px ' + (dx * 0.06).toFixed(2) + 'px ' + (0.3 + dx * 0.10).toFixed(2) + 'px rgba(0,0,0,' + Math.min(0.95, a + 0.2).toFixed(2) + '),'
-       + dx.toFixed(2) + 'px ' + (dx * 0.12).toFixed(2) + 'px ' + sf.toFixed(2) + 'px rgba(0,0,0,' + a.toFixed(2) + ')';
+  var out = ['-0.8px 0 0.5px color-mix(in srgb,var(--fc) ' + bordo + '%,transparent)', '0 0.6px 0.6px rgba(0,0,0,0.9)'];
+  var k = rilievo / (OMBRA_LUCE - rilievo), peso = 1 / Math.pow(luci.length, 0.5);
+  luci.forEach(function(ly){
+    var dx = k * x, dy = k * (y - ly), len = Math.sqrt(dx * dx + dy * dy);
+    if(len > OMBRA_MAX){ dx *= OMBRA_MAX / len; dy *= OMBRA_MAX / len; len = OMBRA_MAX; }
+    var dist = Math.sqrt(x * x + (y - ly) * (y - ly)), a = forza * peso / (1 + dist / OMBRA_META);
+    out.push((dx * 0.5).toFixed(2) + 'px ' + (dy * 0.5).toFixed(2) + 'px ' + (0.3 + len * 0.10).toFixed(2) + 'px rgba(0,0,0,' + Math.min(0.95, a + 0.18 * peso).toFixed(2) + ')');   /* nucleo */
+    out.push(dx.toFixed(2) + 'px ' + dy.toFixed(2) + 'px ' + (0.6 + len * 0.32).toFixed(2) + 'px rgba(0,0,0,' + a.toFixed(2) + ')');                                            /* penombra */
+  });
+  return out.join(',');
 }
 function ombre(root){
   (root || document).querySelectorAll('.block').forEach(function(b){
-    var x0 = b.getBoundingClientRect().left;
-    function metti(el, rilievo, forza){ if(!el) return; var q = el.getBoundingClientRect(); if(!q.width) return; el.style.textShadow = ombraDi(q.left + q.width / 2 - x0, rilievo, forza); }
-    metti(b.querySelector('.pn'), 5, 0.95);
-    b.querySelectorAll('.nm .pa > span').forEach(function(c){ metti(c, 3.8, 0.95); });
-    metti(b.querySelector('.fl'), 1.9, 0.9);
-    metti(b.querySelector('.notebox .tx'), 1.9, 0.85);
+    var R = b.getBoundingClientRect(); if(!R.height) return;
+    var n = (+b.dataset.i || 0) + 1, luci = [];
+    for(var i = 0; i < n; i++) luci.push(R.height * (i + 0.5) / n);
+    /* i punti luce si vedono sulla riga, e il chiarore del blocco parte da lì */
+    var box = b.querySelector('.luci'); if(!box){ box = document.createElement('div'); box.className = 'luci'; b.appendChild(box); }
+    box.innerHTML = luci.map(function(ly){ return '<i style="top:' + ly.toFixed(1) + 'px"></i>'; }).join('');
+    var forzaLuce = Math.round(26 / Math.pow(n, 0.45)), raggio = Math.round(Math.max(150, R.width * 0.62));
+    b.style.setProperty('background', luci.map(function(ly){
+      return 'radial-gradient(' + raggio + 'px ' + Math.round(raggio * 0.6) + 'px at 0px ' + ly.toFixed(1) + 'px,color-mix(in srgb,var(--fc) ' + forzaLuce + '%,transparent) 0%,color-mix(in srgb,var(--fc) ' + Math.round(forzaLuce * 0.4) + '%,transparent) 36%,transparent 100%)';
+    }).concat(['linear-gradient(90deg,rgba(26,24,21,0.55) 0%,rgba(26,24,21,0.20) 60%,rgba(26,24,21,0) 100%)']).join(','), 'important');
+    function metti(el, rilievo, forza){ if(!el) return; var q = el.getBoundingClientRect(); if(!q.width) return; el.style.textShadow = ombraDi(q.left + q.width / 2 - R.left, q.top + q.height / 2 - R.top, luci, rilievo, forza); }
+    metti(b.querySelector('.pn'), 6, 1);
+    b.querySelectorAll('.nm .pa > span').forEach(function(c){ metti(c, 4.6, 1); });
+    metti(b.querySelector('.fl'), 2.4, 0.95);
+    metti(b.querySelector('.notebox .tx'), 2.4, 0.9);
   });
 }
 window.addEventListener('resize', function(){ ombre(document); });

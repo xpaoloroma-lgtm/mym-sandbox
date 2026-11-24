@@ -170,6 +170,23 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
   font-size:8px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:rgba(212,168,74,0.85);pointer-events:none;}
 </style>
 <style id="sbx-comune">
+/* a metà monitor (circa 960): blocchi più stretti, il blocco su due righe, tabella più stretta */
+@media (max-width:1300px){
+  #work{gap:12px!important;padding:12px!important;}
+  #c-blocchi{flex-basis:250px!important;}
+  #c-blocchi .col-hd{height:auto!important;padding:12px!important;flex-wrap:wrap;}
+  .b-riga{flex-wrap:wrap;height:auto!important;gap:10px!important;padding:12px!important;}
+  .b-riga > .btn{height:40px!important;}
+  #b-nome{flex:1 1 0!important;height:40px!important;}
+  #b-posti{flex:0 0 100%!important;gap:8px!important;height:58px;order:3;}
+  .posto{padding:0 10px!important;}
+  .e-barra{padding:12px!important;}
+  #e-cerca{flex:1 1 200px!important;}
+  .e-testa,.e-r{grid-template-columns:52px minmax(140px,1.3fr) 96px minmax(0,1.5fr)!important;column-gap:10px!important;padding:0 12px!important;}
+  .bk-n{font-size:15px!important;}
+  .bk-r{font-size:13px!important;}
+}
+
 /* ══ MISURE COMUNI AI PROTOCOLLI ══
    Stesse in Load, Self e Move (Open viene dopo). Ogni protocollo tiene la sua forma,
    ma queste cose sono uguali dappertutto:

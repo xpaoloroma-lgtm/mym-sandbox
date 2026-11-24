@@ -1600,6 +1600,7 @@ function openPicker(mode, fk, fromR){
     return '<button type="button" class="pitem' + (cur ? ' cur' : '') + '" data-pick="' + r[0] + '"' + (cur ? ' disabled' : '') + '><i style="background:' + f.css + '"></i>' + esc(r[1]) + '</button>';
   }).join('');
   $('pk-ok').disabled = true;
+  $('pk-ok').style.display = mode === 'init' ? 'none' : '';
   $('picker').classList.toggle('replace', mode !== 'change');
   $('pk-mot-in').value = '';
   $('veil').classList.add('open');
@@ -1610,6 +1611,8 @@ $('pk-list').addEventListener('click', function(e){
   pk.sel = +b.dataset.pick;
   $('pk-list').querySelectorAll('.pitem').forEach(function(x){ x.classList.toggle('sel', x === b); });
   $('pk-ok').disabled = false;
+  /* prima scelta: un clic basta, non serve anche Conferma. Nel cambio resta, perché lì c'è anche il motivo. */
+  if(pk.mode === 'init') $('pk-ok').click();
 });
 $('pk-x').addEventListener('click', closePicker);
 $('veil').addEventListener('pointerdown', function(e){ if(e.target === $('veil')) closePicker(); });

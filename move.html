@@ -170,6 +170,10 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
   font-size:8px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:rgba(212,168,74,0.85);pointer-events:none;}
 </style>
 <style id="sbx-comune">
+/* file aperto da solo: nel percorso "Sandbox" è un tasto che riporta a Sandbox */
+.bc a.sb, #breadcrumb a.sb{color:#d4a84a;text-decoration:none;cursor:pointer;}
+.bc a.sb:hover, #breadcrumb a.sb:hover{text-decoration:underline;}
+
 /* a metà monitor (circa 960): blocchi più stretti, il blocco su due righe, tabella più stretta */
 @media (max-width:1300px){
   #work{gap:12px!important;padding:12px!important;}
@@ -207,7 +211,7 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
 </head>
 <body>
 <header>
-  <div class="bc"><span>Paolo</span><span class="sep">›</span><span class="proto" style="color:#78cd9b">Move</span><span class="sep">›</span><span class="cli">Mario Rossi</span></div>
+  <div class="bc"><a class="sb" href="index.html" title="Torna a Sandbox">Sandbox</a><span class="sep">›</span><span class="proto" style="color:#78cd9b">Move</span><span class="sep">›</span><span class="cli">Blocchi</span></div>
   <div class="hdr-r"></div>
 </header>
 

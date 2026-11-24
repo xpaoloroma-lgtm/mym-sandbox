@@ -769,6 +769,13 @@ body.view-only #view-only-banner{display:flex;}
   font-size:8px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:rgba(212,168,74,0.85);pointer-events:none;}
 </style>
 <style id="sbx-comune">
+/* a metà monitor i tasti di prova a destra si accorciano, così il nome del cliente si legge intero */
+@media (max-width:1300px){ .sim .hbtn .lg{display:none!important;} .sim .hbtn .sm{display:inline!important;} .sim{gap:5px!important;padding:3px 4px 3px 6px!important;} header .hdr-r{gap:8px!important;} }
+
+/* file aperto da solo: nel percorso "Sandbox" è un tasto che riporta a Sandbox */
+.bc a.sb, #breadcrumb a.sb{color:#d4a84a;text-decoration:none;cursor:pointer;}
+.bc a.sb:hover, #breadcrumb a.sb:hover{text-decoration:underline;}
+
 /* sotto 860 la riga "ultima seduta" deve stare tutta nella finestra */
 @media (max-width:860px){ .mixbox{column-gap:12px !important;} .ar-h{white-space:normal !important;max-width:96px;} .ar{min-width:0;gap:8px !important;} .ar-n{white-space:normal !important;font-size:10px !important;letter-spacing:1.5px !important;} .ar-w{font-size:11px !important;} }
 
@@ -789,6 +796,8 @@ body.view-only #view-only-banner{display:flex;}
   #view-only-banner .view-only-cta,#view-only-banner .vo-cta{padding:0 8px!important;letter-spacing:1.5px!important;}
 }
 /* ══ fine CONSULTAZIONE ══ */
+#view-only-banner{margin:0 auto 0 16px!important;}
+@media (max-width:1300px){ #view-only-banner{margin:0 auto 0 10px!important;} }
 header .bc{flex:0 1 auto;min-width:0;overflow:hidden;white-space:nowrap;}
 header .hdr-r{flex:none;}
 @media (max-width:1300px){ .sim-lbl,.sim-date{display:none!important;} .hdr-r .btn{padding:0 9px!important;letter-spacing:1.5px!important;} }
@@ -821,7 +830,7 @@ header .hdr-r{flex:none;}
 </head>
 <body>
 <header>
-  <div class="bc"><span>Paolo</span><span class="sep">›</span><span class="proto">Self</span><span class="sep">›</span><span class="cli">Mario Rossi</span></div>
+  <div class="bc"><a class="sb" href="index.html" title="Torna a Sandbox">Sandbox</a><span class="sep">›</span><span class="proto">Self</span><span class="sep">›</span><span class="cli">Mario Rossi</span></div>
   <div id="view-only-banner"><span class="vo-text">Modalità consultazione</span><button type="button" class="vo-cta" id="vo-confirm">Conferma sessione</button></div>
   <div class="hdr-r">
     <button type="button" class="btn btn-sm hbtn" id="undo" disabled title="Undo: annulla l'ultima azione (Ctrl/Cmd+Z)" aria-label="Undo"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 12 12"><path d="M4.5 2.5L2 5l2.5 2.5M2.3 5h5.2a2.6 2.6 0 0 1 0 5.2H5.5" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="lg">Undo</span></button>

@@ -2183,7 +2183,11 @@ function applyMove0(src, tgt){
   }
   if(src.r === R){
     if(src.i === j) return null;
-    var tmp = rs[R][j]; rs[R][j] = id; rs[R][src.i] = tmp;
+    /* (25/11) Su un posto vuoto: il blocco ci va e basta. Su un posto occupato: si INSERISCE lì e gli altri scalano di uno
+       verso il posto lasciato libero, come quando si riordina un elenco. Prima era uno scambio secco tra i due posti:
+       portando il 2 al 4 il 3 restava fermo e il 4 saltava al 2, e trascinando oltre i blocchi lontani si scambiavano a salti. */
+    if(rs[R][j] == null){ rs[R][j] = id; rs[R][src.i] = null; }
+    else { rs[R].splice(src.i, 1); rs[R].splice(j, 0, id); }
     return {ok:true, rounds:rs, copies:syncCopies(rs, cp)};
   }
   if(rs[R].indexOf(id) !== -1) return {ok:false};

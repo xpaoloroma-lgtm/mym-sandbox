@@ -879,7 +879,8 @@ header .hdr-r{flex:none;}
   color:#14110a;background:linear-gradient(180deg,#f0d28c,#d4a84a);border:1px solid #f0d28c;box-shadow:0 0 14px rgba(222,190,120,0.45);}
 .rconf.si{display:inline-flex;align-items:center;}
 .rconf.ok{background:none;border-color:transparent;box-shadow:none;color:rgba(120,200,150,0.9);cursor:default;padding:0 4px;}
-.round.prep .block .neon{background:repeating-linear-gradient(180deg,var(--fc) 0 6px,transparent 6px 11px)!important;box-shadow:none!important;}
+/* in preparazione la riga non è a trattini ma a puntini fini, tutti uguali: tra loro i punti luce sono solo un po' più accesi */
+.round.prep .block .neon{background:radial-gradient(circle at 50% 50%,color-mix(in srgb,var(--fc) 85%,transparent) 0 0.9px,transparent 1.3px) 0 0 / 3px 5px repeat-y!important;box-shadow:none!important;}
 /* (24/11) l'aspetto giusto è quello meno acceso, e vale sempre: in preparazione e dopo la conferma. Tra i due cambia solo la riga, tratteggiata o piena. */
 
 .block .neon{box-shadow:none!important;}
@@ -954,7 +955,7 @@ header .hdr-r{flex:none;}
 /* punti luce: piccoli, un paio di pixel, con un filo di alone */
 /* i punti luce: bianco caldo */
 /* i punti luce si devono appena percepire: un puntino del colore della famiglia schiarito, senza alone, uguale su tutti i colori */
-.block .luci i{position:absolute;left:0.5px;top:-1px;width:2px;height:2px;border-radius:50%;background:color-mix(in srgb,var(--fc) 45%,#fff);opacity:.6;}
+.block .luci i{position:absolute;left:0.5px;top:-1px;width:2px;height:2px;border-radius:50%;background:color-mix(in srgb,var(--fc) 40%,#fff);opacity:.85;box-shadow:0 0 2px 0.5px color-mix(in srgb,var(--fc) 55%,transparent);}
 /* il trattino della nota è un oggetto: quello vero è colorato, la sua copia sotto fa solo l'ombra */
 .block .card .notebox{border-left-color:transparent!important;}
 .block .card .notebox:not(.note-empty)::before{content:'';position:absolute;left:0;top:2px;bottom:2px;width:2px;border-radius:1px;background:var(--tkc,color-mix(in srgb,var(--fc) 60%,transparent));}

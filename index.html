@@ -11804,6 +11804,20 @@ window.addEventListener('load', function(){
 }
 </style>
 <style>
+/* ══ WARM-UP: una riga sola in alto, uguale in tutti i protocolli (il modello è Load) ══ */
+.warm-riga{flex:none;height:46px;display:flex;align-items:center;gap:14px;padding:0 16px;box-sizing:border-box;
+  background:rgba(180,195,210,.024);border:1px solid rgba(180,195,210,.14);border-left:3px solid rgba(180,195,210,.45);border-radius:2px;}
+.warm-riga:focus-within{background:rgba(180,195,210,.05);}
+.warm-riga > span{flex:none;font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(225,232,240,.92);white-space:nowrap;}
+.warm-riga input{flex:1;min-width:0;height:28px;background:none;border:0;border-bottom:1px solid transparent;outline:none;
+  font-family:inherit;font-size:15px !important;font-weight:300;color:rgba(240,235,220,1);padding:0;}
+.warm-riga input::placeholder{color:rgba(190,204,218,.4);}
+.warm-riga input:focus{border-bottom-color:rgba(212,168,74,.6);}
+
+#scheda-slots > .warm-riga{margin:10px 12px 8px;}
+#scheda-slots > .warm-riga input.scheda-note-inp{min-height:0 !important;height:28px !important;padding:0 !important;background:none !important;border:0 !important;border-bottom:1px solid transparent !important;resize:none;}
+</style>
+<style>
 /* Il grafico "Utilizzo per PT" non sta più nella pagina protocolli: lo stesso
    grafico c'è già nella pagina Admin, alla voce "Utilizzo per PT". */
 #proto-chart-wrap{display:none !important;}
@@ -15430,15 +15444,11 @@ function renderScheda(flashFam){
   (function(){
     if(!state.notes) state.notes={};
     var wu = document.createElement('div');
-    wu.className = 'scheda-extra-slot';
-    wu.innerHTML =
-      '<div class="scheda-extra-label">'+
-        '<div class="scheda-extra-tag">Riscaldamento</div>'+
-        '<div class="scheda-extra-name">Warm-up</div>'+
-      '</div>'+
-      '<div class="scheda-extra-right">'+
-        '<textarea spellcheck="false" class="scheda-note-inp" placeholder="indicazioni warm-up" data-key="_warmup">'+encNote(state.notes['_warmup']||'')+'</textarea>'+
-      '</div>';
+    /* la stessa riga di Load, Self: etichetta e una riga di testo. Il testo resta quello di prima (state.notes._warmup). */
+    wu.className = 'warm-riga';
+    wu.innerHTML = '<span>Warm-up</span>'+
+      '<input type="text" class="scheda-note-inp" spellcheck="false" autocomplete="off" placeholder="cosa fa prima di iniziare" aria-label="Warm-up" data-key="_warmup">';
+    wu.querySelector('input').value = String(state.notes['_warmup']||'').replace(/\s*\n\s*/g, ' · ');
     container.appendChild(wu);
     var ta=wu.querySelector('.scheda-note-inp');
     ta.addEventListener('input',function(){ state.notes['_warmup']=this.value; save(); });

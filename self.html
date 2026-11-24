@@ -591,6 +591,16 @@ body.view-only #view-only-banner{display:flex;}
   font-size:8px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:rgba(212,168,74,0.85);pointer-events:none;}
 </style>
 <style id="sbx-comune">
+/* ══ WARM-UP: una riga sola in alto, uguale in tutti i protocolli (il modello è Load) ══ */
+.warm-riga{flex:none;height:46px;display:flex;align-items:center;gap:14px;padding:0 16px;box-sizing:border-box;
+  background:rgba(180,195,210,.024);border:1px solid rgba(180,195,210,.14);border-left:3px solid rgba(180,195,210,.45);border-radius:2px;}
+.warm-riga:focus-within{background:rgba(180,195,210,.05);}
+.warm-riga > span{flex:none;font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(225,232,240,.92);white-space:nowrap;}
+.warm-riga input{flex:1;min-width:0;height:28px;background:none;border:0;border-bottom:1px solid transparent;outline:none;
+  font-family:inherit;font-size:15px;font-weight:300;color:rgba(240,235,220,1);padding:0;}
+.warm-riga input::placeholder{color:rgba(190,204,218,.4);}
+.warm-riga input:focus{border-bottom-color:rgba(212,168,74,.6);}
+
 /* ══ MISURE COMUNI AI PROTOCOLLI ══
    Stesse in Load, Self e Move (Open viene dopo). Ogni protocollo tiene la sua forma,
    ma queste cose sono uguali dappertutto:
@@ -626,6 +636,7 @@ body.view-only #view-only-banner{display:flex;}
 
 <div id="main">
   <section id="work">
+    <div class="warm-riga"><span>Warm-up</span><input type="text" id="w-txt" placeholder="cosa fa prima di iniziare" aria-label="Warm-up" spellcheck="false" autocomplete="off"></div>
     <div id="rounds">
       <div class="round" data-r="0">
         <div class="rdisp" id="disp-0" data-drop="disp" data-r="0"></div>
@@ -876,6 +887,9 @@ function syncCopies(rounds, copies){
 function copyIn(id, r, copies){ return (copies[id] || [null, null]).indexOf(r); }
 /* Annulla: ogni salvataggio mette da parte lo stato di prima. */
 var UNDO = [], lastJSON = null;
+/* warm-up: una riga di testo, salvata con il resto */
+function warmMostra(){ var w = document.getElementById('w-txt'); if(w && document.activeElement !== w) w.value = (S && S.warm) || ''; }
+document.addEventListener('input', function(e){ if(e.target && e.target.id === 'w-txt'){ S.warm = e.target.value; save(); } });
 function save(){
   var j = JSON.stringify(S);
   if(lastJSON && lastJSON !== j){ UNDO.push(lastJSON); if(UNDO.length > 80) UNDO.shift(); }
@@ -1279,6 +1293,7 @@ window.addEventListener('resize', function(){ if(S){ renderSide(); markClipped()
 /* ═══ RENDER COMPLETO (con FLIP sui blocchi che si spostano) ═══ */
 function renderAll(opts){
   opts = opts || {};
+  warmMostra();
   var before = {};
   document.querySelectorAll('.block[data-key]').forEach(function(b){ before[b.dataset.key] = b.getBoundingClientRect(); });
   computeLead(); if(!preview){ normalize(); computeLead(); S.copies = syncCopies(S.today, S.copies); }

@@ -971,7 +971,7 @@ header .hdr-r{flex:none;}
    - righe: quante ne tiene il blocco (due nell'1, di più negli altri); se la nota è più lunga sfuma in fondo, e passandoci sopra si legge tutta */
 .block .card .notebox{font-size:15px!important;font-weight:500!important;line-height:1.35!important;color:rgba(244,232,204,0.96)!important;
   width:auto!important;max-width:max(130px,calc(62cqw - 74px))!important;margin-left:8px!important;padding:0 0 0 9px!important;
-  max-height:max(1.35em,round(down, calc(100cqh - 47px), 1.35em))!important;border-left:2px solid color-mix(in srgb,var(--fc) 55%,transparent)!important;}
+  max-height:max(1.35em,round(down, calc(100cqh - 47px), 1.35em))!important;border-left:2px solid transparent!important;}
 .block .card .notebox .tx{white-space:normal!important;display:block!important;overflow:visible!important;text-overflow:clip!important;}
 .block .card .notebox.clipped{-webkit-mask-image:linear-gradient(180deg,#000 calc(100% - 1.1em),transparent)!important;mask-image:linear-gradient(180deg,#000 calc(100% - 1.1em),transparent)!important;}
 .block .card .notebox .pen{right:-16px!important;}
@@ -1419,7 +1419,7 @@ function renderBlocks(r, anim){
    Anche il chiarore colorato del blocco viene dagli stessi punti. Tutti i numeri qui sono scelte, non misure. */
 var OMBRA_LUCE = 70, OMBRA_META = 240, OMBRA_MAX = 9, LUCE_FORZA = 13, LUCE_BUIO = 70, LUCE_PUNTO_H = 16, LUCE_PUNTO = 30;   /* LUCE_BUIO: quanto resta luminosa (in %) una scritta lontana da ogni luce */
 function lettere(t){ return String(t).split(' ').map(function(w){ return '<span class="pa">' + w.split('').map(function(c){ return '<span>' + esc(c) + '</span>'; }).join('') + '</span>'; }).join(' '); }
-function ombraDi(x, y, luci, rilievo, forza){
+function ombraDi(x, y, luci, rilievo, forza, soloSfumata){
   /* il fianco della lettera che guarda le luci prende un filo del colore della famiglia */
   var mx = 0, my = 0; luci.forEach(function(l){ mx += l.x; my += l.y; }); mx /= luci.length; my /= luci.length;
   var vx = mx - x, vy = my - y, vl = Math.sqrt(vx * vx + vy * vy) || 1;
@@ -1433,6 +1433,8 @@ function ombraDi(x, y, luci, rilievo, forza){
     out.push((dx * 0.5).toFixed(2) + 'px ' + (dy * 0.5).toFixed(2) + 'px ' + (0.3 + len * 0.10).toFixed(2) + 'px rgba(0,0,0,' + Math.min(0.9, a + 0.08 * peso).toFixed(2) + ')');   /* nucleo */
     out.push(dx.toFixed(2) + 'px ' + dy.toFixed(2) + 'px ' + (0.6 + len * 0.32).toFixed(2) + 'px rgba(0,0,0,' + a.toFixed(2) + ')');                                            /* penombra */
   });
+  /* per il trattino della nota: solo la parte sfumata dell'ombra. Con il filo chiaro e l'ombra netta sembrava una riga doppia. */
+  if(soloSfumata) out = out.filter(function(v, i){ return i >= 2 && i % 2 === 1; });
   return out.join(',');
 }
 /* i punti luce stanno vicini tra loro, in fila al centro del blocco: uno nel posto 1, due nel 2, … cinque nel 5 */
@@ -1498,7 +1500,7 @@ function ombre(root){
         var m = lume(nv), nq = nv.getBoundingClientRect();
         if(m){
           nv.style.setProperty('--tkc', 'color-mix(in srgb,var(--fc) ' + m.f + '%,rgb(60,58,54))');
-          no.style.setProperty('--tks', ombraDi(nq.left + 1 - R.left, nq.top + nq.height / 2 - R.top, luci, 1.7, 0.6));
+          no.style.setProperty('--tks', ombraDi(nq.left + 1 - R.left, nq.top + nq.height / 2 - R.top, luci, 1.7, 0.45, true));
         }
       }
     }

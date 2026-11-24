@@ -950,6 +950,9 @@ header .hdr-r{flex:none;}
 .block .luci i{position:absolute;left:-1px;width:5px;height:5px;margin-top:-2.5px;border-radius:50%;background:color-mix(in srgb,var(--fc) 45%,#fff);
   box-shadow:0 0 6px 1px color-mix(in srgb,var(--fc) 85%,transparent),0 0 16px 4px color-mix(in srgb,var(--fc) 40%,transparent);}
 .round.prep .block .luci i{opacity:.55;}
+/* le particelle e le loro ombre si muovono senza scatti tra un passo e l'altro */
+.block .luci i{transition:left .26s linear,top .26s linear;}
+.block .pn,.block .fl,.block .nm .pa > span,.block .notebox .tx{transition:text-shadow .26s linear;}
 /* ═══ PROPORZIONI DEL TESTO NEI BLOCCHI (24/11): numero grande e sottile, alto quanto il blocco; nome a peso normale ═══ */
 .block .card{grid-template-columns:44px minmax(0,1fr);}
 .block .card .pn{font-size:38px;font-weight:200;line-height:1;grid-row:1 / span 3;align-self:center;}
@@ -1384,38 +1387,78 @@ function renderBlocks(r, anim){
 var OMBRA_LUCE = 46, OMBRA_META = 240, OMBRA_MAX = 16;
 function lettere(t){ return String(t).split(' ').map(function(w){ return '<span class="pa">' + w.split('').map(function(c){ return '<span>' + esc(c) + '</span>'; }).join('') + '</span>'; }).join(' '); }
 function ombraDi(x, y, luci, rilievo, forza){
-  x = Math.max(0, x);
-  var bordo = Math.round(95 / (1 + x / OMBRA_META));
-  var out = ['-0.8px 0 0.5px color-mix(in srgb,var(--fc) ' + bordo + '%,transparent)', '0 0.6px 0.6px rgba(0,0,0,0.9)'];
+  /* il fianco della lettera che guarda le luci prende un filo del colore della famiglia */
+  var mx = 0, my = 0; luci.forEach(function(l){ mx += l.x; my += l.y; }); mx /= luci.length; my /= luci.length;
+  var vx = mx - x, vy = my - y, vl = Math.sqrt(vx * vx + vy * vy) || 1;
+  var bordo = Math.round(95 / (1 + vl / OMBRA_META));
+  var out = [(vx / vl * 0.8).toFixed(2) + 'px ' + (vy / vl * 0.8).toFixed(2) + 'px 0.5px color-mix(in srgb,var(--fc) ' + bordo + '%,transparent)', '0 0.6px 0.6px rgba(0,0,0,0.9)'];
   var k = rilievo / (OMBRA_LUCE - rilievo), peso = 1 / Math.pow(luci.length, 0.5);
-  luci.forEach(function(ly){
-    var dx = k * x, dy = k * (y - ly), len = Math.sqrt(dx * dx + dy * dy);
+  luci.forEach(function(l){
+    var dx = k * (x - l.x), dy = k * (y - l.y), len = Math.sqrt(dx * dx + dy * dy);
     if(len > OMBRA_MAX){ dx *= OMBRA_MAX / len; dy *= OMBRA_MAX / len; len = OMBRA_MAX; }
-    var dist = Math.sqrt(x * x + (y - ly) * (y - ly)), a = forza * peso / (1 + dist / OMBRA_META);
+    var dist = Math.sqrt((x - l.x) * (x - l.x) + (y - l.y) * (y - l.y)), a = forza * peso / (1 + dist / OMBRA_META);
     out.push((dx * 0.5).toFixed(2) + 'px ' + (dy * 0.5).toFixed(2) + 'px ' + (0.3 + len * 0.10).toFixed(2) + 'px rgba(0,0,0,' + Math.min(0.95, a + 0.18 * peso).toFixed(2) + ')');   /* nucleo */
     out.push(dx.toFixed(2) + 'px ' + dy.toFixed(2) + 'px ' + (0.6 + len * 0.32).toFixed(2) + 'px rgba(0,0,0,' + a.toFixed(2) + ')');                                            /* penombra */
   });
   return out.join(',');
 }
+/* LUCI VIVE: quando il round è confermato i punti luce si staccano dalla riga e diventano particelle che vagano piano dentro il blocco.
+   Restano luci vere: chiarore e ombre le seguono. Chiave = round-esercizio, così sopravvivono ai ridisegni. */
+var LUCI_VIVE = {}, LUCE_VEL = [3, 7];   /* pixel al secondo: molto piano */
+function luciFerme(n, H){ var o = []; for(var i = 0; i < n; i++) o.push({x:0, y:H * (i + 0.5) / n}); return o; }
+function ombraApplica(b){
+  var g = b._geo; if(!g) return;
+  var luci = g.luci, n = luci.length, box = b.querySelector('.luci');
+  if(box){
+    if(box.children.length !== n) box.innerHTML = luci.map(function(){ return '<i></i>'; }).join('');
+    luci.forEach(function(l, i){ box.children[i].style.left = (l.x - 2.5).toFixed(1) + 'px'; box.children[i].style.top = l.y.toFixed(1) + 'px'; });
+  }
+  var forzaLuce = Math.round(26 / Math.pow(n, 0.45)), raggio = Math.round(Math.max(150, g.W * 0.62));
+  b.style.setProperty('background', luci.map(function(l){
+    return 'radial-gradient(' + raggio + 'px ' + Math.round(raggio * 0.6) + 'px at ' + l.x.toFixed(1) + 'px ' + l.y.toFixed(1) + 'px,color-mix(in srgb,var(--fc) ' + forzaLuce + '%,transparent) 0%,color-mix(in srgb,var(--fc) ' + Math.round(forzaLuce * 0.4) + '%,transparent) 36%,transparent 100%)';
+  }).concat(['linear-gradient(90deg,rgba(26,24,21,0.55) 0%,rgba(26,24,21,0.20) 60%,rgba(26,24,21,0) 100%)']).join(','), 'important');
+  g.pezzi.forEach(function(q){ q.el.style.textShadow = ombraDi(q.x, q.y, luci, q.h, q.f); });
+}
 function ombre(root){
   (root || document).querySelectorAll('.block').forEach(function(b){
     var R = b.getBoundingClientRect(); if(!R.height) return;
-    var n = (+b.dataset.i || 0) + 1, luci = [];
-    for(var i = 0; i < n; i++) luci.push(R.height * (i + 0.5) / n);
-    /* i punti luce si vedono sulla riga, e il chiarore del blocco parte da lì */
-    var box = b.querySelector('.luci'); if(!box){ box = document.createElement('div'); box.className = 'luci'; b.appendChild(box); }
-    box.innerHTML = luci.map(function(ly){ return '<i style="top:' + ly.toFixed(1) + 'px"></i>'; }).join('');
-    var forzaLuce = Math.round(26 / Math.pow(n, 0.45)), raggio = Math.round(Math.max(150, R.width * 0.62));
-    b.style.setProperty('background', luci.map(function(ly){
-      return 'radial-gradient(' + raggio + 'px ' + Math.round(raggio * 0.6) + 'px at 0px ' + ly.toFixed(1) + 'px,color-mix(in srgb,var(--fc) ' + forzaLuce + '%,transparent) 0%,color-mix(in srgb,var(--fc) ' + Math.round(forzaLuce * 0.4) + '%,transparent) 36%,transparent 100%)';
-    }).concat(['linear-gradient(90deg,rgba(26,24,21,0.55) 0%,rgba(26,24,21,0.20) 60%,rgba(26,24,21,0) 100%)']).join(','), 'important');
-    function metti(el, rilievo, forza){ if(!el) return; var q = el.getBoundingClientRect(); if(!q.width) return; el.style.textShadow = ombraDi(q.left + q.width / 2 - R.left, q.top + q.height / 2 - R.top, luci, rilievo, forza); }
+    var r = +b.dataset.r, n = (+b.dataset.i || 0) + 1, key = b.dataset.key;
+    var fatto = !!(S.conf && S.conf[r] && S.today[r].every(function(x){ return x != null; }));
+    if(!b.querySelector('.luci')){ var box = document.createElement('div'); box.className = 'luci'; b.appendChild(box); }
+    var luci;
+    if(fatto){
+      luci = LUCI_VIVE[key];
+      if(!luci || luci.length !== n){   /* appena confermato: partono dalla riga, ognuna per la sua strada */
+        luci = luciFerme(n, R.height).map(function(l){ var a = (Math.random() - 0.5) * 1.6, v = LUCE_VEL[0] + Math.random() * (LUCE_VEL[1] - LUCE_VEL[0]); return {x:l.x, y:l.y, a:a, v:v}; });
+        LUCI_VIVE[key] = luci;
+      }
+    } else { delete LUCI_VIVE[key]; luci = luciFerme(n, R.height); }
+    var pezzi = [];
+    function metti(el, h, f){ if(!el) return; var q = el.getBoundingClientRect(); if(!q.width) return; pezzi.push({el:el, x:q.left + q.width / 2 - R.left, y:q.top + q.height / 2 - R.top, h:h, f:f}); }
     metti(b.querySelector('.pn'), 6, 1);
     b.querySelectorAll('.nm .pa > span').forEach(function(c){ metti(c, 4.6, 1); });
     metti(b.querySelector('.fl'), 2.4, 0.95);
     metti(b.querySelector('.notebox .tx'), 2.4, 0.9);
+    b._geo = {W:R.width, H:R.height, luci:luci, pezzi:pezzi, vive:fatto};
+    ombraApplica(b);
   });
 }
+/* il passo delle particelle: 4 volte al secondo, il resto lo fa la transizione */
+var LUCE_PASSO = 0.25;
+setInterval(function(){
+  if(document.hidden) return;
+  document.querySelectorAll('.block').forEach(function(b){
+    var g = b._geo; if(!g || !g.vive) return;
+    var maxX = g.W * 0.72, m = 6;
+    g.luci.forEach(function(l){
+      l.a += (Math.random() - 0.5) * 0.35;                       /* cambia direzione poco per volta */
+      l.x += Math.cos(l.a) * l.v * LUCE_PASSO; l.y += Math.sin(l.a) * l.v * LUCE_PASSO;
+      if(l.x < m){ l.x = m; l.a = Math.PI - l.a; } if(l.x > maxX){ l.x = maxX; l.a = Math.PI - l.a; }
+      if(l.y < m){ l.y = m; l.a = -l.a; } if(l.y > g.H - m){ l.y = g.H - m; l.a = -l.a; }
+    });
+    ombraApplica(b);
+  });
+}, LUCE_PASSO * 1000);
 window.addEventListener('resize', function(){ ombre(document); });
 
 /* ═══ ROUND: GRAFICO (con morph animato) ═══ */

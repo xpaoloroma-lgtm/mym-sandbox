@@ -1960,7 +1960,9 @@ header{height:57px;flex-shrink:0;padding:0 28px;border-bottom:1px solid var(--bo
   color:rgba(180,195,210,0.82);
   display:inline-flex;align-items:center;justify-content:center;gap:14px;
 }
-/* Open · Pace · Skip = Sandbox (oro tenue, peso del sistema) */
+/* I cinque protocolli (oro tenue). Su una riga sola: con cinque nomi le lettere stanno un po' più vicine. */
+.login-title{white-space:nowrap;letter-spacing:3.5px;gap:12px;}
+@media (max-width:360px){ .login-title{letter-spacing:2.5px;gap:9px;} }
 .login-title-sandbox{
   color:rgba(220,185,110,0.82);
   font-weight:600;
@@ -1975,7 +1977,7 @@ header{height:57px;flex-shrink:0;padding:0 28px;border-bottom:1px solid var(--bo
     rgba(180,195,210,0.30) 50%,
     rgba(180,195,210,0) 100%);
 }
-/* Grid = fuori Sandbox (grigio neutro, peso minore) */
+/* Grid = foglio libero, non è un protocollo (grigio neutro, peso minore) */
 .login-title-libero{
   color:rgba(180,195,210,0.62);
   font-weight:300;
@@ -10472,7 +10474,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
 <div id="login-splash">
   <div class="login-box">
     <div class="login-title">
-      <span class="login-title-sandbox">Open · Pace · Skip</span>
+      <span class="login-title-sandbox">Lift · Load · Self · Open · Move</span>
       <span class="login-title-divider"></span>
       <span class="login-title-libero">Grid</span>
     </div>

@@ -1018,8 +1018,9 @@ header .hdr-r{flex:none;}
 /* i due tastini: tasti della Sandbox (riga sottile), con l'icona che si vede */
 .round-hd .clear,.round-hd .skip2{position:absolute!important;right:20px;z-index:3;width:24px;height:34px!important;min-width:0!important;padding:0!important;margin:0!important;font-size:0!important;gap:0!important;opacity:1!important;
   display:flex!important;align-items:center!important;justify-content:center!important;background:none!important;border:1px solid rgba(180,195,210,0.20)!important;border-radius:2px!important;box-shadow:none!important;color:rgba(210,222,232,0.80)!important;}
-.round-hd .clear svg,.round-hd .skip2 svg{width:12px!important;height:12px!important;flex:none;}
-.round-hd .clear{top:18px;} .round-hd .skip2{top:58px;}
+.round-hd .clear svg,.round-hd .skip2 svg{width:15px!important;height:15px!important;flex:none;display:block;}
+.round-hd .clear,.round-hd .skip2{width:26px!important;height:35px!important;right:19px!important;}
+.round-hd .clear{top:18px;} .round-hd .skip2{top:57px;}
 .round-hd .clear:hover,.round-hd .skip2:hover{border-color:rgba(200,175,90,0.75)!important;color:var(--gold-txt)!important;}
 .round-hd .skip2 .off-t,.round-hd .skip2 .on-t{display:none!important;}
 /* CONFERMA: il tasto dorato della Sandbox, sopra le carte quando il round è pieno. Unica cosa in più: il led rosso che lampeggia */
@@ -1032,6 +1033,15 @@ header .hdr-r{flex:none;}
   animation:ledTic 0.9s steps(1,end) infinite!important;}
 .rconf.ok{background:rgba(10,10,9,0.86)!important;box-shadow:none!important;border:1px solid rgba(120,200,150,0.30)!important;}
 body.dragging .rconf{pointer-events:none!important;opacity:.15;}
+/* I POSTI VUOTI: non più incavi scuri (sembravano loculi). Un posto vuoto è solo spazio libero:
+   niente fondo, niente ombra dentro; resta la riga a puntini grigia a sinistra (la stessa della preparazione, senza colore) e il numero. */
+.slot .empty{inset:3px 0!important;background:none!important;border:0!important;box-shadow:none!important;border-radius:2px;}
+.slot .estrip{display:block!important;left:0!important;top:3px!important;bottom:3px!important;width:3px!important;
+  background:radial-gradient(circle at 50% 50%,rgba(180,195,210,0.34) 0 0.9px,transparent 1.3px) 0 0 / 3px 5px repeat-y!important;}
+.slot .erow .pnum{color:rgba(220,185,110,0.30);}
+.slot .erow .hint{color:rgba(180,195,210,0.42);}
+.slot.hot .empty{background:linear-gradient(90deg,rgba(212,168,74,0.13),rgba(212,168,74,0) 70%)!important;border:0!important;}
+.slot.hot .estrip{background:rgba(212,168,74,0.75)!important;}
 </style>
 </head>
 <body>

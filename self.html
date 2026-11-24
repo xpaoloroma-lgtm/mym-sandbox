@@ -21,8 +21,8 @@
   --text-lo:rgba(180,195,210,0.85); --text-xlo:rgba(180,195,210,0.62);
   --line:rgba(180,195,210,0.14); --line-soft:rgba(180,195,210,0.08);
   --panel:rgba(13,12,10,0.55); --card:rgba(26,24,21,0.62); --raised:rgba(30,28,24,0.72);
-  --f-upper:#d29b50; --f-lower:#cdb97d; --f-buffer:#d27d7d; --f-core:#78cd9b; --f-tempo:#78a5e1;
-  --f-buffer-txt:#d27d7d;
+  --f-upper:#78a5e1; --f-lower:#5cc8d2; --f-buffer:#a98be0; --f-core:#d291c8; --f-tempo:#78cd9b;
+  --f-buffer-txt:#a98be0;
   --red:#e08a8a;
   --font:'Exo 2',sans-serif;
   --lane:100px;
@@ -821,8 +821,8 @@ header .hdr-r{flex:none;}
    - tasto              alto 32 · 10px · 600 · lettere 2px · angoli 2
    - riquadro           bordo 1px · angoli 2
    - percorso in alto   13px · lettere 3px · maiuscolo
-   - colori famiglie    quelli di Open: Upper 210,155,80 · Lower 205,185,125 ·
-                        Buffer 210,125,125 · Core 120,205,155 · Cardio 120,165,225 */
+   - colori famiglie    ufficiali, uguali ovunque (niente giallo, è il colore del sistema; niente rosso, è dei red flag): Upper 120,165,225 · Lower 92,200,210 ·
+                        Buffer 169,139,224 · Core 210,145,200 · Cardio 120,205,155 */
 
 .round-hd .rname{font-size:12px!important;font-weight:700!important;letter-spacing:3px!important}
 .lbl{font-size:12px!important;font-weight:700!important;letter-spacing:3px!important}
@@ -1022,11 +1022,11 @@ var DB_RAW = [
 
 /* ═══ FAMIGLIE ═══ */
 var FAMS = [
-  {k:'U', short:'Upper', label:'Upper',        css:'var(--f-upper)',  txt:'var(--f-upper)',      hex:'#d29b50', db:['row','push']},
-  {k:'L', short:'Lower', label:'Lower',        css:'var(--f-lower)',  txt:'var(--f-lower)',      hex:'#cdb97d', db:['lower']},
-  {k:'B', short:'Buffer', label:'Buffer',       css:'var(--f-buffer)', txt:'var(--f-buffer-txt)', hex:'#d27d7d', db:['buffer']},
-  {k:'C', short:'Core', label:'Core',         css:'var(--f-core)',   txt:'var(--f-core)',       hex:'#78cd9b', db:['core']},
-  {k:'T', short:'Cardio', label:'Cardio Tempo', css:'var(--f-tempo)',  txt:'var(--f-tempo)',      hex:'#78a5e1', db:['tempo']}
+  {k:'U', short:'Upper', label:'Upper',        css:'var(--f-upper)',  txt:'var(--f-upper)',      hex:'#78cd9b', db:['row','push']},
+  {k:'L', short:'Lower', label:'Lower',        css:'var(--f-lower)',  txt:'var(--f-lower)',      hex:'#5cc8d2', db:['lower']},
+  {k:'B', short:'Buffer', label:'Buffer',       css:'var(--f-buffer)', txt:'var(--f-buffer-txt)', hex:'#a98be0', db:['buffer']},
+  {k:'C', short:'Core', label:'Core',         css:'var(--f-core)',   txt:'var(--f-core)',       hex:'#d291c8', db:['core']},
+  {k:'T', short:'Cardio', label:'Cardio Tempo', css:'var(--f-tempo)',  txt:'var(--f-tempo)',      hex:'#78cd9b', db:['tempo']}
 ];
 var FAM = {}; FAMS.forEach(function(f){ FAM[f.k] = f; });
 var DB = {};
@@ -1532,7 +1532,7 @@ function canRegister(){
    Upper va su Forza Upper, Lower su Forza Lower; la forza del Core metà e metà (il tronco serve a entrambi: scelta).
    Barra piena = oggi (o l'ultima seduta se oggi non c'è ancora una coda completa); trattini tenui = le ultime 5 sedute. */
 var BAR_N = ['Aerobico', 'Intensità', 'Forza Upper', 'Forza Lower'];
-var BAR_C = ['var(--mx-a)', 'var(--mx-i)', '#d29b50', '#cdb97d'];
+var BAR_C = ['var(--mx-a)', 'var(--mx-i)', '#78a5e1', '#5cc8d2'];
 function tail4(fo){
   var s = [0, 0, 0, 0], any = false;
   for(var i = 2; i < 5; i++){

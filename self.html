@@ -946,13 +946,16 @@ header .hdr-r{flex:none;}
 .lane .filo.f5{animation:filoB 25s ease-in-out -28s infinite alternate;}
 .lane .filo.f6{animation:filoA 35s ease-in-out -5s infinite alternate;}
 .lane .filo.f7{animation:filoB 48s ease-in-out -48s infinite alternate;}
-.block .luci{position:absolute;left:0;top:0;bottom:0;width:0;z-index:3;pointer-events:none;}
-.block .luci i{position:absolute;left:-1px;width:5px;height:5px;margin-top:-2.5px;border-radius:50%;background:color-mix(in srgb,var(--fc) 45%,#fff);
-  box-shadow:0 0 6px 1px color-mix(in srgb,var(--fc) 85%,transparent),0 0 16px 4px color-mix(in srgb,var(--fc) 40%,transparent);}
-.round.prep .block .luci i{opacity:.55;}
-/* le particelle e le loro ombre si muovono senza scatti tra un passo e l'altro */
-.block .luci i{transition:left .26s linear,top .26s linear;}
-.block .pn,.block .fl,.block .nm .pa > span,.block .notebox .tx{transition:text-shadow .26s linear;}
+.block .luci{position:absolute;left:0;top:0;width:0;height:0;z-index:3;pointer-events:none;}
+/* punti luce: piccoli, un paio di pixel, con un filo di alone */
+.block .luci i{position:absolute;left:-1px;top:-1px;width:2px;height:2px;border-radius:50%;will-change:transform;background:color-mix(in srgb,var(--fc) 35%,#fff);
+  box-shadow:0 0 3px 0.5px color-mix(in srgb,var(--fc) 80%,transparent);}
+.round.prep .block .luci i{opacity:.6;}
+/* la copia per le ombre: stesso testo, stesso posto, invisibile; sta sotto il testo vero */
+.block .card.omb{z-index:1!important;pointer-events:none!important;}
+.block .card.omb,.block .card.omb *{color:transparent!important;-webkit-text-fill-color:transparent!important;border-color:transparent!important;}
+.block .card.omb svg,.block .card.omb .pen{visibility:hidden!important;}
+.block .card:not(.omb){z-index:2;}
 /* ═══ PROPORZIONI DEL TESTO NEI BLOCCHI (24/11): numero grande e sottile, alto quanto il blocco; nome a peso normale ═══ */
 .block .card{grid-template-columns:44px minmax(0,1fr);}
 .block .card .pn{font-size:38px;font-weight:200;line-height:1;grid-row:1 / span 3;align-self:center;}
@@ -1411,7 +1414,7 @@ function ombraApplica(b){
   var luci = g.luci, n = luci.length, box = b.querySelector('.luci');
   if(box){
     if(box.children.length !== n) box.innerHTML = luci.map(function(){ return '<i></i>'; }).join('');
-    luci.forEach(function(l, i){ box.children[i].style.left = (l.x - 2.5).toFixed(1) + 'px'; box.children[i].style.top = l.y.toFixed(1) + 'px'; });
+    luci.forEach(function(l, i){ box.children[i].style.transform = 'translate3d(' + l.x.toFixed(2) + 'px,' + l.y.toFixed(2) + 'px,0)'; });
   }
   var forzaLuce = Math.round(26 / Math.pow(n, 0.45)), raggio = Math.round(Math.max(150, g.W * 0.62));
   b.style.setProperty('background', luci.map(function(l){
@@ -1429,36 +1432,45 @@ function ombre(root){
     if(fatto){
       luci = LUCI_VIVE[key];
       if(!luci || luci.length !== n){   /* appena confermato: partono dalla riga, ognuna per la sua strada */
-        luci = luciFerme(n, R.height).map(function(l){ var a = (Math.random() - 0.5) * 1.6, v = LUCE_VEL[0] + Math.random() * (LUCE_VEL[1] - LUCE_VEL[0]); return {x:l.x, y:l.y, a:a, v:v}; });
+        luci = luciFerme(n, R.height).map(function(l){ var a = (Math.random() - 0.5) * 1.6, v = LUCE_VEL[0] + Math.random() * (LUCE_VEL[1] - LUCE_VEL[0]); return {x:l.x, y:l.y, a:a, v:v, w:0}; });
         LUCI_VIVE[key] = luci;
       }
     } else { delete LUCI_VIVE[key]; luci = luciFerme(n, R.height); }
+    /* le ombre stanno su una copia del testo messa SOTTO il testo vero: così un'ombra non può mai passare sopra una lettera */
+    var vera = b.querySelector('.card:not(.omb)'), omb = b.querySelector('.card.omb');
+    if(vera && !omb){ omb = vera.cloneNode(true); omb.classList.add('omb'); omb.setAttribute('aria-hidden', 'true'); b.insertBefore(omb, vera); }
+    if(!omb) return;
     var pezzi = [];
     function metti(el, h, f){ if(!el) return; var q = el.getBoundingClientRect(); if(!q.width) return; pezzi.push({el:el, x:q.left + q.width / 2 - R.left, y:q.top + q.height / 2 - R.top, h:h, f:f}); }
-    metti(b.querySelector('.pn'), 6, 1);
-    b.querySelectorAll('.nm .pa > span').forEach(function(c){ metti(c, 4.6, 1); });
-    metti(b.querySelector('.fl'), 2.4, 0.95);
-    metti(b.querySelector('.notebox .tx'), 2.4, 0.9);
+    metti(omb.querySelector('.pn'), 6, 1);
+    omb.querySelectorAll('.nm .pa > span').forEach(function(c){ metti(c, 4.6, 1); });
+    metti(omb.querySelector('.fl'), 2.4, 0.95);
+    metti(omb.querySelector('.notebox .tx'), 2.4, 0.9);
     b._geo = {W:R.width, H:R.height, luci:luci, pezzi:pezzi, vive:fatto};
     ombraApplica(b);
   });
 }
-/* il passo delle particelle: 4 volte al secondo, il resto lo fa la transizione */
-var LUCE_PASSO = 0.25;
-setInterval(function(){
-  if(document.hidden) return;
-  document.querySelectorAll('.block').forEach(function(b){
-    var g = b._geo; if(!g || !g.vive) return;
-    var maxX = g.W * 0.72, m = 6;
-    g.luci.forEach(function(l){
-      l.a += (Math.random() - 0.5) * 0.35;                       /* cambia direzione poco per volta */
-      l.x += Math.cos(l.a) * l.v * LUCE_PASSO; l.y += Math.sin(l.a) * l.v * LUCE_PASSO;
-      if(l.x < m){ l.x = m; l.a = Math.PI - l.a; } if(l.x > maxX){ l.x = maxX; l.a = Math.PI - l.a; }
-      if(l.y < m){ l.y = m; l.a = -l.a; } if(l.y > g.H - m){ l.y = g.H - m; l.a = -l.a; }
+/* le particelle si muovono a ogni fotogramma, così scorrono lisce. La direzione gira dolcemente, senza scatti. */
+var luceT = 0;
+function luciGira(t){
+  var dt = Math.min(0.05, (t - luceT) / 1000 || 0); luceT = t;
+  if(!document.hidden && dt > 0){
+    document.querySelectorAll('.block').forEach(function(b){
+      var g = b._geo; if(!g || !g.vive) return;
+      var maxX = g.W * 0.72, m = 5;
+      g.luci.forEach(function(l){
+        l.w = (l.w || 0) * (1 - 0.6 * dt) + (Math.random() - 0.5) * 2.2 * dt;   /* la curva cambia piano */
+        l.a += l.w * dt;
+        l.x += Math.cos(l.a) * l.v * dt; l.y += Math.sin(l.a) * l.v * dt;
+        if(l.x < m){ l.x = m; l.a = Math.PI - l.a; l.w = 0; } if(l.x > maxX){ l.x = maxX; l.a = Math.PI - l.a; l.w = 0; }
+        if(l.y < m){ l.y = m; l.a = -l.a; l.w = 0; } if(l.y > g.H - m){ l.y = g.H - m; l.a = -l.a; l.w = 0; }
+      });
+      ombraApplica(b);
     });
-    ombraApplica(b);
-  });
-}, LUCE_PASSO * 1000);
+  }
+  requestAnimationFrame(luciGira);
+}
+requestAnimationFrame(luciGira);
 window.addEventListener('resize', function(){ ombre(document); });
 
 /* ═══ ROUND: GRAFICO (con morph animato) ═══ */

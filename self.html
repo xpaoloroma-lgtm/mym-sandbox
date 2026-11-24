@@ -847,6 +847,7 @@ header .hdr-r{flex:none;}
 #rank .pr.salvo .fm,#rank .pr.salvo .ex{opacity:.62!important;}
 /* la zona del cambio conta: un filo più larga e staccata dal resto */
 @media (min-width:861px){ #rk-col{background:linear-gradient(180deg,rgba(222,190,120,0.045),rgba(13,12,10,0.55) 220px)!important;border-left:1px solid rgba(222,190,120,0.28)!important;padding-left:16px!important;} }
+#reset.demo-off{color:var(--text-lo)!important;border-style:dashed!important;}
 /* in Self niente "Conferma sessione" in alto: si conferma il round */
 #view-only-banner{display:none!important;}
 #pt-pop{position:fixed;z-index:60;display:flex;align-items:center;gap:6px;padding:8px 10px;background:#0d0c0a;border:1px solid rgba(222,190,120,0.55);border-radius:2px;box-shadow:0 8px 28px rgba(0,0,0,0.6),0 0 14px rgba(222,190,120,0.18);}
@@ -884,8 +885,7 @@ header .hdr-r{flex:none;}
       <span class="sim-date" id="sim-date"></span>
       <span class="gsw" role="group" aria-label="Sfondo dei grafici"><span class="gsw-l">sfondo</span><button type="button" data-ghost="si">Sì</button><button type="button" data-ghost="no">No</button></span>
       <button type="button" class="btn gold btn-sm hbtn" id="nextday" title="Il cliente torna la volta dopo">Giorno dopo</button>
-      <button type="button" class="btn btn-sm hbtn" id="newcli"><span class="lg">Cliente nuovo</span><span class="sm">Nuovo</span></button>
-      <button type="button" class="btn btn-sm hbtn" id="reset"><span class="lg">Dati demo</span><span class="sm">Demo</span></button>
+      <button type="button" class="btn btn-sm hbtn" id="reset" aria-pressed="false"></button>
     </div>
   </div>
 </header>
@@ -1822,7 +1822,7 @@ window.addEventListener('resize', function(){ if(S){ renderSide(); markClipped()
 /* ═══ RENDER COMPLETO (con FLIP sui blocchi che si spostano) ═══ */
 function renderAll(opts){
   opts = opts || {};
-  warmMostra();
+  warmMostra(); demoMostra();
   var before = {};
   document.querySelectorAll('.block[data-key]').forEach(function(b){ before[b.dataset.key] = b.getBoundingClientRect(); });
   computeLead(); if(!preview){ normalize(); computeLead(); S.copies = syncCopies(S.today, S.copies); }
@@ -2308,8 +2308,13 @@ if($('newcli')) $('newcli').addEventListener('click', function(){
   if(!confirm('Ricominciare da un cliente nuovo? I dati della demo in questo browser si perdono (Annulla li riporta).')) return;
   S = blank(); save(); openDay();
 });
+/* Demo on = la storia inventata di Mario Rossi (ottobre e novembre). Demo off = cliente vuoto, da zero. */
+function demoAccesa(){ return S.demo != null ? !!S.demo : !!(S.rounds.length && S.rounds[0].date === '2026-10-13'); }
+function demoMostra(){ var b = $('reset'); if(!b) return; var on = demoAccesa(); b.textContent = on ? 'Demo on' : 'Demo off'; b.classList.toggle('gold', on); b.classList.toggle('demo-off', !on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); b.title = on ? 'Stai vedendo la storia inventata di prova. Clic: cliente vuoto' : 'Stai vedendo un cliente vuoto. Clic: carica la storia inventata di prova'; }
 if($('reset')) $('reset').addEventListener('click', function(){
-  S = seed(); save(); openDay(); toast('Dati demo ripristinati');
+  var on = demoAccesa();
+  S = on ? blank() : seed(); S.demo = !on; save(); openDay(); demoMostra();
+  toast(on ? 'Demo off · cliente vuoto' : 'Demo on · storia di prova');
 });
 document.addEventListener('keydown', function(e){
   if((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key.toLowerCase() === 'z' && !e.target.closest('input,textarea')){ e.preventDefault(); undo(); }

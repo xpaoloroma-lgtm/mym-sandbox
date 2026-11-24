@@ -833,6 +833,8 @@ header .hdr-r{flex:none;}
 .lbl{font-size:12px!important;font-weight:700!important;letter-spacing:3px!important}
 .round-hd .rmeta b,.round-hd .rmeta span{font-size:10px!important;letter-spacing:2px!important}
 .btn,.btn-sm{height:32px!important;font-size:10px!important;font-weight:600!important;letter-spacing:2px!important;border-radius:2px!important}
+#rank .rk-linea{position:absolute;left:-6px;right:0;height:0;border-top:1px solid rgba(222,190,120,0.75);box-shadow:0 0 8px rgba(222,190,120,0.35);z-index:2;pointer-events:none;transition:top .7s cubic-bezier(.3,.7,.2,1),left .7s cubic-bezier(.3,.7,.2,1);}
+#rank.horiz .rk-linea{left:auto;right:auto;top:0!important;bottom:0;width:0;height:auto;border-top:0;border-left:1px solid rgba(222,190,120,0.75);}
 /* chi è al cambio resta del colore della sua famiglia: più grande e acceso, ma non dorato */
 #rank .pr.lead .fm{color:var(--fc)!important;text-shadow:0 0 12px color-mix(in srgb,var(--fc) 45%,transparent)!important;}
 #rank .pr.lead .dot{background:var(--fc)!important;border-color:var(--fc)!important;box-shadow:0 0 10px 2px color-mix(in srgb,var(--fc) 60%,transparent)!important;}
@@ -1673,7 +1675,8 @@ function placeRank(box, st, pct){
     var hh = horiz ? el.offsetWidth : el.offsetHeight;
     return {el:el, h:hh, y:(top - pct(x)) / span * (L - hh)};
   });
-  var GAP = horiz ? 14 : 8;
+  var GAP = horiz ? 14 : 8, GAPL = 26;   /* GAPL: lo spazio dove passa la linea del cambio */
+  function sopra(i){ return rows[i].el.classList.contains('lead'); }
   if(st.every(function(x){ return x.avg == null; })){   /* nessun round ancora: in fila, senza distanze */
     var y0 = 0; rows.forEach(function(r){ r.y = y0; y0 += r.h + GAP * 2; });
     rows.forEach(function(r){ if(horiz){ r.el.style.left = Math.round(W - r.y - r.h) + 'px'; r.el.style.top = ''; } else { r.el.style.top = Math.round(r.y) + 'px'; r.el.style.left = ''; } });
@@ -1681,10 +1684,10 @@ function placeRank(box, st, pct){
   }
   for(var i = 0; i < rows.length; i++){
     rows[i].y = Math.max(rows[i].y, 0);
-    if(i) rows[i].y = Math.max(rows[i].y, rows[i - 1].y + rows[i - 1].h + GAP);
+    if(i) rows[i].y = Math.max(rows[i].y, rows[i - 1].y + rows[i - 1].h + (sopra(i - 1) && !sopra(i) ? GAPL : GAP));
   }
   for(var j = rows.length - 1; j >= 0; j--){
-    var lim = j === rows.length - 1 ? L - rows[j].h : rows[j + 1].y - rows[j].h - GAP;
+    var lim = j === rows.length - 1 ? L - rows[j].h : rows[j + 1].y - rows[j].h - (sopra(j) && !sopra(j + 1) ? GAPL : GAP);
     rows[j].y = Math.min(rows[j].y, lim);
   }
   rows.forEach(function(r){
@@ -1692,6 +1695,13 @@ function placeRank(box, st, pct){
     else { r.el.style.top = Math.round(r.y) + 'px'; r.el.style.left = ''; }
   });
   var oldZone = box.querySelector('.rk-zone'); if(oldZone) oldZone.remove();
+  /* LA LINEA DEL CAMBIO: chi sta sopra (a destra, quando è in orizzontale) va al cambio. Se sono pari, sono sopra in più d'uno. */
+  var ln = box.querySelector('.rk-linea'), ult = -1;
+  rows.forEach(function(r, i){ if(sopra(i)) ult = i; });
+  if(ult === -1 || ult === rows.length - 1){ if(ln) ln.remove(); return; }
+  if(!ln){ ln = document.createElement('div'); ln.className = 'rk-linea'; box.appendChild(ln); }
+  var q = rows[ult].y + rows[ult].h + GAPL / 2;
+  if(horiz){ ln.style.top = ''; ln.style.left = Math.round(W - PADR - q) + 'px'; } else { ln.style.left = ''; ln.style.top = Math.round(q) + 'px'; }
 }
 /* Tendenza: la media della famiglia adesso contro com'era prima dell'ultima seduta. ▲ sale verso il cambio, ▼ scende verso l'adattamento.
    Sotto 0,25 di posizione non segno niente (scelta). */

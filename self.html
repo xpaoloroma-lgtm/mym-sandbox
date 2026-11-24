@@ -912,14 +912,26 @@ header .hdr-r{flex:none;}
 .slot.hot .empty{background:linear-gradient(90deg,rgba(212,168,74,0.16),rgba(4,4,3,0.45) 70%)!important;border-color:rgba(212,168,74,0.6);}
 /* le linee grigie di sfondo del grafico ondeggiano piano: circa 8 pixel, in 14-34 secondi, ogni gruppo col suo tempo.
    La linea dorata NO: quella è il dato e sta ferma. */
-@keyframes ondaA{from{transform:translateX(-2.2px);}to{transform:translateX(2.2px);}}
-@keyframes ondaB{from{transform:translateX(1.9px);}to{transform:translateX(-2.5px);}}
-.lane .onda{animation:ondaA 14s ease-in-out infinite alternate;will-change:transform;}
-.lane .onda.o1{animation:ondaB 19s ease-in-out -7s infinite alternate;}
-.lane .onda.o2{animation:ondaA 23s ease-in-out -12s infinite alternate;}
-.lane .onda.o3{animation:ondaB 29s ease-in-out -4s infinite alternate;}
-.lane .onda.o4{animation:ondaA 34s ease-in-out -17s infinite alternate;}
-@media (prefers-reduced-motion:reduce){ .lane .onda{animation:none!important;} }
+/* il fascio grigio si apre e si chiude a ventaglio; i fili chiari vanno ognuno per conto suo */
+.lane .onda,.lane .filo{transform-box:view-box;transform-origin:0 0;will-change:transform;}
+@keyframes ondaA{from{transform:scaleX(0.90);}to{transform:scaleX(1.10);}}
+@keyframes ondaB{from{transform:scaleX(1.12);}to{transform:scaleX(0.92);}}
+@keyframes filoA{from{transform:translateX(-5px) scaleX(0.88);}to{transform:translateX(4px) scaleX(1.12);}}
+@keyframes filoB{from{transform:translateX(5px) scaleX(1.10);}to{transform:translateX(-4px) scaleX(0.90);}}
+.lane .onda{animation:ondaA 17s ease-in-out infinite alternate;}
+.lane .onda.o1{animation:ondaB 23s ease-in-out -7s infinite alternate;}
+.lane .onda.o2{animation:ondaA 29s ease-in-out -12s infinite alternate;}
+.lane .onda.o3{animation:ondaB 31s ease-in-out -4s infinite alternate;}
+.lane .onda.o4{animation:ondaA 37s ease-in-out -17s infinite alternate;}
+.lane .filo{animation:filoA 13s ease-in-out infinite alternate;}
+.lane .filo.f1{animation:filoB 17s ease-in-out -5s infinite alternate;}
+.lane .filo.f2{animation:filoA 19s ease-in-out -9s infinite alternate;}
+.lane .filo.f3{animation:filoB 22s ease-in-out -3s infinite alternate;}
+.lane .filo.f4{animation:filoA 26s ease-in-out -14s infinite alternate;}
+.lane .filo.f5{animation:filoB 15s ease-in-out -11s infinite alternate;}
+.lane .filo.f6{animation:filoA 21s ease-in-out -2s infinite alternate;}
+.lane .filo.f7{animation:filoB 28s ease-in-out -19s infinite alternate;}
+@media (prefers-reduced-motion:reduce){ .lane .onda,.lane .filo{animation:none!important;} }
 </style>
 </head>
 <body>
@@ -1386,16 +1398,22 @@ var ghostCache = {};
 function ghostSvg(r){
   var key = GHOST;
   if(ghostCache[key]) return ghostCache[key];
-  var s = '', gr = ['', '', '', '', ''], nn = 0;
+  var s = '', gr = ['', '', '', '', ''], nn = 0, fili = '', fl = 0;
   if(GHOST !== 'no'){
     var ys = [0], cum = 0; for(var i = 0; i < 5; i++){ cum += HB[i]; ys.push(cum * 100); }
     var X = function(v){ return 3 + Math.min(v, MAXV) / MAXV * 90; };
     (function perm(a, rest){
-      if(!rest.length){ gr[(nn++) % 5] += '<path d="' + smooth(famVals(a).map(function(v, i){ return [X(v), ys[i]]; })) + '" vector-effect="non-scaling-stroke"/>'; return; }
+      if(!rest.length){
+        var pth = '<path d="' + smooth(famVals(a).map(function(v, i){ return [X(v), ys[i]]; })) + '" vector-effect="non-scaling-stroke"/>';
+        /* una linea ogni 15 è un "filo": un po' più chiara e si muove da sola, così il movimento si vede */
+        if(nn % 15 === 7) fili += '<g class="filo f' + (fl++ % 8) + '">' + pth + '</g>'; else gr[nn % 5] += pth;
+        nn++; return;
+      }
       rest.forEach(function(k, i){ perm(a.concat(k), rest.slice(0, i).concat(rest.slice(i + 1))); });
     })([], ['U','L','B','C','T']);
     /* cinque gruppi di linee: ognuno ondeggia per conto suo, pianissimo (vedi .onda nel css) */
-    s = '<g fill="none" stroke="rgba(220,228,236,0.019)" stroke-width="1">' + gr.map(function(g, i){ return '<g class="onda o' + i + '">' + g + '</g>'; }).join('') + '</g>';
+    s = '<g fill="none" stroke="rgba(220,228,236,0.019)" stroke-width="1">' + gr.map(function(g, i){ return '<g class="onda o' + i + '">' + g + '</g>'; }).join('') + '</g>'
+      + '<g fill="none" stroke="rgba(220,228,236,0.085)" stroke-width="1">' + fili + '</g>';
   }
   ghostCache[key] = s;
   return s;

@@ -392,6 +392,8 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
   });
   window.addEventListener('storage', function(ev){ if(ev.key === 'esercizi-flow-stato') carica(); });
   window.addEventListener('focus', carica);
+  /* dentro Sandbox la barra in alto è quella di Sandbox: la mia, che lì resterebbe una striscia vuota, non serve */
+  if(window.parent !== window){ var h = document.querySelector('header'); if(h) h.style.display = 'none'; }
   disegna(); carica();
 })();
 </script>

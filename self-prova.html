@@ -1042,6 +1042,23 @@ body.dragging .rconf{pointer-events:none!important;opacity:.15;}
 .slot .erow .hint{color:rgba(180,195,210,0.42);}
 .slot.hot .empty{background:linear-gradient(90deg,rgba(212,168,74,0.13),rgba(212,168,74,0) 70%)!important;border:0!important;}
 .slot.hot .estrip{background:rgba(212,168,74,0.75)!important;}
+
+/* ═════════ PROVA 25/11 · quinto giro ═════════ */
+/* I DUE TASTI (svuota, non fatto): tasti veri, fuori dal riquadro delle carte, in colonna a destra, alti metà riquadro ciascuno. Il cestino è sempre nello stesso posto. */
+.rdisp{margin-right:46px!important;padding-right:5px!important;}
+.round-hd .clear,.round-hd .skip2{right:9px!important;width:40px!important;height:41px!important;border-color:rgba(180,195,210,0.26)!important;background:var(--raised)!important;color:rgba(222,230,238,0.88)!important;}
+.round-hd .clear{top:9px!important;} .round-hd .skip2{top:54px!important;}
+.round-hd .clear svg,.round-hd .skip2 svg{width:25px!important;height:25px!important;}
+.round-hd .skip2 svg{width:16px!important;height:16px!important;}
+.round-hd .clear:not(.has){opacity:.35!important;}
+.round-hd .skip2[aria-pressed="true"]{border-color:rgba(212,168,74,0.80)!important;color:var(--gold-txt)!important;}
+.rconf.si{left:15px!important;right:61px!important;top:15px!important;}
+/* LA BARRA COLORATA A SINISTRA DEI BLOCCHI: un filo (1px), senza alone. In preparazione il filo è tratteggiato. */
+.block .neon{width:1px!important;border-radius:0!important;box-shadow:none!important;}
+.round.prep .block .neon{background:repeating-linear-gradient(180deg,color-mix(in srgb,var(--fc) 85%,transparent) 0 2px,transparent 2px 5px)!important;}
+.block .luci i{left:-0.5px!important;}
+.slot .estrip{width:1px!important;background:repeating-linear-gradient(180deg,rgba(180,195,210,0.34) 0 2px,transparent 2px 5px)!important;}
+.slot.hot .estrip{background:rgba(212,168,74,0.75)!important;}
 </style>
 </head>
 <body>
@@ -1369,6 +1386,7 @@ function normalize(){
   /* conferma dei round: se un round confermato viene toccato, torna da confermare */
   if(!S.conf) S.conf = [null, null];
   [0, 1].forEach(function(r){ if(S.conf[r] && S.conf[r] !== S.today[r].join(',')) S.conf[r] = null; });
+  if(S.sess && !S.conf[0] && !S.conf[1]) S.sess = null;   /* nessun round confermato: il PT si richiede alla prossima conferma */
   if(S.pend && (ph !== 'straddle' || S.pend.fam !== LEAD)) S.pend = null;
   [0, 1].forEach(function(r){
     S.today[r] = S.today[r].map(function(x){

@@ -864,9 +864,13 @@ header .hdr-r{flex:none;}
 /* "Fatica / impegno" sopra il grafico non serve più */
 .round-hd .rmeta{display:none!important;}
 /* il tasto Conferma deve farsi notare: finché il round è pieno e non confermato, pulsa */
-@keyframes confPulsa{0%,100%{box-shadow:0 0 10px rgba(222,190,120,0.40),0 0 0 0 rgba(240,210,140,0.55);transform:scale(1);}
-  50%{box-shadow:0 0 22px rgba(240,210,140,0.85),0 0 0 7px rgba(240,210,140,0);transform:scale(1.05);}}
-.rconf.si:not(.ok){animation:confPulsa 1.5s ease-in-out infinite;height:30px;padding:0 16px;font-size:11px;}
+/* niente battito: resta acceso e ogni tanto lo attraversa un riflesso di luce, da sinistra a destra */
+@keyframes confRiflesso{0%,62%{transform:translateX(-140%) skewX(-18deg);}100%{transform:translateX(340%) skewX(-18deg);}}
+.rconf.si:not(.ok){position:relative;overflow:hidden;height:30px;padding:0 16px;font-size:11px;box-shadow:0 0 16px rgba(240,210,140,0.50);}
+.rconf.si:not(.ok)::after{content:'';position:absolute;top:0;bottom:0;left:0;width:38%;pointer-events:none;
+  background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,0.75),rgba(255,255,255,0));animation:confRiflesso 3.6s ease-in-out infinite;}
+.rconf.ok{cursor:pointer!important;}
+#pt-pop button.sel{border-color:#f0d28c;color:var(--gold-txt);}
 /* ═══ CONFERMA DEL ROUND ═══
    Finché non è confermato il round è una preparazione: si vede tratteggiato. Confermato = fatto e salvato. */
 .rconf{display:none;flex:none;height:28px;padding:0 12px;margin-left:10px;border-radius:2px;cursor:pointer;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;white-space:nowrap;
@@ -1671,7 +1675,9 @@ function renderSide(){
     var ok = !!(S.conf && S.conf[r]) && pieno, salta = r === 1 && S.skip2;
     el.classList.toggle('prep', qualcosa && !ok && !salta); el.classList.toggle('fatto', ok);
     bt.classList.toggle('si', pieno && !salta); bt.classList.toggle('ok', ok);
-    bt.textContent = ok ? '✓ fatto' : 'Conferma'; bt.disabled = ok;
+    var chi = S.sess ? ' · ' + S.sess.pt : '';   /* chi è il PT si vede sempre sul tasto, e toccandolo dopo la conferma si può cambiare */
+    bt.textContent = (ok ? '✓ fatto' : 'Conferma') + chi; bt.disabled = false;
+    bt.title = ok ? 'Round confermato' + (S.sess ? ' da ' + S.sess.pt + '. Clic per cambiare PT' : '') : 'Conferma il round';
     if(qualcosa && !ok && !salta) inPrep = true;
   });
   $('rk-col').classList.toggle('prep', inPrep);
@@ -2372,19 +2378,26 @@ function renderPtStrip(){
 $('ss-pt').addEventListener('click', function(e){ var b = e.target.closest('[data-pt]'); if(!b) return; splashPT = b.dataset.pt; renderPtStrip(); $('ss-ok').disabled = false; });
 var daConfermare = null;   /* il round che aspetta il PT per essere confermato */
 /* chi sei: si chiede una volta sola, lì dove si conferma il primo round. Scegliere il nome conferma il round. */
-function ptChiudi(){ var p = $('pt-pop'); if(p) p.remove(); daConfermare = null; }
+var ptCambio = false;
+function ptChiudi(){ var p = $('pt-pop'); if(p) p.remove(); daConfermare = null; ptCambio = false; }
 function ptChiedi(r){
   ptChiudi(); daConfermare = r;
   var bt = document.querySelector('.rconf[data-conf="' + r + '"]'), q = bt.getBoundingClientRect();
   var p = document.createElement('div'); p.id = 'pt-pop';
-  p.innerHTML = '<span>PT</span>' + PT_LIST.map(function(n){ return '<button type="button" data-ptc="' + n + '">' + n + '</button>'; }).join('');
+  p.innerHTML = '<span>PT</span>' + PT_LIST.map(function(n){ return '<button type="button" data-ptc="' + n + '"' + (S.sess && S.sess.pt === n ? ' class="sel"' : '') + '>' + n + '</button>'; }).join('');
   document.body.appendChild(p);
   var w = p.offsetWidth;
   p.style.left = Math.max(8, Math.min(window.innerWidth - w - 8, q.right - w)) + 'px'; p.style.top = (q.bottom + 6) + 'px';
 }
 document.addEventListener('click', function(e){
   var b = e.target.closest('[data-ptc]');
-  if(b){ var r = daConfermare; S.sess = {date:S.simDate, pt:b.dataset.ptc}; ptChiudi(); save(); if(r != null) confermaRound(r); return; }
+  if(b){
+    var r = daConfermare, cambio = ptCambio;
+    if(cambio && S.sess) S.sess.pt = b.dataset.ptc; else S.sess = {date:S.simDate, pt:b.dataset.ptc};
+    ptChiudi(); save();
+    if(r != null) confermaRound(r); else { renderAll(); if(cambio) toast('PT · ' + S.sess.pt); }
+    return;
+  }
   if($('pt-pop') && !e.target.closest('#pt-pop') && !e.target.closest('.rconf')) ptChiudi();
 });
 function confermaRound(r){
@@ -2401,7 +2414,12 @@ $('ss-ok').addEventListener('click', function(){
   if(r != null) confermaRound(r); else { renderAll(); toast('Sessione confermata · ' + splashPT); }
 });
 $('ss-view').addEventListener('click', function(){ daConfermare = null; splashClose(); VIEW = true; applyView(); });
-document.addEventListener('click', function(e){ var b = e.target.closest('[data-conf]'); if(b) confermaRound(+b.dataset.conf); });
+document.addEventListener('click', function(e){
+  var b = e.target.closest('[data-conf]'); if(!b) return;
+  var r = +b.dataset.conf;
+  if(S.conf && S.conf[r] && S.sess){ if($('pt-pop')) ptChiudi(); else { ptChiedi(r); daConfermare = null; ptCambio = true; } return; }   /* già confermato: il clic serve a cambiare PT */
+  confermaRound(r);
+});
 $('vo-confirm').addEventListener('click', splashOpen);
 function applyView(){ document.body.classList.toggle('view-only', VIEW); }
 if($('nextday')) $('nextday').addEventListener('click', function(){

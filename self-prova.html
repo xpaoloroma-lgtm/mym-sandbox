@@ -883,10 +883,12 @@ header .hdr-r{flex:none;}
 /* ═════════ PROVA GRAFICA — solo aspetto, il funzionamento è quello di self.html ═════════ */
 /* 1 · dietro il blocco l'OMBRA di quello che c'è scritto davanti: famiglia sopra, esercizio sotto. Scura, più grande, spostata. */
 .slot{container-type:size;}
-.block .ombra{position:absolute;left:44px;right:0;top:50%;transform:translateY(-38%);z-index:0;pointer-events:none;display:flex;flex-direction:column;gap:.06em;
-  font-family:'Exo 2',sans-serif;font-size:min(50cqh,62px);line-height:.9;white-space:nowrap;color:#000;opacity:.62;filter:blur(1.2px);overflow:hidden;}
-.block .ombra i{font-style:normal;font-size:.36em;font-weight:700;letter-spacing:.3em;text-transform:uppercase;line-height:1;}
-.block .ombra b{font-weight:500;letter-spacing:.01em;}
+/* è un decoro, non un'informazione: una sagoma scura molto sfumata. Grandezza FISSA, uguale in ogni posto:
+   nel blocco basso se ne vede una fascia, in quello alto di più. */
+.block .ombra{position:absolute;left:30px;top:50%;transform:translateY(-50%);z-index:0;pointer-events:none;
+  font-family:'Exo 2',sans-serif;font-size:132px;line-height:1;white-space:nowrap;color:#000;opacity:.66;filter:blur(6px);}
+.block .ombra i{position:absolute;left:.04em;bottom:92%;font-style:normal;font-size:.34em;font-weight:800;letter-spacing:.28em;text-transform:uppercase;line-height:1;}
+.block .ombra b{display:block;font-weight:700;letter-spacing:-.01em;}
 /* 2 · niente righe: i blocchi li separa la luce */
 .slot .sep{display:none!important;}
 .blocks{right:0!important;}

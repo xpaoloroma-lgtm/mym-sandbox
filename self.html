@@ -1399,10 +1399,12 @@ function drawRuler(r, peak, on){
 var GHOST = (function(){ try{ return localStorage.getItem('self_ghost2') || 'si'; }catch(e){ return 'si'; } })();
 var ghostCache = {};
 /* sfondo: tutti i 120 ordini possibili, poco visibili; davanti solo la linea dorata di oggi */
+/* onda di luce sulle linee del grafico. PROVA: ogni 3 secondi. Valore vero voluto da Paolo: 450 (7 minuti e mezzo). */
+var LAMPO_OGNI = 3, LAMPO_DURA = 2, LAMPO_FORZA = 0.05;
 function ghostSvg(r){
   var key = GHOST;
   if(ghostCache[key]) return ghostCache[key];
-  var s = '', gr = ['', '', '', '', '', '', '', '', '', ''], nn = 0, fili = '', fl = 0;
+  var s = '', gr = ['', '', '', '', '', '', '', '', '', ''], nn = 0, fili = '', fl = 0, tutte = '';
   if(GHOST !== 'no'){
     var ys = [0], cum = 0; for(var i = 0; i < 5; i++){ cum += HB[i]; ys.push(cum * 100); }
     var X = function(v){ return 3 + Math.min(v, MAXV) / MAXV * 90; };
@@ -1411,6 +1413,7 @@ function ghostSvg(r){
         var pth = '<path d="' + smooth(famVals(a).map(function(v, i){ return [X(v), ys[i]]; })) + '" vector-effect="non-scaling-stroke"/>';
         /* una linea ogni 15 è un "filo": un po' più chiara e si muove da sola, così il movimento si vede */
         if(nn % 15 === 7) fili += '<g class="filo f' + (fl++ % 8) + '">' + pth + '</g>'; else gr[nn % 10] += pth;
+        tutte += pth;
         nn++; return;
       }
       rest.forEach(function(k, i){ perm(a.concat(k), rest.slice(0, i).concat(rest.slice(i + 1))); });
@@ -1418,6 +1421,13 @@ function ghostSvg(r){
     /* cinque gruppi di linee: ognuno ondeggia per conto suo, pianissimo (vedi .onda nel css) */
     s = '<g fill="none" stroke="rgba(220,228,236,0.019)" stroke-width="1">' + gr.map(function(g, i){ return '<g class="onda o' + i + '">' + g + '</g>'; }).join('') + '</g>'
       + '<g fill="none" stroke="rgba(220,228,236,0.085)" stroke-width="1">' + fili + '</g>';
+    /* L'ONDA DI LUCE: ogni LAMPO_OGNI secondi una fascia chiara scende lungo le linee, dall'alto in basso, in LAMPO_DURA secondi.
+       È una copia delle linee colorata con una sfumatura verticale che scorre. */
+    var fr = (LAMPO_DURA / LAMPO_OGNI).toFixed(5);
+    s += '<defs><linearGradient id="lampoG" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="420">'
+       + '<stop offset="0" stop-color="#fff6dc" stop-opacity="0"/><stop offset="0.55" stop-color="#fff6dc" stop-opacity="' + LAMPO_FORZA + '"/><stop offset="1" stop-color="#fff6dc" stop-opacity="0"/>'
+       + '<animateTransform attributeName="gradientTransform" type="translate" values="0 -440;0 1520;0 1520" keyTimes="0;' + fr + ';1" dur="' + LAMPO_OGNI + 's" repeatCount="indefinite"/>'
+       + '</linearGradient></defs><g fill="none" stroke="url(#lampoG)" stroke-width="1">' + tutte + '</g>';
   }
   ghostCache[key] = s;
   return s;

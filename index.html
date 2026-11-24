@@ -11815,7 +11815,7 @@ window.addEventListener('load', function(){
 .warm-riga input:focus{border-bottom-color:rgba(212,168,74,.6);}
 
 #open-warm{margin:8px 28px 8px 12px;}
-#open-testa{margin-right:14px;justify-content:flex-start !important;gap:20px;}
+#scheda-piede{padding:14px 16px 18px;}
 /* testata della scheda: titolo di zona e un tasto vero per cambiare gli esercizi (prima era una scritta da 7, quasi invisibile) */
 .scheda-header{padding:0 12px 0 16px !important;height:52px;box-sizing:border-box;}
 .scheda-header > span{font-size:12px !important;font-weight:700 !important;letter-spacing:3px !important;color:rgba(225,232,240,.92);}
@@ -11852,15 +11852,16 @@ window.addEventListener('load', function(){
 }
 </style>
 <style>
-/* L'avviso "modalità consultazione" stava fisso sopra la striscia dei red
-   flag e la copriva. Ora è una riga sua, subito sotto la striscia. */
-#view-only-banner{position:static !important;flex-shrink:0;backdrop-filter:none !important;}
+/* L'avviso "modalità consultazione" non è più una riga sua sotto la barra:
+   sta dentro la barra in alto, al centro, come in Self. Una riga in meno prima della sostanza. */
+#view-only-banner{position:static !important;flex:none;backdrop-filter:none !important;height:34px;padding:0 6px 0 14px !important;
+  background:none !important;border:1px solid rgba(180,195,210,0.15) !important;border-radius:2px;gap:14px !important;white-space:nowrap;margin:0 16px;}
 body.view-only #main-layout, body.view-only #grid-layout{margin-top:0 !important;}
 </style>
 <script>
 window.addEventListener('DOMContentLoaded', function(){
-  var b = document.getElementById('view-only-banner'), s = document.getElementById('rf-alert-strip');
-  if(b && s && s.parentNode) s.parentNode.insertBefore(b, s.nextSibling);
+  var b = document.getElementById('view-only-banner'), bc = document.getElementById('breadcrumb');
+  if(b && bc && bc.parentNode) bc.parentNode.insertBefore(b, bc.nextSibling);
 });
 </script>
 <script>
@@ -13281,18 +13282,15 @@ function eseClose(){
 
 <!-- MAIN LAYOUT -->
 <div id="main-layout">
-  <!-- dall'alto in basso: la testata della scheda, poi il warm-up (che è già scheda), poi esercizi a sinistra e obiettivo a destra.
-       Testata e warm-up sono lunghi quanto la pagina: la parte di destra parte sotto. -->
-  <div class="scheda-header" id="open-testa">
-    <span>Scheda</span>
-    <button class="scheda-edit-btn" onclick="editScheda()" title="Torna alla scelta degli esercizi della scheda">Cambia esercizi</button>
-  </div>
+  <!-- sotto la barra c'è subito la scheda: il warm-up è la sua prima riga, lunga quanto la pagina; poi esercizi a sinistra e obiettivo a destra -->
   <div class="warm-riga" id="open-warm"><span>Warm-up</span><input type="text" id="open-warm-txt" spellcheck="false" autocomplete="off" placeholder="cosa fa prima di iniziare" aria-label="Warm-up"></div>
   <div class="top-area">
     <!-- col 1: scheda -->
     <div id="scheda-panel">
       <div class="scheda-scroll">
         <div id="scheda-slots"></div>
+        <!-- in fondo alla scheda, dopo l'ultimo esercizio: non è una riga in più sopra -->
+        <div id="scheda-piede"><button class="scheda-edit-btn" onclick="editScheda()" title="Torna alla scelta degli esercizi della scheda">Cambia esercizi</button></div>
       </div>
     </div>
     <!-- col 2: obiettivo -->

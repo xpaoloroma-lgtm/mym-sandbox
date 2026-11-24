@@ -861,6 +861,12 @@ header .hdr-r{flex:none;}
 #pt-pop span{font-size:10px;font-weight:600;letter-spacing:2px;color:var(--text-lo);margin-right:4px;}
 #pt-pop button{height:32px;padding:0 12px;background:none;border:1px solid var(--line);border-radius:2px;cursor:pointer;font-family:var(--font);font-size:12px;font-weight:600;letter-spacing:1px;color:var(--text-hi);}
 #pt-pop button:hover{border-color:#f0d28c;color:var(--gold-txt);background:rgba(212,168,74,0.10);}
+/* "Fatica / impegno" sopra il grafico non serve più */
+.round-hd .rmeta{display:none!important;}
+/* il tasto Conferma deve farsi notare: finché il round è pieno e non confermato, pulsa */
+@keyframes confPulsa{0%,100%{box-shadow:0 0 10px rgba(222,190,120,0.40),0 0 0 0 rgba(240,210,140,0.55);transform:scale(1);}
+  50%{box-shadow:0 0 22px rgba(240,210,140,0.85),0 0 0 7px rgba(240,210,140,0);transform:scale(1.05);}}
+.rconf.si:not(.ok){animation:confPulsa 1.5s ease-in-out infinite;height:30px;padding:0 16px;font-size:11px;}
 /* ═══ CONFERMA DEL ROUND ═══
    Finché non è confermato il round è una preparazione: si vede tratteggiato. Confermato = fatto e salvato. */
 .rconf{display:none;flex:none;height:28px;padding:0 12px;margin-left:10px;border-radius:2px;cursor:pointer;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;white-space:nowrap;
@@ -1402,12 +1408,16 @@ var ghostCache = {};
 /* Onda di luce sulle linee del grafico: scende nel Round 1 e, appena arriva in fondo, riparte dall'alto nel Round 2.
    Passa a caso ogni 6 minuti e mezzo - 8 minuti e mezzo (così due schermi vicini non vanno insieme), e una volta poco dopo l'apertura. */
 var LAMPO_DURA = 2, LAMPO_FORZA = 0.05, LAMPO_MIN = 390, LAMPO_MAX = 510, LAMPO_INIZIO = 5;
+var lampoT = null;
+/* il conto riparte da capo a ogni azione (clic, tasto, trascinamento): l'onda passa solo quando la pagina è ferma da un po' */
+function lampoAspetta(){ clearTimeout(lampoT); lampoT = setTimeout(lampo, (LAMPO_MIN + Math.random() * (LAMPO_MAX - LAMPO_MIN)) * 1000); }
 function lampo(){
   var a = document.getElementById('lampoA0'); if(a && a.beginElement) a.beginElement();
   setTimeout(function(){ var b = document.getElementById('lampoA1'); if(b && b.beginElement) b.beginElement(); }, LAMPO_DURA * 1000 * 0.8);
-  setTimeout(lampo, (LAMPO_MIN + Math.random() * (LAMPO_MAX - LAMPO_MIN)) * 1000);
+  lampoAspetta();
 }
-setTimeout(lampo, LAMPO_INIZIO * 1000);
+['pointerdown','keydown','wheel'].forEach(function(ev){ document.addEventListener(ev, lampoAspetta, true); });
+lampoT = setTimeout(lampo, LAMPO_INIZIO * 1000);
 function ghostSvg(r){
   var key = GHOST + r;
   if(ghostCache[key]) return ghostCache[key];

@@ -994,67 +994,43 @@ header .hdr-r{flex:none;}
 .block .card .fl{white-space:nowrap;}
 .block .nm .pa{white-space:nowrap;}
 
-/* ═════════ PROVA 25/11 — la parte alta con lo stesso linguaggio dei blocchi (superfici opache, oggetti in rilievo, luce da punti) ═════════ */
-/* CONFERMA: un tasto in rilievo sul piano, scuro e opaco, con un punto luce che respira finché aspetta */
-@keyframes confRespira{0%,100%{opacity:.25;}50%{opacity:1;}}
-.rconf.si:not(.ok){background:linear-gradient(180deg,#2b261d,#1c1914)!important;border:0!important;color:var(--gold-txt)!important;overflow:hidden!important;padding:0 16px 0 24px!important;
-  box-shadow:0 1px 0 rgba(255,240,205,0.16) inset,0 5px 12px rgba(0,0,0,0.7),0 0 0 1px rgba(0,0,0,0.6)!important;text-shadow:1.5px 0.6px 1.5px rgba(0,0,0,0.85);}
-.rconf.si:not(.ok):hover{background:linear-gradient(180deg,#352e22,#221e17)!important;}
-.rconf.ok{text-shadow:1.2px 0.5px 1.2px rgba(0,0,0,0.8);}
-/* alla conferma: la riga si accende dall'alto in basso, blocco dopo blocco */
-@keyframes rigaAccende{0%{clip-path:inset(0 0 100% 0);filter:brightness(2.6);}60%{clip-path:inset(0 0 0 0);filter:brightness(2.6);}100%{clip-path:inset(0 0 0 0);filter:brightness(1);}}
-.round.accendi .slot .block .neon{animation:rigaAccende .42s ease-out both;}
-.round.accendi .slot:nth-child(1) .neon{animation-delay:0s;} .round.accendi .slot:nth-child(2) .neon{animation-delay:.13s;} .round.accendi .slot:nth-child(3) .neon{animation-delay:.26s;}
-.round.accendi .slot:nth-child(4) .neon{animation-delay:.39s;} .round.accendi .slot:nth-child(5) .neon{animation-delay:.52s;}
-/* i tasti secondari: stessa materia, senza luce */
-.round-hd .skip2,.round-hd .clear{background:linear-gradient(180deg,#221f19,#18160f)!important;border:0!important;border-radius:2px!important;height:26px!important;min-width:26px;justify-content:center;
-  box-shadow:0 1px 0 rgba(255,246,224,0.07) inset,0 3px 7px rgba(0,0,0,0.6)!important;color:var(--text-lo)!important;}
-.round-hd .skip2:hover,.round-hd .clear:hover{color:var(--gold-txt)!important;background:linear-gradient(180deg,#2b261d,#1c1914)!important;}
-/* WARM-UP: il blocco zero. Superficie neutra, senza punti luce */
-.warm-riga{background:linear-gradient(90deg,rgba(150,148,140,0.10),rgba(150,148,140,0.03) 45%,transparent 80%),rgba(20,18,15,0.6)!important;border:0!important;border-radius:2px!important;box-shadow:none!important;
-  border-left:3px solid rgba(150,148,140,0.45)!important;}
-.warm-riga span{text-shadow:1.5px 0.6px 1.5px rgba(0,0,0,0.85);}
-.warm-riga input{font-size:15px!important;font-weight:500!important;color:rgba(244,232,204,0.94)!important;text-shadow:1.3px 0.5px 1.3px rgba(0,0,0,0.8);}
-
-
-/* ═════════ PROVA 25/11 · terzo giro ═════════
-   - niente scritta "Round 1 / Round 2": quella riga si toglie e lo spazio va alle carte
-   - le carte: cinque in fila, sempre nello stesso posto. Sono carte, non blocchi in piccolo: chiare e in rilievo quando sono da posare,
-     incavo vuoto quando sono già nel round (com'era prima), ma opache e con il colore solo su un filo in alto
-   - Conferma: compare sopra le carte quando il round è pieno; led rosso che lampeggia */
+/* ═════════ PROVA 25/11 · quarto giro — la parte alta torna al linguaggio della Sandbox: fondo scuro, righe sottili, dorato.
+   La fisicità (luce, ombre, rilievo) resta solo nei blocchi, che sono la cosa che si lavora. ═════════ */
 .round{position:relative;gap:6px!important;}
+/* niente riga "Round 1 / Round 2" */
 .round-hd{height:0!important;min-height:0!important;padding:0!important;border:0!important;margin:0!important;overflow:visible;}
 .round-hd .rname{display:none!important;}
-.rdisp{order:0;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:5px!important;height:86px;box-sizing:border-box;padding:6px 34px 6px 6px!important;
-  background:rgba(4,4,3,0.45)!important;border:0!important;border-radius:3px!important;box-shadow:inset 0 3px 9px rgba(0,0,0,0.75),inset 0 -1px 0 rgba(255,246,224,0.04)!important;}
 .rbody{order:1;}
-.rdisp .tile{height:auto!important;min-height:0!important;padding:9px 5px 5px 7px!important;flex-direction:column!important;align-items:flex-start!important;justify-content:flex-start!important;gap:0!important;overflow:hidden;}
+/* le carte: cinque in fila, riquadro sottile come gli altri della Sandbox */
+.rdisp{order:0;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:4px!important;height:86px;box-sizing:border-box;padding:6px 34px 6px 5px!important;
+  background:rgba(6,6,5,0.30)!important;border:1px solid var(--line-soft)!important;border-radius:2px!important;box-shadow:none!important;}
+.rdisp .tile{height:auto!important;min-height:0!important;padding:10px 3px 5px 5px!important;flex-direction:column!important;align-items:flex-start!important;justify-content:flex-start!important;gap:0!important;overflow:hidden;border-radius:2px!important;transform:none!important;box-shadow:none!important;}
 .rdisp .tile .fam-name{display:none!important;}
-.rdisp .tile .nm{font-size:14px!important;font-weight:500!important;line-height:1.18!important;white-space:normal!important;display:-webkit-box!important;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;overflow-wrap:anywhere;max-width:100%;}
-/* il colore è un filo in alto, non una fascia */
-.rdisp .tile::before{left:0!important;right:0!important;top:0!important;bottom:auto!important;width:auto!important;height:3px!important;border-radius:0!important;background:var(--fc)!important;box-shadow:none!important;opacity:.85;}
+.rdisp .tile .nm{font-size:13.5px!important;letter-spacing:0!important;font-weight:400!important;line-height:1.18!important;white-space:normal!important;display:-webkit-box!important;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;overflow-wrap:anywhere;max-width:100%;text-shadow:none!important;}
+.rdisp .tile::before{left:0!important;right:0!important;top:0!important;bottom:auto!important;width:auto!important;height:2px!important;border-radius:0!important;background:var(--fc)!important;box-shadow:none!important;opacity:.8;}
 .rdisp .tile::after{display:none!important;}
-/* da posare: carta chiara in rilievo */
-.rdisp .tile:not(.used){background:linear-gradient(180deg,#39342a,#231f18)!important;border:0!important;transform:none!important;
-  box-shadow:0 1px 0 rgba(255,246,224,0.14) inset,0 5px 11px rgba(0,0,0,0.65),0 0 0 1px rgba(0,0,0,0.55)!important;}
-.rdisp .tile:not(.used) .nm{color:rgba(250,246,236,0.96)!important;text-shadow:1.2px 0.5px 1.3px rgba(0,0,0,0.75);}
-.rdisp .tile:not(.used):hover{background:linear-gradient(180deg,#463f32,#2a251c)!important;transform:translateY(-2px)!important;box-shadow:0 1px 0 rgba(255,246,224,0.2) inset,0 9px 16px rgba(0,0,0,0.7),0 0 0 1px rgba(0,0,0,0.55)!important;}
-/* già nel round: resta l'incavo, con il nome appena leggibile */
-.rdisp .tile.used{background:rgba(0,0,0,0.35)!important;border:0!important;box-shadow:inset 0 2px 6px rgba(0,0,0,0.8)!important;}
-.rdisp .tile.used::before{opacity:.22;}
-.rdisp .tile.used .nm{color:rgba(190,196,204,0.34)!important;text-shadow:none;}
-/* i due tastini stanno in colonna a destra delle carte */
-.round-hd .clear,.round-hd .skip2{position:absolute!important;right:20px;z-index:3;width:22px;height:34px!important;min-width:0!important;padding:0!important;margin:0!important;font-size:0!important;gap:0!important;opacity:1!important;}
+.rdisp .tile:not(.used){background:var(--raised)!important;border:1px solid rgba(180,195,210,0.26)!important;}
+.rdisp .tile:not(.used) .nm{color:var(--text-hi)!important;}
+.rdisp .tile:not(.used):hover{border-color:rgba(200,175,90,0.75)!important;background:rgba(212,168,74,0.07)!important;transform:translateY(-1px)!important;}
+.rdisp .tile.used{background:transparent!important;border:1px dashed rgba(180,195,210,0.16)!important;}
+.rdisp .tile.used::before{opacity:.2;}
+.rdisp .tile.used .nm{color:var(--text-xlo)!important;opacity:.6;}
+/* i due tastini: tasti della Sandbox (riga sottile), con l'icona che si vede */
+.round-hd .clear,.round-hd .skip2{position:absolute!important;right:20px;z-index:3;width:24px;height:34px!important;min-width:0!important;padding:0!important;margin:0!important;font-size:0!important;gap:0!important;opacity:1!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;background:none!important;border:1px solid rgba(180,195,210,0.20)!important;border-radius:2px!important;box-shadow:none!important;color:rgba(210,222,232,0.80)!important;}
+.round-hd .clear svg,.round-hd .skip2 svg{width:12px!important;height:12px!important;flex:none;}
 .round-hd .clear{top:18px;} .round-hd .skip2{top:58px;}
-.round-hd .clear,.round-hd .skip2{display:flex!important;align-items:center!important;justify-content:center!important;}
+.round-hd .clear:hover,.round-hd .skip2:hover{border-color:rgba(200,175,90,0.75)!important;color:var(--gold-txt)!important;}
 .round-hd .skip2 .off-t,.round-hd .skip2 .on-t{display:none!important;}
-/* CONFERMA sopra le carte, quando il round è pieno */
-.rconf.si{position:absolute!important;left:20px;right:48px;top:18px;height:74px!important;margin:0!important;justify-content:center;gap:14px;font-size:13px!important;letter-spacing:4px!important;z-index:4;}
-.rconf.si:not(.ok){padding:0 18px!important;background:linear-gradient(180deg,#2e2920,#1d1a14)!important;}
-@keyframes ledTic{0%,49%{background:#ff2d1f;box-shadow:0 0 4px 1px rgba(255,60,40,0.95),0 0 12px 3px rgba(255,40,20,0.55);}50%,100%{background:#3a0d09;box-shadow:inset 0 0 2px rgba(0,0,0,0.8);}}
+/* CONFERMA: il tasto dorato della Sandbox, sopra le carte quando il round è pieno. Unica cosa in più: il led rosso che lampeggia */
+.rconf.si{position:absolute!important;left:20px;right:50px;top:18px;height:74px!important;margin:0!important;justify-content:center;gap:14px;font-size:12px!important;letter-spacing:4px!important;z-index:4;border-radius:2px!important;overflow:hidden;}
+.rconf.si:not(.ok){padding:0 18px!important;background:rgba(18,16,12,0.94)!important;border:1px solid rgba(212,168,74,0.80)!important;color:var(--gold-txt)!important;box-shadow:0 0 18px rgba(212,168,74,0.14)!important;text-shadow:none!important;}
+.rconf.si:not(.ok):hover{background:rgba(40,33,20,0.96)!important;border-color:#f0d28c!important;}
+.rconf.si:not(.ok)::before{display:none!important;}
+@keyframes ledTic{0%,49%{background:#ff2d1f;box-shadow:0 0 4px 1px rgba(255,60,40,0.95),0 0 12px 3px rgba(255,40,20,0.55);}50%,100%{background:#3a0d09;box-shadow:none;}}
 .rconf.si:not(.ok)::after{content:''!important;position:static!important;order:-1;flex:none;width:7px!important;height:7px!important;margin:0!important;border-radius:50%;transform:none!important;opacity:1!important;
   animation:ledTic 0.9s steps(1,end) infinite!important;}
-.rconf.ok{background:rgba(8,8,7,0.82)!important;box-shadow:none!important;border:0!important;}
+.rconf.ok{background:rgba(10,10,9,0.86)!important;box-shadow:none!important;border:1px solid rgba(120,200,150,0.30)!important;}
 body.dragging .rconf{pointer-events:none!important;opacity:.15;}
 </style>
 </head>
@@ -1481,7 +1457,7 @@ function renderBlocks(r, anim){
    Più la lettera è lontana dalla luce, più l'ombra è lunga, sfumata e debole. Con più luci ogni ombra è più leggera,
    perché le altre luci la rischiarano. Sotto ogni lettera resta un filo d'ombra di contatto.
    Anche il chiarore colorato del blocco viene dagli stessi punti. Tutti i numeri qui sono scelte, non misure. */
-var OMBRA_LUCE = 95, OMBRA_META = 240, OMBRA_MAX = 9, LUCE_FORZA = 2.1, LUCE_BUIO = 70, LUCE_PUNTO_H = OMBRA_LUCE, LUCE_PUNTO = 9.8;   /* una sola altezza della luce, per il cerchio sul piano e per le ombre */   /* LUCE_BUIO: quanto resta luminosa (in %) una scritta lontana da ogni luce */
+var OMBRA_LUCE = 95, OMBRA_META = 240, OMBRA_MAX = 9, LUCE_FORZA = 1.5, LUCE_BUIO = 70, LUCE_PUNTO_H = OMBRA_LUCE, LUCE_PUNTO = 6.9;   /* una sola altezza della luce, per il cerchio sul piano e per le ombre */   /* LUCE_BUIO: quanto resta luminosa (in %) una scritta lontana da ogni luce */
 function lettere(t){ return String(t).split(' ').map(function(w){ return '<span class="pa">' + w.split('').map(function(c){ return '<span>' + esc(c) + '</span>'; }).join('') + '</span>'; }).join(' '); }
 function ombraDi(x, y, luci, rilievo, forza, soloSfumata){
   /* il fianco della lettera che guarda le luci prende un filo del colore della famiglia */
@@ -2631,8 +2607,6 @@ function confermaRound(r){
   if(!S.sess){ ptChiedi(r); return; }
   if(!S.conf) S.conf = [null, null];
   S.conf[r] = S.today[r].join(','); save(); renderAll(); toast('Round ' + (r + 1) + ' confermato');
-  /* alla conferma la luce scende lungo la riga del round, un blocco dopo l'altro */
-  var rd = document.querySelector('.round[data-r="' + r + '"]'); if(rd){ rd.classList.remove('accendi'); void rd.offsetWidth; rd.classList.add('accendi'); setTimeout(function(){ rd.classList.remove('accendi'); }, 1500); }
 }
 $('ss-ok').addEventListener('click', function(){
   if(!splashPT) return;

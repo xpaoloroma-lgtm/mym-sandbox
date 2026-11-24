@@ -1563,7 +1563,7 @@ var ghostCache = {};
 /* sfondo: tutti i 120 ordini possibili, poco visibili; davanti solo la linea dorata di oggi */
 /* Onda di luce sulle linee del grafico: scende nel Round 1 e, appena arriva in fondo, riparte dall'alto nel Round 2.
    Passa a caso ogni 6 minuti e mezzo - 8 minuti e mezzo (così due schermi vicini non vanno insieme), e una volta poco dopo l'apertura. */
-var LAMPO_DURA = 2.6, LAMPO_FORZA = 0.02, LAMPO_MIN = 390, LAMPO_MAX = 510, LAMPO_INIZIO = 5;
+var LAMPO_DURA = 7, LAMPO_FORZA = 0.01, LAMPO_ALTA = 1000, LAMPO_MIN = 390, LAMPO_MAX = 510, LAMPO_INIZIO = 5;
 var lampoT = null;
 /* il conto riparte da capo a ogni azione (clic, tasto, trascinamento): l'onda passa solo quando la pagina è ferma da un po' */
 function lampoAspetta(){ clearTimeout(lampoT); lampoT = setTimeout(lampo, (LAMPO_MIN + Math.random() * (LAMPO_MAX - LAMPO_MIN)) * 1000); }
@@ -1596,9 +1596,9 @@ function ghostSvg(r){
       + '<g fill="none" stroke="rgba(220,228,236,0.085)" stroke-width="1">' + fili + '</g>';
     /* L'ONDA DI LUCE: una fascia chiara scende lungo le linee, dall'alto in basso. Parte quando la chiama lampo() (più sotto).
        È una copia delle linee colorata con una sfumatura verticale che scorre; ferma, la sfumatura sta fuori dal grafico. */
-    s += '<defs><linearGradient id="lampoG' + r + '" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="420" gradientTransform="translate(0 -440)">'
+    s += '<defs><linearGradient id="lampoG' + r + '" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="' + LAMPO_ALTA + '" gradientTransform="translate(0 -' + (LAMPO_ALTA + 20) + ')">'
        + '<stop offset="0" stop-color="#fff6dc" stop-opacity="0"/><stop offset="0.55" stop-color="#fff6dc" stop-opacity="' + LAMPO_FORZA + '"/><stop offset="1" stop-color="#fff6dc" stop-opacity="0"/>'
-       + '<animateTransform id="lampoA' + r + '" attributeName="gradientTransform" type="translate" from="0 -440" to="0 1520" dur="' + LAMPO_DURA + 's" begin="indefinite" fill="remove"/>'
+       + '<animateTransform id="lampoA' + r + '" attributeName="gradientTransform" type="translate" from="0 -' + (LAMPO_ALTA + 20) + '" to="0 1520" dur="' + LAMPO_DURA + 's" begin="indefinite" fill="remove"/>'
        + '</linearGradient></defs><g fill="none" stroke="url(#lampoG' + r + ')" stroke-width="1">' + tutte + '</g>';
   }
   ghostCache[key] = s;

@@ -1563,7 +1563,7 @@ var ghostCache = {};
 /* sfondo: tutti i 120 ordini possibili, poco visibili; davanti solo la linea dorata di oggi */
 /* Onda di luce sulle linee del grafico: scende nel Round 1 e, appena arriva in fondo, riparte dall'alto nel Round 2.
    Passa a caso ogni 6 minuti e mezzo - 8 minuti e mezzo (così due schermi vicini non vanno insieme), e una volta poco dopo l'apertura. */
-var LAMPO_DURA = 2, LAMPO_FORZA = 0.05, LAMPO_MIN = 390, LAMPO_MAX = 510, LAMPO_INIZIO = 5;
+var LAMPO_DURA = 2.6, LAMPO_FORZA = 0.02, LAMPO_MIN = 390, LAMPO_MAX = 510, LAMPO_INIZIO = 5;
 var lampoT = null;
 /* il conto riparte da capo a ogni azione (clic, tasto, trascinamento): l'onda passa solo quando la pagina è ferma da un po' */
 function lampoAspetta(){ clearTimeout(lampoT); lampoT = setTimeout(lampo, (LAMPO_MIN + Math.random() * (LAMPO_MAX - LAMPO_MIN)) * 1000); }

@@ -69,21 +69,12 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
 
 #pag{position:relative;z-index:1;flex:1;min-height:0;overflow-y:auto;padding:22px 28px 60px;scrollbar-width:thin;scrollbar-color:rgba(212,168,74,0.6) transparent;}
 .dentro{max-width:920px;}
-.su{font-size:13px;line-height:1.6;color:var(--text-lo);margin-bottom:18px;}
-.filtri{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:26px;}
-.f{height:32px;padding:0 14px;background:none;border:1px solid var(--line);border-radius:2px;cursor:pointer;font-family:var(--font);font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text-lo);}
-.f.on{border-color:var(--gold-soft);color:var(--gold-txt);background:rgba(212,168,74,0.08);}
-.zona{margin-bottom:30px;}
-.zona h2{font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--text-hi);margin:0 0 10px;padding-bottom:8px;border-bottom:1px solid rgba(212,168,74,0.35);}
-.r{display:grid;grid-template-columns:52px 86px minmax(0,1fr);column-gap:14px;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--line-soft);}
-.r .d{font-size:11px;letter-spacing:1px;color:var(--text-xlo);}
-.r .t{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;}
-.r .t.nuovo{color:#78cd9b;} .r .t.cambiato{color:#d4a84a;} .r .t.tolto{color:#e08a8a;}
-.r .x{font-size:14px;line-height:1.5;color:var(--text-mid);}
-.prima li{font-size:14px;line-height:1.5;color:var(--text-mid);padding:7px 0;border-bottom:1px solid var(--line-soft);list-style:none;}
-.prima ul{margin:0;padding:0;}
+.zona{margin-bottom:34px;}
+.zona h2{font-size:15px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gold-txt);margin:0 0 6px;padding-bottom:10px;border-bottom:1px solid rgba(212,168,74,0.35);}
+.zona ul{margin:0;padding:0;}
+.zona li{list-style:none;font-size:17px;line-height:1.5;color:var(--text-hi);padding:11px 0;border-bottom:1px solid var(--line-soft);}
 .bc a.sb{color:#d4a84a;text-decoration:none;} .bc a.sb:hover{text-decoration:underline;}
-@media (max-width:620px){ .r{grid-template-columns:44px 74px minmax(0,1fr);column-gap:10px;} #pag{padding:16px 14px 50px;} }
+@media (max-width:620px){ #pag{padding:16px 14px 50px;} .zona li{font-size:15px;} }
 </style>
 </head>
 <body>
@@ -92,120 +83,62 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
   <div class="hdr-r"></div>
 </header>
 <div id="pag"><div class="dentro">
-  <div class="su">Cosa è stato aggiunto, cambiato e tolto nel ramo <b>ristrutturazione</b>, dal 21 novembre 2026. Il live non è toccato. Qui ci sono i concetti e le funzioni, non i ritocchi grafici.</div>
-  <div class="filtri" id="filtri"></div>
   <div id="zone"></div>
-  <div class="zona prima"><h2>Da sistemare prima di usarlo al posto del live</h2><ul id="prima"></ul></div>
 </div></div>
 <script>
 
 /* ═══ COME SI AGGIORNA ═══
-   Una riga per ogni cosa aggiunta, cambiata o tolta. Si aggiunge IN CIMA alla sua zona.
-   d = giorno · t = 'nuovo' | 'cambiato' | 'tolto' · x = cosa, in una frase.
-   Qui vanno i concetti e le funzioni, non i ritocchi grafici. */
+   Pagina da riunione: cosa cambia per chi allena. Una frase per cosa, poche.
+   Si aggiunge nella zona giusta. Niente ritocchi grafici. */
 var ZONE = [
+ ['Come ci si muove', [
+  'Dopo l\'accesso si arriva alla pagina Sandbox: Ore e Riunioni da una parte, Protocolli dall\'altra.',
+  'In alto c\'è sempre scritto dove sei. Ogni parola è un tasto che ti riporta lì.',
+  'Il tasto Indietro del browser fa un passo indietro dentro la Sandbox, non ti butta fuori.',
+  'La Sandbox è fatta per stare a metà schermo, con un\'altra finestra accanto.'
+ ]],
  ['Clienti', [
-  ['24/11','nuovo','Nuovo cliente dalla pagina protocolli: una finestra con nome e cognome, nick, red flag e un campo note.'],
-  ['24/11','nuovo','Nick e note stanno sul cliente, non su un protocollo: restano anche quando parte una progressione nuova. Si vedono nell\'elenco clienti.'],
-  ['23/11','nuovo','Nomi doppi: non si può più creare un cliente con un nome che esiste già, da nessuna parte della Sandbox.'],
-  ['23/11','nuovo','Pagina dettagli del cliente: red flag attivi con la data, dove può stare, tutta la sua storia, e i red flag si cambiano lì.'],
-  ['23/11','cambiato','Un protocollo per cliente alla volta.']
- ]],
- ['Pagina protocolli', [
-  ['23/11','cambiato','È diventata protocolli e clienti: a sinistra l\'elenco dei clienti, a destra la griglia dei protocolli.'],
-  ['23/11','nuovo','Elenco clienti con gli ultimi tre allenamenti e da quanto non viene. Si ordina per ultimo allenamento o A–Z, si filtra per protocollo e per red flag.'],
-  ['23/11','nuovo','Un clic sul cliente apre la sua timeline di un anno, con la riga di oggi e i segni di progressione finita o interrotta. Da lì si sceglie il trainer e si entra.'],
-  ['23/11','cambiato','Nessun trainer già scelto: chi sei lo dici ogni volta, per il cliente che hai aperto.'],
-  ['22/11','nuovo','Griglia dei protocolli a paletti: difficoltà in verticale, autonomia in orizzontale, con i testi dei paletti attorno.'],
-  ['23/11','cambiato','Passando sul nome di un protocollo nella griglia si accende la sua zona.'],
-  ['23/11','cambiato','In fondo alla pagina: Red Flags, Esercizi, Admin. Il grafico "Utilizzo per PT" sta solo in Admin.'],
-  ['22/11','tolto','Pace non c\'è più. Skip resta solo come Skip gruppo. Grid è un foglio libero, non un protocollo.']
- ]],
- ['Navigazione', [
-  ['22/11','nuovo','Una barra sola in alto con il percorso (Sandbox › Protocolli › protocollo › cliente). Ogni pezzo è un tasto che ti porta lì.'],
-  ['22/11','nuovo','Pagina Sandbox dopo l\'accesso: Ore e Riunioni da una parte, Protocolli dall\'altra.'],
-  ['22/11','nuovo','Il tasto Indietro del browser fa un passo indietro dentro la Sandbox, non ti butta fuori.'],
-  ['24/11','nuovo','La pagina Esercizi si apre da dentro ogni protocollo, con lo stesso tasto nella barra. Si apre sopra e chiudendola torni dov\'eri.'],
-  ['24/11','tolto','Il tasto "esci".'],
-  ['24/11','cambiato','Pagina di accesso: i protocolli sono Lift, Load, Self, Open, Move.']
+  'Clienti e protocolli sono in una pagina sola: i clienti a sinistra, i protocolli a destra.',
+  'Di ogni cliente si vedono subito gli ultimi tre allenamenti e da quanto non viene.',
+  'Un clic sul cliente apre il suo anno. Da lì dici chi sei ed entri.',
+  'Il cliente nuovo si crea lì: nome e cognome, nick, red flag, note.',
+  'Due clienti con lo stesso nome non si possono più creare.',
+  'Un cliente sta in un protocollo alla volta.'
  ]],
  ['Red flag', [
-  ['23/11','nuovo','Pagina Red Flags, con il semaforo per protocollo: per ogni red flag dice dove si può stare (verde, giallo, arancio, rosso).'],
-  ['23/11','nuovo','Per accendere un red flag serve la password di accesso; per toglierlo la password admin. La richiesta dice quale red flag e di chi.'],
-  ['23/11','nuovo','Ogni red flag tiene la data in cui è stato acceso.'],
-  ['24/11','cambiato','Dentro un protocollo i red flag stanno in un posto solo: una striscia sotto la barra, e solo se il cliente ne ha di attivi.']
+  'C\'è la pagina Red Flags: per ogni red flag dice in quali protocolli il cliente può stare.',
+  'Per accendere un red flag serve la password di accesso. Per toglierlo serve quella admin.',
+  'Durante l\'allenamento, se il cliente ha red flag attivi, c\'è una striscia rossa in alto. Se non ne ha, non c\'è niente.'
  ]],
- ['Tutti i protocolli', [
-  ['24/11','cambiato','La Sandbox si usa a metà monitor, con due finestre affiancate: le pagine sono fatte e provate lì.'],
-  ['24/11','cambiato','Una finestra stretta sul computer non diventa più la versione da telefono. Quella scatta solo su un apparecchio che si tocca.'],
-  ['24/11','cambiato','Sotto la barra c\'è subito il lavoro: niente righe di titolo o di stato impilate.'],
-  ['24/11','cambiato','Modalità consultazione e Conferma sessione: un riquadro solo, uguale dappertutto, sempre nella barra dopo il percorso.'],
-  ['24/11','cambiato','Warm-up: una riga sola in alto, uguale in Open, Load e Self.'],
-  ['24/11','cambiato','Stesse misure per titoli, etichette, tasti e riquadri. I colori delle famiglie sono quelli di Open, anche in Self.'],
-  ['23/11','cambiato','Lo storico esce da destra con il mouse e rientra, uguale in tutti.']
+ ['Protocolli', [
+  'I protocolli sono cinque: Lift, Load, Self, Open, Move.',
+  'Pace non c\'è più. Skip resta solo per il gruppo. Grid è un foglio libero, non un protocollo.',
+  'La griglia dice dove sta un cliente: quanto è difficile il lavoro e quanto è autonomo lui.',
+  'Warm-up, storico, consultazione e Conferma sessione sono uguali e nello stesso posto in tutti i protocolli.',
+  'La pagina Esercizi si apre da dentro ogni protocollo e chiudendola torni dov\'eri.'
  ]],
  ['Open', [
-  ['24/11','cambiato','Il warm-up è la prima riga della scheda. Via la riga "Scheda".'],
-  ['24/11','cambiato','Il tasto per cambiare gli esercizi della scheda adesso si vede: "Cambia esercizi", in fondo alla scheda.'],
-  ['24/11','cambiato','Il gate sta sotto gli esercizi. Il testo del "perché adesso" prende tutta la larghezza; il numero grande resta solo come sfondo.']
+  'Il warm-up è la prima riga della scheda.',
+  'Gli esercizi della scheda si cambiano con il tasto "Cambia esercizi", in fondo alla scheda.'
  ]],
- ['Load', [
-  ['24/11','tolto','La progressione di Open dentro Load: niente livelli, niente stazione che avanza, niente barre di Open in alto. Le stazioni di Open si cambiano liberamente.'],
-  ['24/11','cambiato','Il cambio di esercizio in una stazione di Open resta solo come riga nello storico.'],
-  ['24/11','cambiato','A finestra bassa il complementare non sparisce più: la zona di lavoro scorre.'],
-  ['21/11','nuovo','Load è nella pagina protocolli, come prototipo con dati di esempio.']
- ]],
- ['Self', [
-  ['24/11','cambiato','Messo il file nuovo: effetto cascata nel grafico, "verso il cambio" nuovo, riquadro "ultima seduta rispetto alle 4 prima".'],
-  ['24/11','cambiato','Intensità elevata: via il righello graduato. La linea scalda da oro ad arancio a rosso sopra la soglia.'],
-  ['24/11','cambiato','Per scegliere un esercizio basta un clic. La conferma resta solo nel cambio, dove c\'è il motivo.'],
-  ['24/11','cambiato','"Verso il cambio" resta a destra anche a metà monitor.'],
-  ['21/11','nuovo','Self è nella pagina protocolli, come prototipo con dati di esempio.']
+ ['Load e Self', [
+  'Sono nella pagina protocolli, in prova con dati di esempio: non si usano ancora con i clienti.',
+  'Load: le stazioni di Open si cambiano liberamente. Il cambio resta scritto nello storico.',
+  'Self: per scegliere un esercizio basta un clic. Quando l\'intensità è alta, la linea del grafico diventa rossa.'
  ]],
  ['Move', [
-  ['23/11','nuovo','Move esiste: per ora è la zona dove il trainer costruisce i blocchi, senza cliente.'],
-  ['23/11','nuovo','Un blocco è sempre 2 esercizi più 1 cardio. 50 movimenti in tutto tra i due esercizi, divisi come vuole il cliente; poi il cardio.'],
-  ['23/11','nuovo','Gli esercizi di Move sono quelli che nella pagina Esercizi hanno una voce in "Prot. Fil". Quelli a terra chiedono l\'SRT, e il blocco che li contiene lo segna.'],
-  ['24/11','nuovo','Accanto a ogni esercizio si vede in quanti blocchi sta già, e in quali. L\'elenco si ordina per nome, per uso, per posizione.']
- ]],
- ['Esercizi', [
-  ['23/11','nuovo','"Prot. Fil" ha anche la voce Cardio, che vale con e senza SRT.']
- ]],
- ['Demo', [
-  ['23/11','nuovo','38 clienti finti con percorsi realistici (1, 2 o 3 volte a settimana, annulli al 18% circa, red flag), per provare senza toccare i clienti veri.']
+  'Move è cominciato: per ora c\'è la parte dove si costruiscono i blocchi, senza cliente.',
+  'Un blocco è sempre 2 esercizi più 1 cardio. 50 movimenti in tutto tra i due esercizi, divisi come vuole il cliente; poi il cardio.',
+  'Gli esercizi a terra chiedono l\'SRT.'
  ]]
 ];
-/* Cose da sistemare prima di usare il ramo al posto del live */
-var PRIMA = [
- 'La demo oggi parte accesa da sola: va spenta.',
- 'Rinominare, eliminare e azzerare un cliente: nel ramo non c\'è più un posto da dove farlo.',
- 'Non c\'è più un modo per scollegarsi.',
- 'Nick e note si scrivono solo alla creazione del cliente.',
- 'Load, Self e Move sono prototipi: non sono collegati ai clienti e non salvano sul database. I blocchi di Move restano nel browser dove li fai.',
- 'Red flag rosso = il protocollo non si fa: deciso, non ancora costruito.',
- 'Move: manca la seduta con il cliente (i tre blocchi grossi).'
-];
-
 (function(){
-  var tipo = '';
   function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
-  function gg(d){ var p = d.split('/'); return (+p[1]) * 100 + (+p[0]); }
-  function disegna(){
-    var T = [['','Tutto'],['nuovo','Nuovo'],['cambiato','Cambiato'],['tolto','Tolto']];
-    document.getElementById('filtri').innerHTML = T.map(function(t){ return '<button type="button" class="f' + (tipo === t[0] ? ' on' : '') + '" data-t="' + t[0] + '">' + t[1] + '</button>'; }).join('');
-    document.getElementById('zone').innerHTML = ZONE.map(function(z){
-      var righe = z[1].filter(function(r){ return !tipo || r[1] === tipo; }).slice().sort(function(a, b){ return gg(b[0]) - gg(a[0]); });
-      if(!righe.length) return '';
-      return '<div class="zona"><h2>' + esc(z[0]) + '</h2>' + righe.map(function(r){
-        return '<div class="r"><span class="d">' + r[0] + '</span><span class="t ' + r[1] + '">' + r[1] + '</span><span class="x">' + esc(r[2]) + '</span></div>';
-      }).join('') + '</div>';
-    }).join('');
-    document.getElementById('prima').innerHTML = PRIMA.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join('');
-  }
-  document.getElementById('filtri').addEventListener('click', function(e){ var b = e.target.closest('[data-t]'); if(!b) return; tipo = b.getAttribute('data-t'); disegna(); });
+  document.getElementById('zone').innerHTML = ZONE.map(function(z){
+    return '<div class="zona"><h2>' + esc(z[0]) + '</h2><ul>' + z[1].map(function(x){ return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div>';
+  }).join('');
   /* dentro Sandbox la barra in alto è quella di Sandbox */
   if(window.parent !== window){ var h = document.querySelector('header'); if(h) h.style.display = 'none'; }
-  disegna();
 })();
 </script>
 </body>

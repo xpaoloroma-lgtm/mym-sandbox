@@ -847,6 +847,21 @@ header .hdr-r{flex:none;}
 #rank .pr.salvo .fm,#rank .pr.salvo .ex{opacity:.62!important;}
 /* la zona del cambio conta: un filo più larga e staccata dal resto */
 @media (min-width:861px){ #rk-col{background:linear-gradient(180deg,rgba(222,190,120,0.045),rgba(13,12,10,0.55) 220px)!important;border-left:1px solid rgba(222,190,120,0.28)!important;padding-left:16px!important;} }
+/* ═══ CONFERMA DEL ROUND ═══
+   Finché non è confermato il round è una preparazione: si vede tratteggiato. Confermato = fatto e salvato. */
+.rconf{display:none;flex:none;height:28px;padding:0 12px;margin-left:10px;border-radius:2px;cursor:pointer;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;white-space:nowrap;
+  color:#14110a;background:linear-gradient(180deg,#f0d28c,#d4a84a);border:1px solid #f0d28c;box-shadow:0 0 14px rgba(222,190,120,0.45);}
+.rconf.si{display:inline-flex;align-items:center;}
+.rconf.ok{background:none;border-color:transparent;box-shadow:none;color:rgba(120,200,150,0.9);cursor:default;padding:0 4px;}
+.round.prep .block .neon{background:repeating-linear-gradient(180deg,var(--fc) 0 6px,transparent 6px 11px)!important;box-shadow:none!important;}
+.round.prep .block .nm,.round.prep .block .pn{opacity:.72;}
+/* con il tasto di conferma nella riga, svuota e non fatto restano solo come icona: la riga deve stare a metà monitor */
+.round-hd:has(.rconf.si) .clear{font-size:0!important;gap:0!important;margin-left:6px!important;padding:0 5px!important;}
+.round-hd:has(.rconf.si) .skip2 .off-t,.round-hd:has(.rconf.si) .skip2 .on-t{display:none!important;}
+.round-hd .rconf{margin-left:auto;margin-right:8px;}
+.round-hd:has(.rconf.si) .clear{margin-right:0!important;}
+#rk-col.prep .rk-linea{border-top-style:dashed;}
+#rank.horiz .rk-linea{border-left-style:solid;} #rk-col.prep #rank.horiz .rk-linea{border-left-style:dashed;}
 /* chi è al cambio resta del colore della sua famiglia: più grande e acceso, ma non dorato */
 #rank .pr.lead .fm{color:var(--fc)!important;text-shadow:0 0 12px color-mix(in srgb,var(--fc) 45%,transparent)!important;}
 #rank .pr.lead .dot{background:var(--fc)!important;border-color:var(--fc)!important;box-shadow:0 0 10px 2px color-mix(in srgb,var(--fc) 60%,transparent)!important;}
@@ -875,12 +890,12 @@ header .hdr-r{flex:none;}
     <div id="rounds">
       <div class="round" data-r="0">
         <div class="rdisp" id="disp-0" data-drop="disp" data-r="0"></div>
-        <div class="round-hd"><span class="lbl rname">Round 1</span><button type="button" class="clear" data-clear="0" title="Svuota il round" aria-label="Svuota il Round 1"><svg aria-hidden="true" width="11" height="11" viewBox="0 0 12 12"><path d="M2.5 3.5h7M5 3.5V2.2h2v1.3M3.4 3.5l.5 6.3h4.2l.5-6.3" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>svuota</button><div class="rmeta"><b>Fatica</b><span>impegno</span></div></div>
+        <div class="round-hd"><span class="lbl rname">Round 1</span><button type="button" class="clear" data-clear="0" title="Svuota il round" aria-label="Svuota il Round 1"><svg aria-hidden="true" width="11" height="11" viewBox="0 0 12 12"><path d="M2.5 3.5h7M5 3.5V2.2h2v1.3M3.4 3.5l.5 6.3h4.2l.5-6.3" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>svuota</button><button type="button" class="rconf" data-conf="0"></button><div class="rmeta"><b>Fatica</b><span>impegno</span></div></div>
         <div class="rbody"><div class="blocks" id="blocks-0"></div><div class="ruler" id="ruler-0"></div><svg class="lane" id="lane-0" viewBox="0 0 100 1500" preserveAspectRatio="none" aria-label="Fatica e impegno del Round 1" role="img"></svg></div>
       </div>
       <div class="round" data-r="1">
         <div class="rdisp" id="disp-1" data-drop="disp" data-r="1"></div>
-        <div class="round-hd"><span class="lbl rname">Round 2</span><button type="button" class="skip2" id="skip2" aria-pressed="false" title="Segna il Round 2 come non fatto"><svg aria-hidden="true" width="9" height="9" viewBox="0 0 10 10"><path d="M1.5 1.5l7 7M8.5 1.5l-7 7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg><span class="off-t">non fatto</span><span class="on-t">non fatto · riattiva</span></button><button type="button" class="clear" data-clear="1" title="Svuota il round" aria-label="Svuota il Round 2"><svg aria-hidden="true" width="11" height="11" viewBox="0 0 12 12"><path d="M2.5 3.5h7M5 3.5V2.2h2v1.3M3.4 3.5l.5 6.3h4.2l.5-6.3" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>svuota</button><div class="rmeta"><b>Fatica</b><span>impegno</span></div></div>
+        <div class="round-hd"><span class="lbl rname">Round 2</span><button type="button" class="skip2" id="skip2" aria-pressed="false" title="Segna il Round 2 come non fatto"><svg aria-hidden="true" width="9" height="9" viewBox="0 0 10 10"><path d="M1.5 1.5l7 7M8.5 1.5l-7 7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg><span class="off-t">non fatto</span><span class="on-t">non fatto · riattiva</span></button><button type="button" class="clear" data-clear="1" title="Svuota il round" aria-label="Svuota il Round 2"><svg aria-hidden="true" width="11" height="11" viewBox="0 0 12 12"><path d="M2.5 3.5h7M5 3.5V2.2h2v1.3M3.4 3.5l.5 6.3h4.2l.5-6.3" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>svuota</button><button type="button" class="rconf" data-conf="1"></button><div class="rmeta"><b>Fatica</b><span>impegno</span></div></div>
         <div class="rbody"><div class="blocks" id="blocks-1"></div><div class="ruler" id="ruler-1"></div><svg class="lane" id="lane-1" viewBox="0 0 100 1500" preserveAspectRatio="none" aria-label="Fatica e impegno del Round 2" role="img"></svg></div>
       </div>
     </div>
@@ -1175,6 +1190,9 @@ function exFor(r, fk){
 /* tiene coerente la giornata: via l'esercizio che non può stare in quel round */
 function normalize(){
   var ph = phase();
+  /* conferma dei round: se un round confermato viene toccato, torna da confermare */
+  if(!S.conf) S.conf = [null, null];
+  [0, 1].forEach(function(r){ if(S.conf[r] && S.conf[r] !== S.today[r].join(',')) S.conf[r] = null; });
   if(S.pend && (ph !== 'straddle' || S.pend.fam !== LEAD)) S.pend = null;
   [0, 1].forEach(function(r){
     S.today[r] = S.today[r].map(function(x){
@@ -1427,13 +1445,15 @@ function standings(){
    Conta solo i round già contati (le sessioni chiuse): così una famiglia uscita non può rientrare.
    A pari merito la considero ancora dentro. */
 function reachability(){
-  if(phase() === 'closed' || cycLen() === 0) return null;
+  if(phase() === 'closed') return null;
   var keys = FAMS.map(function(f){ return f.k; });
   var SP = {}; keys.forEach(function(k){ SP[k] = 0; });
-  S.rounds.slice(cycStart()).forEach(function(rd, i){ keys.forEach(function(k){ var p = famIdx(rd.o, k); if(p !== -1) SP[k] += (p + 1); }); });
-  var done = cycLen(), m = CICLO - done, W = [];
+  var fatti = S.rounds.slice(cycStart()).map(function(rd){ return rd.o; });
+  [0, 1].forEach(function(R){ if(todayInCycle(R) && S.today[R].every(function(x){ return x != null; })) fatti.push(S.today[R]); });   /* anche i round pieni di oggi, come la colonna */
+  fatti.forEach(function(o){ keys.forEach(function(k){ var p = famIdx(o, k); if(p !== -1) SP[k] += (p + 1); }); });
+  var done = fatti.length, m = CICLO - done, W = [];
   for(var j = 1; j <= m; j++) W.push(1);
-  var prev0 = lastFirstFam(), budget = {n:400000}, can = {};
+  var prev0 = fatti.length ? famOf(fatti[fatti.length - 1][0]) : lastFirstFam(), budget = {n:400000}, can = {};
   keys.forEach(function(F){ can[F] = m === 0 ? null : canWin(F, keys.filter(function(k){ return k !== F; }), SP, W, prev0, budget); });
   if(m === 0){   /* ciclo finito: dentro solo chi è in cima (o pari) */
     var best = Math.min.apply(null, keys.map(function(k){ return SP[k]; }));
@@ -1499,7 +1519,7 @@ function renderSide(){
   var st = standings(), lead = st[0], ph = phase(), n = Math.min(cycLen(), CICLO);
   var pct = function(x){ return x.avg == null ? 0 : Math.round((5 - x.avg) / 4 * 100); };
   /* conta come round di oggi solo quello completo e in una sessione confermata: è quello che resterà quando cambia il giorno */
-  var placedToday = (ph === 'closed' || !S.sess) ? 0 : [0, 1].filter(function(R){ return todayInCycle(R) && shown()[R].every(function(x){ return x != null; }); }).length;
+  var placedToday = ph === 'closed' ? 0 : [0, 1].filter(function(R){ return todayInCycle(R) && shown()[R].every(function(x){ return x != null; }); }).length;
   var nowN = Math.min(CICLO, n + placedToday);
   $('v-lbl').textContent = ph === 'closed' ? 'Da cambiare' : 'Verso il cambio';
   $('v-ring').innerHTML = progHtml(n, nowN, CICLO);
@@ -1537,6 +1557,18 @@ function renderSide(){
   placeRank(box, st, pct);
   document.querySelectorAll('.clear').forEach(function(c){ c.classList.toggle('has', S.today[+c.dataset.clear].some(function(x){ return x != null; })); });
   var r2 = document.querySelector('.round[data-r="1"]'); if(r2) r2.classList.toggle('skipped', !!S.skip2);
+  /* round: vuoto / in preparazione (tratteggiato) / pieno da confermare / confermato */
+  var inPrep = false;
+  [0, 1].forEach(function(r){
+    var el = document.querySelector('.round[data-r="' + r + '"]'), bt = el.querySelector('.rconf');
+    var qualcosa = S.today[r].some(function(x){ return x != null; }), pieno = S.today[r].every(function(x){ return x != null; });
+    var ok = !!(S.conf && S.conf[r]) && pieno, salta = r === 1 && S.skip2;
+    el.classList.toggle('prep', qualcosa && !ok && !salta); el.classList.toggle('fatto', ok);
+    bt.classList.toggle('si', pieno && !salta); bt.classList.toggle('ok', ok);
+    bt.textContent = ok ? '✓ fatto' : 'Conferma'; bt.disabled = ok;
+    if(qualcosa && !ok && !salta) inPrep = true;
+  });
+  $('rk-col').classList.toggle('prep', inPrep);
   if($('sim-date')) $('sim-date').textContent = formatDate(S.simDate);
   syncGhostBtns();
   var sk = $('skip2'); if(sk){ sk.classList.toggle('on', !!S.skip2); sk.setAttribute('aria-pressed', S.skip2 ? 'true' : 'false'); }
@@ -1766,7 +1798,7 @@ function replayCycle(){
 function changeText(){
   var ph = phase();
   if(ph === 'closed') return 'da cambiare oggi';
-  var today = S.sess ? [0, 1].filter(function(R){ return todayInCycle(R) && S.today[R].every(function(x){ return x != null; }); }).length : 0;
+  var today = [0, 1].filter(function(R){ return todayInCycle(R) && S.today[R].every(function(x){ return x != null; }); }).length;
   var left = CICLO - cycLen() - today;
   if(left <= 0) return 'cambio alla prossima';
   var n = Math.ceil(left / 2);
@@ -2183,8 +2215,10 @@ function addDays(iso, n){ var t = new Date(iso + 'T12:00:00'); t.setDate(t.getDa
 function nextDay(iso){ var w = new Date(iso + 'T12:00:00').getDay(); return addDays(iso, w === 1 ? 3 : w === 4 ? 4 : 3); }   /* lunedì e giovedì, per la demo */
 function closeSession(){
   if(!S.sess) return null;
+  if(!S.conf) S.conf = [null, null];
   var date = S.sess.date, pt = S.sess.pt, ph = phase(), at = S.rounds.length, n = 0;
-  var full = function(r){ return S.today[r].every(function(x){ return x != null; }); };
+  var full = function(r){ return !!S.conf[r] && S.today[r].every(function(x){ return x != null; }); };   /* fatto = pieno E confermato */
+  var resta = [0, 1].filter(function(r){ return !full(r) && S.today[r].some(function(x){ return x != null; }); }).map(function(r){ return S.today[r].slice(); });
   if(full(0)){ S.rounds.push({date:date, pt:pt, o:S.today[0].slice()}); n++; }
   if(!S.skip2 && full(1)){
     if(ph === 'straddle' && S.pend && n === 1){
@@ -2193,8 +2227,10 @@ function closeSession(){
     }
     S.rounds.push({date:date, pt:pt, o:S.today[1].slice()}); n++;
   }
-  S.sessions.push({date:date, pt:pt, at:at, n:n});
-  S.today = [[null,null,null,null,null],[null,null,null,null,null]]; S.skip2 = false; S.pend = null; S.sess = null;
+  if(n) S.sessions.push({date:date, pt:pt, at:at, n:n});
+  /* i round preparati e non confermati non si buttano: restano lì, da fare */
+  S.today = [resta[0] || [null,null,null,null,null], resta[1] || [null,null,null,null,null]]; S.conf = [null, null];
+  S.skip2 = false; S.pend = null; S.sess = null;
   S.copies = syncCopies(S.today, {});
   return {date:date, n:n};
 }
@@ -2203,12 +2239,10 @@ function openDay(){
   var closed = null, dropped = false;
   /* cambio di giorno: la sessione confermata si chiude e conta; quello fatto in sola consultazione non conta e si svuota */
   if(S.sess && S.sess.date !== S.simDate){ closed = closeSession(); save(); }
-  else if(!S.sess && S.dayOf && S.dayOf !== S.simDate && S.today.some(function(r){ return r.some(function(x){ return x != null; }); })){
-    S.today = [[null,null,null,null,null],[null,null,null,null,null]]; S.skip2 = false; S.pend = null; S.copies = syncCopies(S.today, {}); dropped = true;
-  }
+
   if(S.dayOf !== S.simDate){ S.dayOf = S.simDate; save(); }
   laneVals = [null, null]; renderAll();
-  if(closed) toast('Sessione del ' + formatDate(closed.date) + ' chiusa · ' + closed.n + ' round contati');
+  if(closed && closed.n) toast('Sessione del ' + formatDate(closed.date) + ' · ' + closed.n + ' round salvati');
   else if(dropped) toast('Il giorno prima era solo consultazione: non contato');
   clearTimeout(splashTimer);
   if(!S.sess) splashTimer = setTimeout(splashOpen, closed ? 1400 : 700);   /* in Open: 5 secondi */
@@ -2225,12 +2259,22 @@ function renderPtStrip(){
   $('ss-pt').innerHTML = PT_LIST.map(function(p){ return '<button type="button" class="ss-ptb' + (splashPT === p ? ' sel' : '') + '" data-pt="' + p + '">' + p + '</button>'; }).join('');
 }
 $('ss-pt').addEventListener('click', function(e){ var b = e.target.closest('[data-pt]'); if(!b) return; splashPT = b.dataset.pt; renderPtStrip(); $('ss-ok').disabled = false; });
+var daConfermare = null;   /* il round che aspetta il PT per essere confermato */
+function confermaRound(r){
+  if(!S.today[r].every(function(x){ return x != null; })) return;
+  if(!S.sess){ daConfermare = r; splashOpen(); return; }
+  if(!S.conf) S.conf = [null, null];
+  S.conf[r] = S.today[r].join(','); save(); renderAll(); toast('Round ' + (r + 1) + ' confermato');
+}
 $('ss-ok').addEventListener('click', function(){
   if(!splashPT) return;
   S.sess = {date:S.simDate, pt:splashPT};
-  splashClose(); VIEW = false; applyView(); save(); renderAll(); toast('Sessione confermata · ' + splashPT);
+  var r = daConfermare; daConfermare = null;
+  splashClose(); VIEW = false; applyView(); save();
+  if(r != null) confermaRound(r); else { renderAll(); toast('Sessione confermata · ' + splashPT); }
 });
-$('ss-view').addEventListener('click', function(){ splashClose(); VIEW = true; applyView(); });
+$('ss-view').addEventListener('click', function(){ daConfermare = null; splashClose(); VIEW = true; applyView(); });
+document.addEventListener('click', function(e){ var b = e.target.closest('[data-conf]'); if(b) confermaRound(+b.dataset.conf); });
 $('vo-confirm').addEventListener('click', splashOpen);
 function applyView(){ document.body.classList.toggle('view-only', VIEW); }
 if($('nextday')) $('nextday').addEventListener('click', function(){

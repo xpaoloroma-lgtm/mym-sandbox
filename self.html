@@ -1709,11 +1709,9 @@ function placeRank(box, st, pct){
   });
   var PADR = horiz ? 16 : 0;   /* margine a destra: il primo non tocca il bordo */
   var L = (horiz ? W : H) - PADR;
-  var top = Math.max(pct(st[0]), 1);
-  /* scala: dal primo (in cima / a destra) all'ultimo (in fondo / a sinistra), così si usa tutto lo spazio */
-  var withAvg = st.filter(function(x){ return x.avg != null; });
-  var bot = withAvg.length ? pct(withAvg[withAvg.length - 1]) : 0;
-  var span = Math.max(top - bot, 1);
+  /* SCALA FISSA: in cima la media 1 (sempre primo), in fondo la media 5 (sempre ultimo).
+     Così una famiglia si muove solo se cambia la SUA media: chi non viene toccato resta fermo. */
+  var top = 100, span = 100;
   var rows = st.map(function(x){
     var el = box.querySelector('.pr[data-id="' + x.fam + '"]');
     var hh = horiz ? el.offsetWidth : el.offsetHeight;

@@ -914,10 +914,10 @@ header .hdr-r{flex:none;}
    La linea dorata NO: quella è il dato e sta ferma. */
 /* il fascio grigio si apre e si chiude a ventaglio; i fili chiari vanno ognuno per conto suo */
 .lane .onda,.lane .filo{transform-box:view-box;transform-origin:0 0;will-change:transform;}
-@keyframes ondaA{from{transform:translateX(-1px) scaleX(0.97);}to{transform:translateX(1px) scaleX(1.03);}}
-@keyframes ondaB{from{transform:translateX(1px) scaleX(1.035);}to{transform:translateX(-1px) scaleX(0.975);}}
-@keyframes filoA{from{transform:translateX(-2px) scaleX(0.955);}to{transform:translateX(1.6px) scaleX(1.045);}}
-@keyframes filoB{from{transform:translateX(2px) scaleX(1.04);}to{transform:translateX(-1.6px) scaleX(0.96);}}
+@keyframes ondaA{from{transform:translateX(-0.3px) scaleX(0.991);}to{transform:translateX(0.3px) scaleX(1.009);}}
+@keyframes ondaB{from{transform:translateX(0.3px) scaleX(1.0105);}to{transform:translateX(-0.3px) scaleX(0.9925);}}
+@keyframes filoA{from{transform:translateX(-0.6px) scaleX(0.9865);}to{transform:translateX(0.48px) scaleX(1.0135);}}
+@keyframes filoB{from{transform:translateX(0.6px) scaleX(1.012);}to{transform:translateX(-0.48px) scaleX(0.988);}}
 .lane .onda{animation:ondaA 28s ease-in-out infinite alternate;}
 .lane .onda.o1{animation:ondaB 32s ease-in-out -18s infinite alternate;}
 .lane .onda.o2{animation:ondaA 42s ease-in-out -30s infinite alternate;}

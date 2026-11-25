@@ -1091,6 +1091,9 @@ body.dragging .rconf{pointer-events:none!important;opacity:.15;}
 #corsa .na + .na{margin-top:18px;}
 #corsa .na b{font-size:10.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--fc);opacity:.9;}
 #corsa .na .md{font-size:22px;font-weight:200;line-height:1;color:var(--fc);font-variant-numeric:tabular-nums;}
+/* IN GIOCO O FUORI. A colori: può ancora finire al cambio in questo ciclo. Grigia e spenta: non può più, comunque vadano i round che mancano. */
+#corsa .na.fuori{opacity:.5;}
+#corsa .na.fuori .fila i.uno{font-weight:400;}
 #corsa .na .fila{grid-column:1 / -1;justify-content:flex-start;margin-top:5px;}
 #corsa .na .fila i{width:13px;font-size:12px;font-weight:400;opacity:.6;text-align:left;}
 #corsa .na .fila i.uno{opacity:1;}
@@ -2197,7 +2200,9 @@ function renderCorsa(st, RCH){
     return '<div class="np" style="--fc:' + f.txt + '"><b>' + esc(f.short) + '</b><span class="ex">' + esc(x.id != null ? DB[x.id].nome : '—') + '</span><span class="md">' + media(x) + '</span><span class="cosa">posto medio nel round</span>' + fila(x) + '</div>'; }).join('');
   if(primi.length) h += '<div class="cq">' + esc(changeText()) + '</div><div class="riga"></div>';
   h += tutti.filter(function(x){ return primi.indexOf(x) === -1; }).map(function(x){ var f = FAM[x.fam];
-    return '<div class="na" style="--fc:' + f.txt + '"><b>' + esc(f.short) + '</b><span class="md">' + media(x) + '</span>' + fila(x) + '</div>'; }).join('');
+    /* chi non può più finire al cambio in questo ciclo (calcolo esatto di reachability) perde il colore: resta grigio */
+    var fuori = !!(RCH && RCH.can && RCH.can[x.fam] === false);
+    return '<div class="na' + (fuori ? ' fuori' : '') + '" style="--fc:' + (fuori ? 'rgb(150,158,166)' : f.txt) + '"><b>' + esc(f.short) + '</b><span class="md">' + media(x) + '</span>' + fila(x) + '</div>'; }).join('');
   var chi = primi.map(function(x){ return x.fam; }).join(',');
   function metti(){ box.classList.toggle('due', primi.length > 1); if(box.innerHTML !== h) box.innerHTML = h; box.style.opacity = 1; }
   clearTimeout(NUMERI.attesa);

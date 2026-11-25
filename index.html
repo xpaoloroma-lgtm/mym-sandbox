@@ -10464,6 +10464,34 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   };
 })();
 </script>
+
+<style id="cella-open-css">
+/* ═════════ OPEN · LA CELLA DELL'ESERCIZIO, come in Self ═════════
+   Ogni stazione è una cella: famiglia piccola sopra, nome grande, nota SOTTO il nome (non più a fianco).
+   Le celle si dividono tutta l'altezza della scheda. Un punto luce a metà del bordo sinistro: luce, filo e ombre li calcola cellaOpen(). */
+@media (min-width:760px){
+  #scheda-panel .scheda-scroll{display:flex;flex-direction:column;}
+  #scheda-slots{flex:1 0 auto;display:flex;flex-direction:column;padding:4px 0 0;}
+  #scheda-slots .scheda-slot{flex:1 1 0;min-height:112px;display:flex !important;flex-direction:column;justify-content:center;gap:5px;
+    padding:10px 16px 10px 24px;margin:3px 10px 3px 12px;border:0 !important;border-radius:2px;background-color:rgb(18,17,15);overflow:hidden;}
+  #scheda-slots .scheda-slot-left{padding:0 !important;display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:10px;align-items:baseline;position:static;}
+  #scheda-slots .scheda-slot-label{grid-column:1;font-size:9px !important;font-weight:600;letter-spacing:3px;margin:0 0 3px;opacity:.78;}
+  #scheda-slots .scheda-slot-id{grid-column:2;grid-row:1;margin:0;font-size:9px;letter-spacing:1px;color:rgba(180,195,210,.42);white-space:nowrap;}
+  #scheda-slots .scheda-slot-name{grid-column:1 / -1;font-size:24px !important;font-weight:400;letter-spacing:.2px;line-height:1.15;color:rgb(250,246,236);}
+  #scheda-slots .scheda-slot-swap{top:8px;right:8px;}
+  #scheda-slots .scheda-slot:hover .scheda-slot-id{opacity:0;}
+  /* la nota: sotto il nome, bianco caldo, rientrata dietro al suo trattino; cresce con il testo fino a quattro righe */
+  #scheda-slots .scheda-slot-right{border-left:0 !important;position:relative;padding-left:12px;display:block;}
+  #scheda-slots .scheda-slot-right::before{content:'';position:absolute;left:0;top:2px;bottom:2px;width:1px;background:var(--fc,rgba(180,195,210,.5));opacity:.5;}
+  #scheda-slots .scheda-slot-right:focus-within::before{background:rgba(212,168,74,1);opacity:.9;}
+  #scheda-slots .scheda-slot .scheda-note-inp{display:block;width:100%;field-sizing:content;min-height:1.35em !important;max-height:5.4em;height:auto;padding:0 !important;
+    font-size:15px !important;font-weight:500;line-height:1.35;color:rgb(246,236,210);background:none !important;overflow-y:auto;scrollbar-width:thin;}
+  #scheda-slots .scheda-slot .scheda-note-inp::placeholder{color:rgba(180,195,210,.30);font-size:10px;font-weight:400;letter-spacing:2px;text-transform:uppercase;}
+  /* la famiglia su cui si lavora adesso: resta il segno dorato a sinistra, senza velare il colore della cella */
+  #scheda-slots .scheda-slot.active-fam{box-shadow:none;}
+  #scheda-slots .scheda-slot.active-fam::before{width:1px;box-shadow:none;background:rgba(212,168,74,.95);}
+}
+</style>
 </head>
 <body>
 
@@ -15670,6 +15698,7 @@ function renderScheda(flashFam){
     var lvl = state.levels[slot.key] || 1;
     var div = document.createElement('div');
     div.className = 'scheda-slot' + (isActive ? ' active-fam' : '') + (isFlash ? ' flash-fam' : '');
+    div.style.setProperty('--fc', slot.color);
     if(!state.notes) state.notes={};
     var noteVal = state.notes[slot.key] || '';
     div.innerHTML =
@@ -15717,7 +15746,54 @@ function renderScheda(flashFam){
     ta.addEventListener('keydown',function(e){ e.stopPropagation(); });
     ta.addEventListener('click',function(e){ e.stopPropagation(); });
   })();
+  cellaOpenChiedi();
 }
+
+/* LA CELLA DELL'ESERCIZIO IN OPEN: luce e ombre calcolate, stessa legge e stessi numeri di Self e Load, con un punto luce solo. */
+var cellaOpenInCoda = false;
+function cellaOpenChiedi(){ if(!cellaOpenInCoda){ cellaOpenInCoda = true; requestAnimationFrame(function(){ cellaOpenInCoda = false; cellaOpen(); }); } }
+function cellaOpen(){
+  var OMBRA_LUCE = 95, OMBRA_META = 240, OMBRA_MAX = 9, LUCE_FORZA = 1.5, LUCE_BUIO = 70, LUCE_PUNTO = 6.9, FILO = 45;
+  var largo = window.matchMedia('(min-width:760px)').matches;
+  function ombraDi(x, y, l, rilievo, forza){
+    var vx = l.x - x, vy = l.y - y, vl = Math.sqrt(vx * vx + vy * vy) || 1;
+    var out = [(vx / vl * 0.8).toFixed(2) + 'px ' + (vy / vl * 0.8).toFixed(2) + 'px 0.5px rgba(255,240,205,' + (0.5 / (1 + vl / OMBRA_META)).toFixed(2) + ')', '0 0.6px 0.6px rgba(0,0,0,0.9)'];
+    var k = rilievo / (OMBRA_LUCE - rilievo), dx = k * (x - l.x), dy = k * (y - l.y), len = Math.sqrt(dx * dx + dy * dy);
+    if(len > OMBRA_MAX){ dx *= OMBRA_MAX / len; dy *= OMBRA_MAX / len; len = OMBRA_MAX; }
+    var a = forza / (1 + vl / OMBRA_META);
+    out.push((dx * 0.5).toFixed(2) + 'px ' + (dy * 0.5).toFixed(2) + 'px ' + (0.3 + len * 0.10).toFixed(2) + 'px rgba(0,0,0,' + Math.min(0.9, a + 0.08).toFixed(2) + ')');
+    out.push(dx.toFixed(2) + 'px ' + dy.toFixed(2) + 'px ' + (0.6 + len * 0.32).toFixed(2) + 'px rgba(0,0,0,' + a.toFixed(2) + ')');
+    return out.join(',');
+  }
+  var passi = [0, 0.25, 0.5, 0.75, 1, 1.3, 1.6, 2, 2.5, 3.1, 3.8, 4.6], fine = passi[passi.length - 1] * OMBRA_LUCE;
+  var stops = passi.map(function(q){ var e = 1 / Math.pow(1 + q * q, 1.5); return 'color-mix(in srgb,var(--fc) ' + (LUCE_PUNTO * e).toFixed(2) + '%,transparent) ' + (q * OMBRA_LUCE / fine * 100).toFixed(1) + '%'; }).join(',') + ',transparent 100%';
+  document.querySelectorAll('#scheda-slots .scheda-slot').forEach(function(b){
+    var R = b.getBoundingClientRect();
+    if(!largo || !R.height){ b.style.removeProperty('background-image'); return; }
+    var l = {x:0.5, y:R.height / 2};
+    b.style.setProperty('background-image', [
+      'radial-gradient(circle 1.6px at 1px ' + l.y.toFixed(1) + 'px,color-mix(in srgb,var(--fc) 40%,#fff) 0 55%,transparent 100%)',
+      'linear-gradient(color-mix(in srgb,var(--fc) ' + FILO + '%,transparent),color-mix(in srgb,var(--fc) ' + FILO + '%,transparent))',
+      'radial-gradient(circle ' + Math.round(fine) + 'px at ' + l.x + 'px ' + l.y.toFixed(1) + 'px,' + stops + ')',
+      'linear-gradient(90deg,color-mix(in srgb,var(--fc) ' + LUCE_FORZA + '%,transparent) 0%,color-mix(in srgb,var(--fc) ' + (LUCE_FORZA * 0.45).toFixed(1) + '%,transparent) 30%,color-mix(in srgb,var(--fc) ' + (LUCE_FORZA * 0.12).toFixed(1) + '%,transparent) 58%,transparent 80%)'
+    ].join(','));
+    b.style.backgroundSize = 'auto,1px 100%,auto,auto'; b.style.backgroundRepeat = 'no-repeat'; b.style.backgroundPosition = '0 0';
+    function pezzo(el, h, f, base){
+      if(!el) return; var q = el.getBoundingClientRect(); if(!q.width) return;
+      var x = q.left - R.left + Math.min(q.width / 2, 40), y = q.top + q.height / 2 - R.top;
+      el.style.textShadow = ombraDi(x, y, l, h, f);
+      if(base){
+        var d2 = ((x - l.x) * (x - l.x) + (y - l.y) * (y - l.y)) / (OMBRA_LUCE * OMBRA_LUCE), e = 1 / Math.pow(1 + d2, 1.5);
+        el.style.color = 'color-mix(in srgb,' + base + ' ' + Math.round(LUCE_BUIO + (100 - LUCE_BUIO) * Math.min(1, e * 1.3)) + '%,rgb(96,92,84))';
+      }
+    }
+    pezzo(b.querySelector('.scheda-slot-label'), 3, 0.7);
+    pezzo(b.querySelector('.scheda-slot-name'), 4.6, 0.7, 'rgb(250,246,236)');
+    pezzo(b.querySelector('.scheda-note-inp'), 2.3, 0.6, 'rgb(246,236,210)');
+  });
+}
+window.addEventListener('resize', cellaOpenChiedi);
+document.addEventListener('input', function(e){ if(e.target && e.target.classList && e.target.classList.contains('scheda-note-inp')) cellaOpenChiedi(); });   /* la nota cresce: la cella cambia altezza */
 
 function getSteps(){ return SEQUENCES[state.type].steps; }
 

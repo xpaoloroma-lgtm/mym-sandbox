@@ -2,99 +2,98 @@
 <html lang="it"><head><meta charset="utf-8"><title>Self · prova del cambio</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
-/* PROVA: tre modi di mostrare il cambio in orizzontale. Non è collegata a Self: usa i sette round dei dati demo e li rifà in fila. */
+/* PROVA: "i nomi corrono", tre versioni. Non è collegata a Self: usa i sette round dei dati demo e li rifà in fila.
+   Il pallino è il punto esatto sulla corsia. Il nome sta DIETRO al pallino (a sinistra), così il pallino è il muso che va verso la linea.
+   Se a sinistra non c'è posto per il nome, il nome passa davanti (a destra). Oltre la linea il nome sta sempre a destra, dentro la zona del cambio. */
 body{margin:0;background:#0d0c0a;color:#e8e2d0;font-family:"Exo 2","Segoe UI",Arial,sans-serif;padding:16px;}
 .riga{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start;}
-.p{width:232px;overflow:hidden;background:#12110f;border:1px solid rgba(222,190,120,.25);padding:10px 0 8px;position:relative;}
+.p{width:232px;background:#12110f;border:1px solid rgba(222,190,120,.25);padding:10px 0 0;position:relative;overflow:hidden;}
 .t{font-size:12px;letter-spacing:2px;font-weight:600;padding:0 10px 8px;}
 .su{display:flex;justify-content:space-between;padding:0 10px 6px;font-size:8.5px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;color:#deba6e;}
-.campo{position:relative;height:400px;}
-.linea{position:absolute;top:0;bottom:0;left:176px;width:0;border-left:1px solid rgba(222,190,120,.8);}
-.zona{position:absolute;top:0;bottom:0;left:176px;right:0;background:linear-gradient(90deg,rgba(222,190,120,.10),rgba(222,190,120,.02));}
-.c{position:absolute;left:0;right:0;height:80px;}
-.c .fm{position:absolute;left:10px;top:6px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--fc);transition:opacity .5s;}
-.c .ex{position:absolute;left:10px;top:21px;font-size:11px;color:rgba(190,204,218,.7);transition:opacity .5s;}
-.c .via{position:absolute;left:10px;right:0;top:52px;height:0;border-top:1px solid rgba(180,195,210,.13);}
-.c.fuori .fm,.c.fuori .ex{opacity:.4;}
-.mossa{transition:left .9s cubic-bezier(.3,.7,.2,1),width .9s cubic-bezier(.3,.7,.2,1),opacity .6s,transform .9s cubic-bezier(.3,.7,.2,1);}
-/* 1 · pallini */
-.pal{position:absolute;top:52px;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:var(--fc);}
-.c.primo .pal{box-shadow:0 0 0 4px rgba(222,190,120,.28),0 0 12px rgba(222,190,120,.5);}
-.c.fuori .pal{background:none;box-shadow:inset 0 0 0 1.5px var(--fc);opacity:.6;}
-.scia{position:absolute;top:52px;width:4px;height:4px;margin:-2px 0 0 -2px;border-radius:50%;background:var(--fc);}
-.med{position:absolute;top:60px;width:40px;margin-left:-20px;text-align:center;font-size:11px;color:#f0ebdc;}
-/* 2 · barre */
-.bar{position:absolute;left:10px;top:49px;height:6px;border-radius:0 3px 3px 0;background:linear-gradient(90deg,color-mix(in srgb,var(--fc) 15%,transparent),var(--fc));}
-.c.primo .bar{box-shadow:0 0 10px rgba(222,190,120,.45);}
-.c.fuori .bar{opacity:.35;}
-/* 3 · i nomi corrono */
-.p3 .c{height:58px;} .p3 .c .via{top:30px;}
-.nome{position:absolute;top:16px;transform:translateX(-100%);white-space:nowrap;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--fc);padding-right:9px;}
-.nome::after{content:'';position:absolute;right:0;top:50%;width:5px;height:5px;margin-top:-2.5px;border-radius:50%;background:var(--fc);}
-.nome small{display:block;font-size:10px;font-weight:400;letter-spacing:.3px;text-transform:none;color:rgba(190,204,218,.7);}
-.c.primo .nome{transform:translateX(0);padding-right:0;padding-left:10px;font-size:9px;letter-spacing:1px;}
-.c.primo .nome small{display:none;}
-.c.primo .nome::after{right:auto;left:0;box-shadow:0 0 0 3px rgba(222,190,120,.3);}
-.c.fuori .nome{opacity:.4;}
-.p3 .med{top:18px;}
+.campo{position:relative;height:430px;}
+.linea{position:absolute;top:0;bottom:0;left:140px;width:0;border-left:1px solid rgba(222,190,120,.8);}
+.zona{position:absolute;top:0;bottom:0;left:140px;right:0;background:linear-gradient(90deg,rgba(222,190,120,.10),rgba(222,190,120,.02));}
+.c{position:absolute;left:0;right:0;height:86px;}
+.c .via{position:absolute;left:10px;right:0;top:43px;height:0;border-top:1px solid rgba(180,195,210,.10);}
+.mossa{transition:left .9s cubic-bezier(.3,.7,.2,1),opacity .6s,transform .9s cubic-bezier(.3,.7,.2,1);}
+.pal{position:absolute;top:43px;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;background:var(--fc);}
+.c.primo .pal{width:9px;height:9px;margin:-4.5px 0 0 -4.5px;box-shadow:0 0 0 4px rgba(222,190,120,.26),0 0 12px rgba(222,190,120,.5);}
+.c.fuori .pal{background:none;box-shadow:inset 0 0 0 1.5px var(--fc);opacity:.55;}
+.scia{position:absolute;top:43px;width:3px;height:3px;margin:-1.5px 0 0 -1.5px;border-radius:50%;background:var(--fc);}
+.et{position:absolute;top:43px;white-space:nowrap;line-height:1;}
+.et b{display:block;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--fc);}
+.et small{display:block;margin-top:4px;font-size:10.5px;color:rgba(190,204,218,.72);}
+.et i{font-style:normal;font-size:10.5px;color:rgba(240,235,220,.78);}
+.et.sx{transform:translate(calc(-100% - 10px),-50%);text-align:right;}
+.et.dx{transform:translate(11px,-50%);text-align:left;}
+.c.primo .et.dx{transform:translate(14px,-50%);}
+.c.fuori .et{opacity:.38;}
+/* A: solo la famiglia, la media piccola accanto */
+.pa .et b{display:inline;} .pa .et i{margin-left:6px;}
+/* C: la riga di chi è primo si accende appena */
+.pc .c.primo .via{border-top-color:rgba(222,190,120,.35);}
 .nota{font-size:12px;color:rgba(190,204,218,.75);max-width:720px;line-height:1.5;margin:14px 2px 0;}
 </style></head><body>
 <div class="riga">
-  <div class="p p1"><div class="t">1 · PALLINI</div><div class="su"><span class="rd"></span><span>cambio</span></div><div class="campo"><div class="zona"></div><div class="linea"></div></div></div>
-  <div class="p p2"><div class="t">2 · BARRE</div><div class="su"><span class="rd"></span><span>cambio</span></div><div class="campo"><div class="zona"></div><div class="linea"></div></div></div>
-  <div class="p p3"><div class="t">3 · I NOMI CORRONO</div><div class="su"><span class="rd"></span><span>cambio</span></div><div class="campo" style="height:290px"><div class="zona"></div><div class="linea"></div></div></div>
+  <div class="p pa" data-v="a"><div class="t">A · SOLO LA FAMIGLIA</div><div class="su"><span class="rd"></span><span>cambio</span></div><div class="campo"><div class="zona"></div><div class="linea"></div></div></div>
+  <div class="p pb" data-v="b"><div class="t">B · CON L'ESERCIZIO</div><div class="su"><span class="rd"></span><span>cambio</span></div><div class="campo"><div class="zona"></div><div class="linea"></div></div></div>
+  <div class="p pc" data-v="c"><div class="t">C · ESERCIZIO SOLO OLTRE</div><div class="su"><span class="rd"></span><span>cambio</span></div><div class="campo"><div class="zona"></div><div class="linea"></div></div></div>
 </div>
-<div class="nota">Si rifanno in fila i sette round dei dati demo, poi si riparte. Chi va al cambio sta oltre la linea. Gli altri stanno prima della linea: più sono lontani, più sono indietro rispetto a chi è primo. Chi non può più arrivare al cambio è spento.</div>
+<div class="nota">Si rifanno in fila i sette round dei dati demo, poi si riparte. Chi va al cambio sta oltre la linea. Gli altri stanno prima: più sono lontani dalla linea, più sono indietro rispetto a chi è primo. Chi non può più arrivare al cambio è spento.</div>
 <script>
 var FAM = [['U','Upper','#408cff','Cable Row'],['L','Lower','#f28030','Goblet Squat'],['B','Buffer','#b266e8','KB Swing'],['C','Core','#f0e846','Plank'],['T','Cardio','#58d086','Rower']];
 var ROUND = ['BTCUL','CBTLU','BCTUL','UTBCL','BTUCL','CUTBL','TCLBU'];   /* i sei round salvati dei dati demo + il Round 1 della prova di stamattina */
-var LINEA = 176, SINISTRA = 16, OLTRE = 204, PASSO = (LINEA - 8 - SINISTRA) / 3;   /* 3 punti di media di distacco = tutta la corsia */
+var LINEA = 140, SINISTRA = 16, ARRIVO = LINEA - 7, OLTRE = LINEA + 12, PASSO = (ARRIVO - SINISTRA) / 3;   /* 3 punti di media di distacco = tutta la corsia */
 function stato(n){
   var o = FAM.map(function(f){ var ps = []; for(var i = 0; i < n; i++) ps.push(ROUND[i].indexOf(f[0]) + 1); var s = 0; ps.forEach(function(p){ s += p; }); return {k:f[0], ps:ps, avg:s / n}; });
   function prima(a, b){ if(Math.abs(a.avg - b.avg) > 1e-9) return a.avg - b.avg; for(var p = 1; p <= 5; p++){ var ca = a.ps.filter(function(x){ return x === p; }).length, cb = b.ps.filter(function(x){ return x === p; }).length; if(ca !== cb) return cb - ca; } return 0; }
   var ord = o.slice().sort(prima), top = ord[0];
   o.forEach(function(x){
     x.primo = prima(x, top) === 0;
-    x.gap = x.avg - top.avg;
     /* "non cambia più" nella prova: anche facendo sempre primo nei round che mancano, e il primo sempre quinto, non lo raggiunge. Nel Self vero c'è il calcolo esatto. */
     var m = 10 - n, s = 0; x.ps.forEach(function(p){ s += p; }); var st = 0; top.ps.forEach(function(p){ st += p; });
     x.fuori = !x.primo && (s + m * 1 > st + m * 5);
-    x.x = x.primo ? OLTRE : Math.max(SINISTRA, LINEA - 8 - x.gap * PASSO);
+    x.x = x.primo ? OLTRE : Math.max(SINISTRA, ARRIVO - (x.avg - top.avg) * PASSO);
   });
   return o;
 }
 function fm(v){ return v.toFixed(1).replace('.', ','); }
 var pannelli = [].slice.call(document.querySelectorAll('.p'));
-pannelli.forEach(function(p, pi){
-  var campo = p.querySelector('.campo'), H = pi === 2 ? 58 : 80;
+pannelli.forEach(function(p){
+  var campo = p.querySelector('.campo');
   FAM.forEach(function(f, i){
-    var c = document.createElement('div'); c.className = 'c'; c.dataset.k = f[0]; c.style.top = (i * H) + 'px'; c.style.setProperty('--fc', f[2]);
-    var h = pi === 2 ? '<div class="via"></div><div class="nome mossa">' + f[1] + '<small>' + f[3] + '</small></div>'
-      : '<div class="fm">' + f[1] + '</div><div class="ex">' + f[3] + '</div><div class="via"></div>'
-        + (pi === 0 ? '<i class="scia mossa"></i><i class="scia mossa"></i><i class="scia mossa"></i><div class="pal mossa"></div><div class="med mossa"></div>' : '<div class="bar mossa"></div><div class="med mossa" style="top:58px"></div>');
-    c.innerHTML = h; campo.appendChild(c);
+    var c = document.createElement('div'); c.className = 'c'; c.dataset.k = f[0]; c.style.top = (i * 86) + 'px'; c.style.setProperty('--fc', f[2]);
+    c.innerHTML = '<div class="via"></div><i class="scia mossa"></i><i class="scia mossa"></i><i class="scia mossa"></i><div class="pal mossa"></div><div class="et sx mossa"></div>';
+    campo.appendChild(c);
   });
 });
 function mostra(n){
   var passati = []; for(var j = Math.max(1, n - 3); j < n; j++) passati.push(stato(j));
   var st = stato(n);
-  pannelli.forEach(function(p, pi){
+  pannelli.forEach(function(p){
+    var v = p.dataset.v;
     p.querySelector('.rd').textContent = 'round ' + n + ' / 10';
     st.forEach(function(x){
+      var f = FAM.filter(function(q){ return q[0] === x.k; })[0];
       var c = p.querySelector('.c[data-k="' + x.k + '"]'); c.classList.toggle('primo', x.primo); c.classList.toggle('fuori', x.fuori);
-      if(pi === 0){
-        c.querySelector('.pal').style.left = x.x + 'px';
-        var m = c.querySelector('.med'); m.style.left = x.x + 'px'; m.textContent = fm(x.avg);
-        [].forEach.call(c.querySelectorAll('.scia'), function(s, q){
-          var v = passati[passati.length - 1 - q]; if(!v){ s.style.opacity = 0; return; }
-          var y = v.filter(function(z){ return z.k === x.k; })[0]; s.style.left = y.x + 'px'; s.style.opacity = [0.5, 0.3, 0.16][q];
-        });
-      } else if(pi === 1){
-        c.querySelector('.bar').style.width = (x.x - 10) + 'px';
-        var m2 = c.querySelector('.med'); m2.style.left = Math.max(26, x.x - 14) + 'px'; m2.textContent = fm(x.avg);
-      } else {
-        c.querySelector('.nome').style.left = (x.primo ? LINEA - 2 : 104 + (x.x - SINISTRA) * (LINEA - 8 - 104) / (LINEA - 8 - SINISTRA)) + 'px';   /* qui la corsia è più corta: a sinistra serve il posto per il nome */
-      }
+      c.querySelector('.pal').style.left = x.x + 'px';
+      var et = c.querySelector('.et');
+      /* oltre la linea lo spazio è stretto: lì ogni cosa va su una riga sua */
+      var h = v === 'a' ? (x.primo ? '<b style="display:block">' + f[1] + '</b><small>' + fm(x.avg) + '</small>' : '<b>' + f[1] + '</b><i>' + fm(x.avg) + '</i>')
+            : v === 'b' ? '<b>' + f[1] + '</b><small>' + f[3] + (x.primo ? '</small><small>' : ' · ') + fm(x.avg) + '</small>'
+            : '<b>' + f[1] + '</b><small>' + (x.primo ? f[3] : fm(x.avg)) + '</small>';
+      if(et.innerHTML !== h) et.innerHTML = h;
+      /* da che parte sta il nome: dietro al pallino (a sinistra) se ci sta; se no davanti. Oltre la linea sempre a destra. */
+      var dx = x.primo || (x.x - 10 - et.offsetWidth < 6);
+      et.classList.toggle('dx', dx); et.classList.toggle('sx', !dx);
+      et.style.left = x.x + 'px';
+      [].forEach.call(c.querySelectorAll('.scia'), function(s, q){
+        var prec = passati[passati.length - 1 - q]; if(!prec){ s.style.opacity = 0; return; }
+        var y = prec.filter(function(z){ return z.k === x.k; })[0];
+        /* la scia non passa mai sotto al nome: si vede solo dalla parte libera del pallino */
+        var libera = dx ? y.x < x.x - 5 : y.x > x.x + 5;
+        s.style.left = y.x + 'px'; s.style.opacity = libera && !y.primo ? [0.5, 0.3, 0.16][q] : 0;
+      });
     });
   });
 }

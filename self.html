@@ -2185,16 +2185,19 @@ function renderCorsa(st, RCH){
   var con = st.filter(function(x){ return x.avg != null; }), vuoto = !con.length;
   var tutti = vuoto ? FAMS.map(function(f){ return {fam:f.k, id:S.prop[f.k], ps:[], avg:null}; }) : con;
   var primi = vuoto ? [] : con.filter(function(x){ return primaDi(x, con[0]) === 0; });
+  /* il posto medio si scrive solo se la famiglia ha almeno un posto VERO: con soli trattini (posti stimati) il numero
+     sarebbe la media dei posti liberi, cioè un numero che nessuno ha fatto (es. 3,5 a ciclo appena cominciato) */
+  function media(x){ return x.avg != null && x.ps.some(function(q){ return !q.stima; }) ? fmMedia(x.avg) : ''; }
   function fila(x){
     var h = x.ps.map(function(q){ return q.stima ? '<i class="no">–</i>' : '<i class="' + (q.p === 1 ? 'uno' : '') + (q.today ? ' oggi' : '') + '">' + q.p + '</i>'; }).join('');
     for(var k = x.ps.length; k < CICLO; k++) h += '<i class="resta">·</i>';
     return '<span class="fila">' + h + '</span>';
   }
   var h = primi.map(function(x){ var f = FAM[x.fam];
-    return '<div class="np" style="--fc:' + f.txt + '"><b>' + esc(f.short) + '</b><span class="ex">' + esc(x.id != null ? DB[x.id].nome : '—') + '</span><span class="md">' + fmMedia(x.avg) + '</span><span class="cosa">posto medio nel round</span>' + fila(x) + '</div>'; }).join('');
+    return '<div class="np" style="--fc:' + f.txt + '"><b>' + esc(f.short) + '</b><span class="ex">' + esc(x.id != null ? DB[x.id].nome : '—') + '</span><span class="md">' + media(x) + '</span><span class="cosa">posto medio nel round</span>' + fila(x) + '</div>'; }).join('');
   if(primi.length) h += '<div class="cq">' + esc(changeText()) + '</div><div class="riga"></div>';
   h += tutti.filter(function(x){ return primi.indexOf(x) === -1; }).map(function(x){ var f = FAM[x.fam];
-    return '<div class="na" style="--fc:' + f.txt + '"><b>' + esc(f.short) + '</b><span class="md">' + (x.avg != null ? fmMedia(x.avg) : '') + '</span>' + fila(x) + '</div>'; }).join('');
+    return '<div class="na" style="--fc:' + f.txt + '"><b>' + esc(f.short) + '</b><span class="md">' + media(x) + '</span>' + fila(x) + '</div>'; }).join('');
   var chi = primi.map(function(x){ return x.fam; }).join(',');
   function metti(){ box.classList.toggle('due', primi.length > 1); if(box.innerHTML !== h) box.innerHTML = h; box.style.opacity = 1; }
   clearTimeout(NUMERI.attesa);

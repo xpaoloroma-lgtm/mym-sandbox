@@ -11,7 +11,7 @@ html,body{height:100%;}
 body{margin:0;background:#0d0c0a;color:var(--txt);font-family:"Exo 2","Segoe UI",Arial,sans-serif;display:flex;flex-direction:column;}
 header{flex:none;height:56px;display:flex;align-items:center;gap:10px;padding:0 24px;border-bottom:1px solid rgba(222,190,120,.22);font-size:12px;letter-spacing:3px;text-transform:uppercase;}
 header .g{color:var(--gold-txt);} header .m{color:var(--move);} header .s{color:var(--lo);} header .d{margin-left:auto;color:var(--lo);letter-spacing:2px;}
-main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.28fr) minmax(0,1fr);gap:12px;padding:12px;}
+main{flex:1;min-height:0;display:grid;grid-template-columns:232px minmax(0,1.12fr) minmax(0,1fr);gap:12px;padding:12px;}
 .col{min-height:0;display:flex;flex-direction:column;gap:12px;}
 .et{font-size:9px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--lo);}
 
@@ -35,10 +35,27 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.28fr) min
 .bk-n .via{width:28px;height:28px;border:1px solid var(--line);background:none;color:var(--lo);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
 .bk-n .via:hover{border-color:rgba(212,168,74,.6);color:var(--gold-txt);}
 .bk-n .via svg{width:12px;height:12px;display:block;}
-.sotto{flex:none;display:flex;gap:10px;}
-.sotto .piu{flex:1;}
-.sotto .ed{flex:none;height:40px;padding:0 16px;display:flex;align-items:center;border:1px solid var(--line);color:var(--lo);font:600 10px "Exo 2",sans-serif;letter-spacing:3px;text-transform:uppercase;text-decoration:none;}
-.sotto .ed:hover{border-color:rgba(212,168,74,.6);color:var(--gold-txt);}
+/* ── LA COLONNA DEI BLOCCHI DA PRENDERE: gli stessi blocchi dell'editor, alla stessa misura. Si trascinano nella seduta (o un clic li mette in fondo). ── */
+.lib{min-height:0;display:flex;flex-direction:column;border:1px solid var(--line);background:#12110f;}
+.lib-su{flex:none;display:flex;align-items:center;gap:8px;padding:12px 12px 10px;}
+.lib-su .lbl{font-size:12px;font-weight:600;letter-spacing:3px;text-transform:uppercase;}
+.lib-su a{margin-left:auto;height:28px;padding:0 10px;display:flex;align-items:center;border:1px solid var(--line);color:var(--lo);font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;text-decoration:none;}
+.lib-su a:hover{border-color:rgba(212,168,74,.6);color:var(--gold-txt);}
+.lib-cerca{flex:none;padding:0 12px;}
+#bq{width:100%;height:36px;padding:0 12px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:var(--txt);font:400 14px "Exo 2",sans-serif;outline:0;}
+#bq:focus{border-color:rgba(212,168,74,.6);}
+.filtri{flex:none;display:flex;flex-wrap:wrap;gap:5px;padding:8px 12px 10px;border-bottom:1px solid var(--line);}
+.filtri button{height:28px;padding:0 9px;border:1px solid var(--line);background:none;color:var(--lo);font:600 9px "Exo 2",sans-serif;letter-spacing:1.6px;text-transform:uppercase;cursor:pointer;}
+.filtri button.on{border-color:rgba(212,168,74,.75);color:var(--gold-txt);background:rgba(212,168,74,.08);}
+.bl{flex:1;min-height:0;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;scrollbar-width:thin;scrollbar-color:rgba(212,168,74,.4) transparent;}
+.bl .bk{flex:none;cursor:grab;} .bl .bk:hover{border-color:rgba(212,168,74,.6);} .bl .bk.gia{opacity:.45;} .bl .bk:active{cursor:grabbing;}
+.bl .bk-n{font-size:15px;} .bl .bk-r{font-size:13px;} .bl .bk-r i{width:50px;font-size:9px;}
+.bl .niente{font-size:13px;color:var(--lo);padding:6px 2px;}
+/* la seduta mentre si trascina: il bordo si accende e una riga dorata dice dove cadrà il blocco */
+.blocchi.sopra{outline:1px dashed rgba(212,168,74,.7);outline-offset:3px;}
+.blocchi .qui{flex:none;height:0;border-top:2px solid var(--gold);margin:-6px 0;}
+.blocchi .vuota{flex:1;display:flex;align-items:center;justify-content:center;border:1px dashed rgba(180,195,210,.28);color:var(--lo);font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;}
+.blocchi .bk{cursor:grab;} .blocchi .bk.preso{opacity:.35;}
 .piu{flex:none;height:40px;border:1px dashed rgba(180,195,210,.28);background:none;color:var(--lo);font:600 10px "Exo 2",sans-serif;letter-spacing:3px;text-transform:uppercase;cursor:pointer;}
 
 /* ── IL CLIENTE ── */
@@ -96,14 +113,6 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.28fr) min
 .fin-b{flex:1;min-height:0;overflow-y:auto;padding:0 20px 20px;scrollbar-width:thin;scrollbar-color:rgba(212,168,74,.4) transparent;}
 .fin-b .rf-lista{margin-top:0;}
 /* ── LA SCELTA DEL BLOCCO: ricerca, filtri, elenco. Un clic sul blocco lo mette nella seduta di oggi. ── */
-#bq{width:100%;height:42px;padding:0 14px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:var(--txt);font:400 16px "Exo 2",sans-serif;outline:0;}
-#bq:focus{border-color:rgba(212,168,74,.6);}
-.filtri{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 12px;}
-.filtri button{height:32px;padding:0 14px;border:1px solid var(--line);background:none;color:var(--lo);font:600 10px "Exo 2",sans-serif;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;}
-.filtri button.on{border-color:rgba(212,168,74,.75);color:var(--gold-txt);background:rgba(212,168,74,.08);}
-.bl{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.bl .bk{cursor:pointer;} .bl .bk:hover{border-color:rgba(212,168,74,.6);} .bl .bk.gia{opacity:.45;}
-.bl .niente{grid-column:1 / -1;font-size:14px;color:var(--lo);padding:14px 2px;}
 /* ── LE NOTE: campo grande, carattere grosso, quattro comandi ── */
 .note{flex:1;min-height:150px;display:flex;flex-direction:column;border:1px solid var(--line);background:#12110f;}
 .note:focus-within{border-color:rgba(212,168,74,.55);}
@@ -118,13 +127,18 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.28fr) min
 .carta ul,.carta ol{margin:4px 0;padding-left:26px;} .carta li{margin:2px 0;}
 .carta:empty::before{content:'Note';color:rgba(190,204,218,.3);}
 
-@media (max-width:880px){ main{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);} .cella .nm{font-size:17px;} .rf li{font-size:17px;} .chi .nome{font-size:22px;} .carta{font-size:17px;} .b-su .nome{font-size:14px;} }
+@media (max-width:880px){ main{grid-template-columns:206px minmax(0,1.1fr) minmax(0,1fr);gap:10px;padding:10px;} .blocchi .bk-r{font-size:17px;} .blocchi .bk-n{font-size:20px;} .blocchi .bk-r i{width:62px;} .cella .nm{font-size:17px;} .rf li{font-size:17px;} .chi .nome{font-size:22px;} .carta{font-size:17px;} .b-su .nome{font-size:14px;} }
 </style></head><body>
 <header><span class="g">Sandbox</span><span class="s">›</span><span class="m">Move</span><span class="s">›</span><span>Cliente di esempio</span><span class="d">gio 26 nov</span></header>
 <main>
+  <div class="lib">
+    <div class="lib-su"><span class="lbl">Blocchi <span id="bl-n" style="color:var(--lo)"></span></span><a href="move.html" title="L'editor dove si costruiscono i blocchi">Editor →</a></div>
+    <div class="lib-cerca"><input id="bq" type="text" placeholder="Cerca blocco o esercizio" autocomplete="off"></div>
+    <div class="filtri" id="filtri"></div>
+    <div class="bl" id="bl"></div>
+  </div>
   <div class="col">
     <div class="blocchi" id="blocchi"></div>
-    <div class="sotto"><button class="piu" type="button">+ blocco</button><a class="ed" href="move.html" title="L'editor dove si costruiscono i blocchi">Editor blocchi →</a></div>
   </div>
   <div class="col">
     <div class="chi">
@@ -149,7 +163,6 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.28fr) min
   </div>
 </main>
 <div class="velo" id="velo-rf"><div class="fin" role="dialog" aria-modal="true"><div class="fin-su"><b>Red Flags</b><button class="fin-x" type="button" data-chiudi>Chiudi</button></div><div class="fin-b"><div class="rf-lista" id="rf-lista"></div></div></div></div>
-<div class="velo" id="velo-bl"><div class="fin" role="dialog" aria-modal="true"><div class="fin-su"><b>Blocchi</b><button class="fin-x" type="button" data-chiudi>Chiudi</button></div><div class="fin-b"><input id="bq" type="text" placeholder="Cerca blocco o esercizio" autocomplete="off"><div class="filtri" id="filtri"></div><div class="bl" id="bl"></div></div></div></div>
 <script>
 /* dati di esempio: tre blocchi, ognuno con Esercizio 1, Esercizio 2 e Cardio, come nell'editor */
 var BLOCCHI = [
@@ -160,9 +173,9 @@ var BLOCCHI = [
 function righe(b){ return '<div class="bk-r"><i>1</i>' + (b.e[0] || '—') + '</div><div class="bk-r"><i>2</i>' + (b.e[1] || '—') + '</div><div class="bk-r"><i>Cardio</i>' + (b.cardio || '—') + '</div>'; }
 function disegna(){
   document.getElementById('blocchi').innerHTML = BLOCCHI.map(function(b, i){
-    return '<div class="bk' + (b.fatto ? ' fatto' : '') + '"><div class="bk-n"><span>' + (b.nome || 'Senza nome') + '</span><button class="ok" type="button" data-i="' + i + '">' + (b.fatto ? '✓ fatto' : 'Fatto') + '</button>'
+    return '<div class="bk' + (b.fatto ? ' fatto' : '') + '" data-i="' + i + '" draggable="true"><div class="bk-n"><span>' + (b.nome || 'Senza nome') + '</span><button class="ok" type="button" data-i="' + i + '">' + (b.fatto ? '✓ fatto' : 'Fatto') + '</button>'
       + '<button class="via" type="button" data-via="' + i + '" title="Togli il blocco" aria-label="Togli il blocco"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7"/></svg></button></div>' + righe(b) + '</div>';
-  }).join('');
+  }).join('') || '<div class="vuota">Trascina qui i blocchi</div>';
 }
 disegna();
 /* ═══ RED FLAGS ═══ Stesso elenco e stessi testi di Open e Load (RF_DATA copiato da Load). Stato per cliente: attivo + nota, più la Custom.
@@ -252,8 +265,11 @@ function rfSunto(){
 }
 function rfLista(){ document.getElementById('rf-lista').innerHTML = RF_DATA.map(function(f){ return rfScheda(f, false); }).join('') + rfCustom(false); }
 function rfTocca(e, dentroFinestra){
+  /* GLI INTERRUTTORI QUI NON SI MUOVONO. La regola della Sandbox è: per ACCENDERE un red flag serve la password di accesso,
+     per TOGLIERLO serve la password admin (rfChiedi). Questa pagina di prova non ha né accesso né password, quindi non accende e non toglie niente:
+     mostra soltanto. Nella pagina vera l'interruttore chiamerà rfChiedi, come nella finestra del cliente. */
   var o = e.target.closest('[data-rfo]');
-  if(o){ var k = o.dataset.rfo; RF[k] = RF[k] || {}; RF[k].attivo = !RF[k].attivo; if(RF[k].attivo && dentroFinestra) RF[k].aperta = true; rfLista(); rfSunto(); return true; }
+  if(o){ avviso(o, RF[o.dataset.rfo] && RF[o.dataset.rfo].attivo ? 'Per toglierlo serve la password admin, dalla Sandbox' : 'Per accenderlo serve la password di accesso, dalla Sandbox'); return true; }
   var x = e.target.closest('[data-rfx]');
   if(x && dentroFinestra){ var k2 = x.dataset.rfx; RF[k2] = RF[k2] || {}; RF[k2].aperta = !RF[k2].aperta; rfLista(); return true; }
   if(x && !dentroFinestra){ var k3 = x.dataset.rfx; RF[k3] = RF[k3] || {}; RF[k3].aperta = true; apri('velo-rf'); rfLista(); return true; }   /* dal sunto: clic sul nome apre la finestra su quella */
@@ -264,9 +280,15 @@ document.getElementById('velo-rf').addEventListener('click', function(e){ rfTocc
 document.getElementById('velo-rf').addEventListener('input', function(e){
   var n = e.target.dataset.rfn, c = e.target.dataset.rfc;
   if(n){ RF[n] = RF[n] || {}; RF[n].note = e.target.value; }
-  if(c){ RF.__custom = RF.__custom || {}; RF.__custom[c] = e.target.value; if(c === 'nome' && e.target.value) RF.__custom.attivo = true; }
+  if(c){ RF.__custom = RF.__custom || {}; RF.__custom[c] = e.target.value; }   /* scrivere il nome non accende la Custom: per accendere serve la password */
   rfSunto();
 });
+var avvisoT = 0;
+function avviso(vicino, testo){
+  var a = document.getElementById('avviso'); if(!a){ a = document.createElement('div'); a.id = 'avviso'; a.style.cssText = 'position:fixed;z-index:400;max-width:260px;padding:9px 12px;background:#1b1813;border:1px solid rgba(220,100,100,.6);color:#f3e9e6;font-size:13px;line-height:1.35;pointer-events:none;transition:opacity .2s'; document.body.appendChild(a); }
+  var r = vicino.getBoundingClientRect(); a.textContent = testo; a.style.opacity = 1; a.style.left = Math.max(8, Math.min(window.innerWidth - 276, r.right - 260)) + 'px'; a.style.top = (r.bottom + 8) + 'px';
+  clearTimeout(avvisoT); avvisoT = setTimeout(function(){ a.style.opacity = 0; }, 2600);
+}
 function apri(id){ document.getElementById(id).classList.add('open'); }
 function chiudi(){ [].forEach.call(document.querySelectorAll('.velo.open'), function(v){ v.classList.remove('open'); }); }
 document.addEventListener('click', function(e){ if(e.target.closest('[data-chiudi]') || (e.target.classList && e.target.classList.contains('velo'))) chiudi(); });
@@ -288,26 +310,57 @@ var ESEMPI = [
 ];
 var LIB = []; try{ LIB = JSON.parse(localStorage.getItem('move-blocchi') || '[]') || []; }catch(e){ LIB = []; }
 var VERI = LIB.length > 0; if(!VERI) LIB = ESEMPI;
+if(VERI){ BLOCCHI.length = 0; disegna(); }   /* con i blocchi veri dell'editor la seduta parte vuota: i tre di esempio servono solo se l'editor è vuoto */
 var VOCI = ['Tutti','In piedi','Seduto','Prono/Sup.','Quadrupedia'], filtro = 'Tutti';
 function blElenco(){
   var q = document.getElementById('bq').value.trim().toLowerCase(), par = q.split(/\s+/).filter(Boolean);
   document.getElementById('filtri').innerHTML = VOCI.map(function(v){ return '<button type="button" class="' + (v === filtro ? 'on' : '') + '" data-f="' + v + '">' + v + '</button>'; }).join('');
   var l = LIB.filter(function(b){ var t = (b.nome + ' ' + (b.e || []).join(' ') + ' ' + (b.cardio || '')).toLowerCase(); return par.every(function(w){ return t.indexOf(w) !== -1; }) && (filtro === 'Tutti' || b.pos === filtro); });
+  document.getElementById('bl-n').textContent = '· ' + LIB.length;
   document.getElementById('bl').innerHTML = l.length ? l.map(function(b){
     var gia = BLOCCHI.some(function(x){ return x.id === b.id; });
-    return '<div class="bk' + (gia ? ' gia' : '') + '" data-b="' + b.id + '" role="button" tabindex="0"><div class="bk-n"><span>' + (b.nome || 'Senza nome') + '</span>' + (gia ? '<span class="et" style="margin-left:auto">già in seduta</span>' : '') + '</div>' + righe(b) + '</div>';
+    return '<div class="bk' + (gia ? ' gia' : '') + '" data-b="' + b.id + '" draggable="true" title="Trascinalo nella seduta"><div class="bk-n"><span>' + (b.nome || 'Senza nome') + '</span></div>' + righe(b) + '</div>';
   }).join('') : '<div class="niente">Nessun blocco.</div>';
 }
 document.getElementById('bq').addEventListener('input', blElenco);
-document.getElementById('velo-bl').addEventListener('click', function(e){
-  var f = e.target.closest('[data-f]'); if(f){ filtro = f.dataset.f; blElenco(); return; }
-  var b = e.target.closest('[data-b]'); if(!b) return;
-  var x = LIB.filter(function(q){ return q.id === b.dataset.b; })[0]; if(!x) return;
-  BLOCCHI.push({id:x.id, nome:x.nome || 'Senza nome', fatto:false, e:(x.e || []).slice(), cardio:x.cardio || ''});
-  disegna(); chiudi();
+document.getElementById('filtri').addEventListener('click', function(e){ var f = e.target.closest('[data-f]'); if(f){ filtro = f.dataset.f; blElenco(); } });
+function daLib(id){ var x = LIB.filter(function(q){ return q.id === id; })[0]; return x ? {id:x.id, nome:x.nome || 'Senza nome', fatto:false, e:(x.e || []).slice(), cardio:x.cardio || ''} : null; }
+/* un clic sul blocco lo mette in fondo alla seduta (per chi non trascina) */
+document.getElementById('bl').addEventListener('click', function(e){ var b = e.target.closest('[data-b]'); if(!b) return; var n = daLib(b.dataset.b); if(n){ BLOCCHI.push(n); disegna(); blElenco(); } });
+
+/* ═══ TRASCINARE ═══ Dall'elenco alla seduta (il blocco entra dove lo lasci), e dentro la seduta per cambiare l'ordine. */
+var presa = null;   /* {da:'lib', id} oppure {da:'sed', i} */
+document.addEventListener('dragstart', function(e){
+  var k = e.target.closest && e.target.closest('.bk'); if(!k) return;
+  if(k.parentNode.id === 'bl') presa = {da:'lib', id:k.dataset.b};
+  else if(k.parentNode.id === 'blocchi'){ presa = {da:'sed', i:+k.dataset.i}; k.classList.add('preso'); }
+  else return;
+  e.dataTransfer.effectAllowed = 'copyMove'; try{ e.dataTransfer.setData('text/plain', 'blocco'); }catch(x){}
 });
-document.getElementById('blocchi').addEventListener('click', function(e){ var v = e.target.closest('.via'); if(v){ BLOCCHI.splice(+v.dataset.via, 1); disegna(); return; } var b = e.target.closest('.ok'); if(!b) return; var x = BLOCCHI[+b.dataset.i]; x.fatto = !x.fatto; disegna(); });
-document.querySelector('.piu').addEventListener('click', function(){ document.getElementById('bq').value = ''; filtro = 'Tutti'; blElenco(); apri('velo-bl'); document.getElementById('bq').focus(); });
+function dove(y){   /* in che posto della seduta cade: prima del primo blocco che ha il centro sotto il mouse */
+  var ks = [].slice.call(document.querySelectorAll('#blocchi > .bk')), i = ks.length;
+  for(var q = 0; q < ks.length; q++){ var r = ks[q].getBoundingClientRect(); if(y < r.top + r.height / 2){ i = q; break; } }
+  return i;
+}
+var zona = document.getElementById('blocchi');
+zona.addEventListener('dragover', function(e){
+  if(!presa) return; e.preventDefault(); e.dataTransfer.dropEffect = presa.da === 'lib' ? 'copy' : 'move';
+  zona.classList.add('sopra');
+  var i = dove(e.clientY), m = zona.querySelector('.qui'); if(!m){ m = document.createElement('div'); m.className = 'qui'; }
+  var ks = zona.querySelectorAll(':scope > .bk'); if(ks[i]) zona.insertBefore(m, ks[i]); else zona.appendChild(m);
+});
+function pulisci(){ zona.classList.remove('sopra'); var m = zona.querySelector('.qui'); if(m) m.remove(); [].forEach.call(document.querySelectorAll('.bk.preso'), function(k){ k.classList.remove('preso'); }); }
+zona.addEventListener('dragleave', function(e){ if(!zona.contains(e.relatedTarget)) pulisci(); });
+zona.addEventListener('drop', function(e){
+  if(!presa) return; e.preventDefault();
+  var i = dove(e.clientY);
+  if(presa.da === 'lib'){ var n = daLib(presa.id); if(n) BLOCCHI.splice(i, 0, n); }
+  else { var x = BLOCCHI.splice(presa.i, 1)[0]; if(presa.i < i) i--; BLOCCHI.splice(i, 0, x); }
+  presa = null; pulisci(); disegna(); blElenco();
+});
+document.addEventListener('dragend', function(){ presa = null; pulisci(); });
+blElenco();
+document.getElementById('blocchi').addEventListener('click', function(e){ var v = e.target.closest('.via'); if(v){ BLOCCHI.splice(+v.dataset.via, 1); disegna(); blElenco(); return; } var b = e.target.closest('.ok'); if(!b) return; var x = BLOCCHI[+b.dataset.i]; x.fatto = !x.fatto; disegna(); });
 /* i quattro comandi delle note: elenco puntato, elenco numerato, sottolineato, colore */
 document.querySelector('.barra').addEventListener('mousedown', function(e){
   var b = e.target.closest('button'); if(!b) return; e.preventDefault();   /* non togliere il cursore dal testo */

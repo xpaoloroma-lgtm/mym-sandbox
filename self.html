@@ -1071,7 +1071,16 @@ body.dragging .rconf{pointer-events:none!important;opacity:.15;}
    "Oggi rispetto alle ultime 5" non si mostra più. */
 #rk-col #rank{display:none !important;}
 #rk-col #mixbox{display:none !important;}
-#corsa{display:flex;flex-direction:column;align-items:stretch;flex:none;margin:auto 0;transition:opacity .3s;}
+#corsa{display:flex;flex-direction:column;align-items:stretch;flex:1;min-height:0;margin:0;}
+#corsa .testa{flex:none;transition:opacity .3s;}
+/* LA SCALA (25/11): sotto la riga dorata le altre famiglie stanno a una distanza PROPORZIONALE al loro distacco da chi è primo.
+   Vicina alla riga = vicina al cambio. La distanza si legge dalla riga dorata in giù. Nessuna famiglia perde il colore.
+   Chi non può più finire al cambio in questo ciclo sta sotto la riga grigia tratteggiata "non cambia più". */
+#corsa .scala{position:relative;flex:1;min-height:0;}
+#corsa .scala .na{position:absolute;left:0;right:0;top:0;transition:top .7s cubic-bezier(.3,.7,.2,1),opacity .3s;}
+#corsa .scala .na + .na{margin-top:0;}
+#corsa .nonpiu{position:absolute;left:0;right:0;height:0;border-top:1px dashed rgba(180,195,210,0.34);transition:top .7s cubic-bezier(.3,.7,.2,1),opacity .3s;}
+#corsa .nonpiu span{position:absolute;right:4px;top:4px;font-size:7.5px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;color:rgba(190,204,218,0.6);white-space:nowrap;}
 #corsa .np{text-align:center;padding-bottom:4px;}
 #corsa .np + .np{margin-top:22px;}
 #corsa .np b{display:block;font-size:17px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--fc);line-height:1.1;}
@@ -1086,22 +1095,19 @@ body.dragging .rconf{pointer-events:none!important;opacity:.15;}
 #corsa .fila i.no{opacity:.28;}
 #corsa .fila i.resta{color:rgba(180,195,210,0.9);opacity:.22;}
 #corsa .cq{margin-top:16px;font-size:8.5px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold-txt);text-align:center;}
-#corsa .riga{height:0;border-top:1px solid rgba(222,190,120,0.4);margin:20px 18px 18px;}
+#corsa .riga{height:0;border-top:1px solid rgba(222,190,120,0.55);margin:20px 0 0;}
 #corsa .na{display:grid;grid-template-columns:1fr auto;align-items:baseline;padding:0 6px;}
 #corsa .na + .na{margin-top:18px;}
 #corsa .na b{font-size:10.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--fc);opacity:.9;}
 #corsa .na .md{font-size:22px;font-weight:200;line-height:1;color:var(--fc);font-variant-numeric:tabular-nums;}
-/* IN GIOCO O FUORI. A colori: può ancora finire al cambio in questo ciclo. Grigia e spenta: non può più, comunque vadano i round che mancano. */
-#corsa .na.fuori{opacity:.5;}
-#corsa .na.fuori .fila i.uno{font-weight:400;}
 #corsa .na .fila{grid-column:1 / -1;justify-content:flex-start;margin-top:5px;}
 #corsa .na .fila i{width:13px;font-size:12px;font-weight:400;opacity:.6;text-align:left;}
 #corsa .na .fila i.uno{opacity:1;}
 #corsa .na .fila i.resta{opacity:.2;}
 @media (max-width:860px){
   /* finestra stretta: la colonna è una striscia bassa. Resta solo chi andrà al cambio, messo in riga. */
-  #corsa{flex:1;flex-direction:row;align-items:center;gap:18px;margin:0;min-width:0;}
-  #corsa .riga,#corsa .na,#corsa .cosa{display:none;}
+  #corsa{flex:1;flex-direction:row;align-items:center;gap:18px;margin:0;min-width:0;} #corsa .testa{display:flex;align-items:center;gap:18px;}
+  #corsa .riga,#corsa .scala,#corsa .cosa{display:none;}
   #corsa .np{display:flex;align-items:baseline;gap:12px;text-align:left;padding:0;} #corsa .np + .np{margin:0;}
   #corsa .np b{font-size:13px;} #corsa .np .ex{margin:0;font-size:11px;} #corsa .np .md,#corsa.due .np .md{margin:0;font-size:26px;}
   #corsa .fila{margin:0;} #corsa .fila i{width:12px;font-size:12px;} #corsa .cq{margin:0;}
@@ -2196,18 +2202,37 @@ function renderCorsa(st, RCH){
     for(var k = x.ps.length; k < CICLO; k++) h += '<i class="resta">·</i>';
     return '<span class="fila">' + h + '</span>';
   }
+  if(!box.querySelector('.scala')) box.innerHTML = '<div class="testa"></div><div class="scala"><div class="nonpiu"><span>non cambia più</span></div>' + FAMS.map(function(f){ return '<div class="na" data-k="' + f.k + '" style="--fc:' + f.txt + '"></div>'; }).join('') + '</div>';
+  var testa = box.querySelector('.testa'), scala = box.querySelector('.scala');
   var h = primi.map(function(x){ var f = FAM[x.fam];
     return '<div class="np" style="--fc:' + f.txt + '"><b>' + esc(f.short) + '</b><span class="ex">' + esc(x.id != null ? DB[x.id].nome : '—') + '</span><span class="md">' + media(x) + '</span><span class="cosa">posto medio nel round</span>' + fila(x) + '</div>'; }).join('');
   if(primi.length) h += '<div class="cq">' + esc(changeText()) + '</div><div class="riga"></div>';
-  h += tutti.filter(function(x){ return primi.indexOf(x) === -1; }).map(function(x){ var f = FAM[x.fam];
-    /* chi non può più finire al cambio in questo ciclo (calcolo esatto di reachability) perde il colore: resta grigio */
-    var fuori = !!(RCH && RCH.can && RCH.can[x.fam] === false);
-    return '<div class="na' + (fuori ? ' fuori' : '') + '" style="--fc:' + (fuori ? 'rgb(150,158,166)' : f.txt) + '"><b>' + esc(f.short) + '</b><span class="md">' + media(x) + '</span>' + fila(x) + '</div>'; }).join('');
   var chi = primi.map(function(x){ return x.fam; }).join(',');
-  function metti(){ box.classList.toggle('due', primi.length > 1); if(box.innerHTML !== h) box.innerHTML = h; box.style.opacity = 1; }
+  function scalaMetti(){
+    /* SCELTA: 3 punti di posto medio di distacco occupano tutta l'altezza libera; chi è più indietro di così sta in fondo */
+    var H = scala.clientHeight, RIGA = 46, SU = 16, altri = tutti.filter(function(x){ return primi.indexOf(x) === -1; }), top0 = primi.length ? con[0].avg : null;
+    var ys = altri.map(function(x){ return SU + (top0 == null || x.avg == null ? 0 : Math.min(1, (x.avg - top0) / 3)) * Math.max(0, H - SU - RIGA); });
+    var fuori = altri.map(function(x){ return !!(RCH && RCH.can && RCH.can[x.fam] === false); });
+    /* in fondo, di fila, quelle che non possono più: tra loro e le altre passa la riga grigia, e serve il suo posto */
+    var primoFuori = altri.length; for(var i = altri.length - 1; i >= 0 && fuori[i]; i--) primoFuori = i;
+    for(var j = 1; j < ys.length; j++) ys[j] = Math.max(ys[j], ys[j - 1] + RIGA + (j === primoFuori ? 30 : 0));
+    if(primoFuori === 0 && ys.length) ys = ys.map(function(y){ return y + 30; });
+    var sfora = ys.length ? ys[ys.length - 1] + RIGA - H : 0;
+    if(sfora > 0) for(var q = ys.length - 1; q >= 0; q--){ ys[q] = Math.min(ys[q], H - RIGA - (ys.length - 1 - q) * RIGA - 0); }   /* non c'è spazio: si stringono dal fondo */
+    FAMS.forEach(function(f){
+      var el = scala.querySelector('.na[data-k="' + f.k + '"]'), i = -1; altri.forEach(function(x, k){ if(x.fam === f.k) i = k; });
+      if(i === -1){ el.style.opacity = 0; el.style.pointerEvents = 'none'; return; }
+      var x = altri[i], hh = '<b>' + esc(f.short) + '</b><span class="md">' + media(x) + '</span>' + fila(x);
+      if(el.innerHTML !== hh) el.innerHTML = hh;
+      el.style.opacity = 1; el.style.pointerEvents = ''; el.style.top = Math.max(0, ys[i]).toFixed(1) + 'px';
+    });
+    var np = scala.querySelector('.nonpiu');
+    if(primoFuori < altri.length){ np.style.opacity = 1; np.style.top = (ys[primoFuori] - 24).toFixed(1) + 'px'; } else np.style.opacity = 0;
+  }
+  function metti(){ box.classList.toggle('due', primi.length > 1); if(testa.innerHTML !== h) testa.innerHTML = h; testa.style.opacity = 1; scalaMetti(); }
   clearTimeout(NUMERI.attesa);
-  /* quando cambia chi andrà al cambio, la colonna si spegne un attimo e si riaccende con il nuovo: così l'occhio ci va */
-  if(NUMERI.chi != null && NUMERI.chi !== chi && box.innerHTML){ box.style.opacity = 0; NUMERI.attesa = setTimeout(metti, 320); }
+  /* quando cambia chi andrà al cambio, la parte alta si spegne un attimo e si riaccende con il nuovo: così l'occhio ci va */
+  if(NUMERI.chi != null && NUMERI.chi !== chi && testa.innerHTML){ testa.style.opacity = 0; NUMERI.attesa = setTimeout(metti, 320); }
   else metti();
   NUMERI.chi = chi;
 }

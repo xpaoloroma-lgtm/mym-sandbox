@@ -24,7 +24,7 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:232px minmax(0,1.12f
 .bk-r{font-size:14px;color:var(--lo);line-height:1.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .bk-r i{font-style:normal;display:inline-block;width:60px;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(190,204,218,.45);}
 /* nella seduta: lo stesso blocco, ingrandito, e alto quanto gli tocca */
-.blocchi .bk{flex:1 1 0;min-height:150px;display:flex;flex-direction:column;justify-content:center;padding:14px 18px 16px;}
+.blocchi .bk{display:flex;flex-direction:column;justify-content:center;padding:14px 18px 16px;}
 .blocchi .bk-n{font-size:24px;font-weight:300;margin-bottom:12px;}
 .blocchi .bk-r{font-size:21px;color:rgb(250,246,236);line-height:1.75;}
 .blocchi .bk-r i{width:84px;font-size:11px;letter-spacing:2px;}
@@ -48,14 +48,31 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:232px minmax(0,1.12f
 .filtri button{height:28px;padding:0 9px;border:1px solid var(--line);background:none;color:var(--lo);font:600 9px "Exo 2",sans-serif;letter-spacing:1.6px;text-transform:uppercase;cursor:pointer;}
 .filtri button.on{border-color:rgba(212,168,74,.75);color:var(--gold-txt);background:rgba(212,168,74,.08);}
 .bl{flex:1;min-height:0;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;scrollbar-width:thin;scrollbar-color:rgba(212,168,74,.4) transparent;}
-.bl .bk{flex:none;cursor:grab;} .bl .bk:hover{border-color:rgba(212,168,74,.6);} .bl .bk.gia{opacity:.45;} .bl .bk:active{cursor:grabbing;}
+.bl .bk{flex:none;cursor:grab;} .bl .bk:hover{border-color:rgba(212,168,74,.6);} .bl .bk.gia{opacity:.45;cursor:default;} .bl .bk.gia:hover{border-color:var(--line);}
 .bl .bk-n{font-size:15px;} .bl .bk-r{font-size:13px;} .bl .bk-r i{width:50px;font-size:9px;}
 .bl .niente{font-size:13px;color:var(--lo);padding:6px 2px;}
-/* la seduta mentre si trascina: il bordo si accende e una riga dorata dice dove cadrà il blocco */
-.blocchi.sopra{outline:1px dashed rgba(212,168,74,.7);outline-offset:3px;}
-.blocchi .qui{flex:none;height:0;border-top:2px solid var(--gold);margin:-6px 0;}
-.blocchi .vuota{flex:1;display:flex;align-items:center;justify-content:center;border:1px dashed rgba(180,195,210,.28);color:var(--lo);font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;}
-.blocchi .bk{cursor:grab;} .blocchi .bk.preso{opacity:.35;}
+/* ── I POSTI DELLA SEDUTA e il trascinamento, come in Self ── */
+.blocchi{overflow:visible;}
+.posto{flex:1 1 0;min-height:150px;display:flex;position:relative;}
+.posto > .bk{flex:1;min-height:0;cursor:grab;}
+.posto.vuoto{align-items:center;gap:16px;padding-left:20px;}
+.posto.vuoto .pt{position:absolute;left:0;top:3px;bottom:3px;width:1px;background:repeating-linear-gradient(180deg,rgba(180,195,210,.34) 0 2px,transparent 2px 5px);}
+.posto.vuoto .pn{font-size:38px;font-weight:200;line-height:1;color:rgba(222,190,120,.32);}
+.posto.vuoto .ph{font-size:14px;color:rgba(190,204,218,.38);}
+.posto.vuoto.oltre{flex:none;min-height:56px;} .posto.vuoto.oltre .pn{font-size:24px;}
+.posto.vuoto.acceso{background:linear-gradient(90deg,rgba(212,168,74,.16),rgba(4,4,3,0) 70%);} .posto.vuoto.acceso .pt{background:rgba(212,168,74,.75);} .posto.vuoto.acceso .pn{color:var(--gold-txt);} .posto.vuoto.acceso .ph{color:var(--gold-txt);}
+.posto.acceso > .bk{filter:brightness(1.18);border-color:rgba(212,168,74,.6);}
+.bk.alzato{opacity:.35;}
+.bk.entra{animation:entra .32s cubic-bezier(.2,.8,.2,1);} @keyframes entra{from{opacity:0;transform:scale(.97);}to{opacity:1;transform:none;}}
+.lib.acceso{border-color:rgba(212,168,74,.6);}
+body.trascina,body.trascina *{cursor:grabbing !important;}
+body.trascina{user-select:none;}
+#ghost{position:fixed;left:0;top:0;z-index:5000;pointer-events:none;display:none;align-items:center;gap:10px;height:44px;padding:0 16px 0 18px;border-radius:2px;background:rgba(30,28,24,.82);backdrop-filter:blur(8px);
+  border:1px solid rgba(212,168,74,.6);box-shadow:0 18px 40px rgba(0,0,0,.6),0 0 30px rgba(200,175,90,.10);transform-origin:20% 50%;}
+#ghost::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;background:rgba(200,196,186,.7);}
+#ghost .nm{font-size:15px;color:var(--txt);}
+#ghost .why{font-size:11px;color:var(--lo);display:none;}
+#ghost.fuori{border-color:rgba(180,195,210,.45);opacity:.85;} #ghost.fuori .why{display:inline;}
 .piu{flex:none;height:40px;border:1px dashed rgba(180,195,210,.28);background:none;color:var(--lo);font:600 10px "Exo 2",sans-serif;letter-spacing:3px;text-transform:uppercase;cursor:pointer;}
 
 /* ── IL CLIENTE ── */
@@ -162,6 +179,7 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:232px minmax(0,1.12f
     </div>
   </div>
 </main>
+<div id="ghost"><span class="nm"></span><span class="why">torna tra i blocchi</span></div>
 <div class="velo" id="velo-rf"><div class="fin" role="dialog" aria-modal="true"><div class="fin-su"><b>Red Flags</b><button class="fin-x" type="button" data-chiudi>Chiudi</button></div><div class="fin-b"><div class="rf-lista" id="rf-lista"></div></div></div></div>
 <script>
 /* dati di esempio: tre blocchi, ognuno con Esercizio 1, Esercizio 2 e Cardio, come nell'editor */
@@ -171,12 +189,132 @@ var BLOCCHI = [
   {id:'x3', nome:'A terra',              fatto:false, e:['Ponte','Quadrupedia, braccio avanti'], cardio:'Camminata'}
 ];
 function righe(b){ return '<div class="bk-r"><i>1</i>' + (b.e[0] || '—') + '</div><div class="bk-r"><i>2</i>' + (b.e[1] || '—') + '</div><div class="bk-r"><i>Cardio</i>' + (b.cardio || '—') + '</div>'; }
+/* ═══ LA SEDUTA: POSTI E TRASCINAMENTO, come in Self ═══
+   La seduta ha dei POSTI: sempre almeno tre, numerati. Un posto vuoto si vede (numero + "trascina qui"); quando i posti sono tutti pieni ne compare uno in più in fondo.
+   Il trascinamento è lo stesso di Self: un fantasma segue il mouse, il posto sotto si accende, e se il posto è occupato il blocco SI INSERISCE lì
+   e gli altri scalano (li vedi spostarsi mentre trascini). Togliere un blocco (la X, o riportarlo sulla colonna dei blocchi) lo fa volare al suo posto nell'elenco. */
+var SED = BLOCCHI.slice();            /* i posti: un blocco oppure null */
+var anteprima = null, drag = null, zittoClic = false;
+function posti(a){ a = a.slice(); while(a.length > 3 && a[a.length - 1] == null) a.pop(); while(a.length < 3) a.push(null); if(a.every(function(x){ return x != null; })) a.push(null); return a; }
+function mostrati(){ return posti(anteprima || SED); }
+function inSeduta(id){ return SED.some(function(x){ return x && x.id === id; }); }
 function disegna(){
-  document.getElementById('blocchi').innerHTML = BLOCCHI.map(function(b, i){
-    return '<div class="bk' + (b.fatto ? ' fatto' : '') + '" data-i="' + i + '" draggable="true"><div class="bk-n"><span>' + (b.nome || 'Senza nome') + '</span><button class="ok" type="button" data-i="' + i + '">' + (b.fatto ? '✓ fatto' : 'Fatto') + '</button>'
-      + '<button class="via" type="button" data-via="' + i + '" title="Togli il blocco" aria-label="Togli il blocco"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7"/></svg></button></div>' + righe(b) + '</div>';
-  }).join('') || '<div class="vuota">Trascina qui i blocchi</div>';
+  var a = mostrati();
+  document.getElementById('blocchi').innerHTML = a.map(function(b, i){
+    if(!b) return '<div class="posto vuoto' + (i >= 3 ? ' oltre' : '') + '" data-i="' + i + '"><i class="pt"></i><span class="pn">' + (i + 1) + '</span><span class="ph">trascina qui</span></div>';
+    return '<div class="posto" data-i="' + i + '"><div class="bk' + (b.fatto ? ' fatto' : '') + '" data-key="' + b.id + '"><div class="bk-n"><span>' + (b.nome || 'Senza nome') + '</span><button class="ok" type="button" data-ok="' + b.id + '">' + (b.fatto ? '✓ fatto' : 'Fatto') + '</button>'
+      + '<button class="via" type="button" data-via="' + b.id + '" title="Togli il blocco" aria-label="Togli il blocco"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7"/></svg></button></div>' + righe(b) + '</div></div>';
+  }).join('');
+  if(drag && drag.on && drag.src.da === 'sed'){ var k = document.querySelector('#blocchi .bk[data-key="' + drag.src.id + '"]'); if(k) k.classList.add('alzato'); }
 }
+/* come in Self: si fotografa dov'erano i blocchi, si ridisegna, e ognuno scivola dal posto vecchio al nuovo */
+function scivola(fn, durata){
+  var prima = {}; [].forEach.call(document.querySelectorAll('#blocchi .bk[data-key]'), function(b){ prima[b.dataset.key] = b.getBoundingClientRect(); });
+  fn();
+  [].forEach.call(document.querySelectorAll('#blocchi .bk[data-key]'), function(b){
+    var o = prima[b.dataset.key], n = b.getBoundingClientRect();
+    if(!o){ b.classList.add('entra'); return; }
+    var dx = o.left - n.left, dy = o.top - n.top, sy = o.height / n.height;
+    if(Math.abs(dx) > 1 || Math.abs(dy) > 1 || Math.abs(sy - 1) > 0.01){
+      b.style.transformOrigin = 'top left'; b.style.transition = 'none'; b.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scaleY(' + sy + ')';
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){ b.style.transition = 'transform ' + durata + 's cubic-bezier(.2,.8,.2,1)'; b.style.transform = ''; }); });
+    }
+  });
+}
+/* la mossa: torna i posti nuovi, oppure null se non si può */
+function mossa(src, tgt){
+  var a = posti(SED), nuovo;
+  if(!tgt) return null;
+  if(tgt.dove === 'lib'){ if(src.da !== 'sed') return null; a[src.i] = null; return {posti:a, torna:src.id}; }
+  var j = tgt.i;
+  if(src.da === 'lib'){
+    if(inSeduta(src.id)) return null;
+    nuovo = daLib(src.id); if(!nuovo) return null;
+    if(a[j] == null){ a[j] = nuovo; return {posti:a}; }
+    var buco = -1; for(var q = j + 1; q < a.length; q++) if(a[q] == null){ buco = q; break; }   /* posto occupato: si inserisce, gli altri scalano verso il primo posto libero */
+    if(buco !== -1) a.splice(buco, 1);
+    a.splice(j, 0, nuovo); return {posti:a};
+  }
+  if(src.i === j) return null;
+  var x = a[src.i];
+  if(a[j] == null){ a[j] = x; a[src.i] = null; return {posti:a}; }
+  a.splice(src.i, 1); a.splice(j, 0, x); return {posti:a};
+}
+function bersaglio(x, y){
+  var el = document.elementFromPoint(x, y); if(!el) return null;
+  if(el.closest('.lib')) return {dove:'lib'};
+  var z = document.getElementById('blocchi'), r = z.getBoundingClientRect();
+  if(x < r.left || x > r.right || y < r.top - 20 || y > r.bottom + 20) return null;
+  var ps = z.querySelectorAll('.posto'), best = -1, d = 1e9;   /* dalla posizione, non dall'elemento sotto il mouse: aggancia sempre */
+  [].forEach.call(ps, function(p){ var q = p.getBoundingClientRect(), c = Math.abs(y - (q.top + q.height / 2)); if(c < d){ d = c; best = +p.dataset.i; } });
+  return best === -1 ? null : {dove:'sed', i:best};
+}
+function segni(tgt, ok){
+  [].forEach.call(document.querySelectorAll('.posto.acceso,.lib.acceso'), function(e){ e.classList.remove('acceso'); });
+  if(!tgt || !ok) return;
+  if(tgt.dove === 'lib') document.querySelector('.lib').classList.add('acceso');
+  else { var p = document.querySelector('#blocchi .posto[data-i="' + tgt.i + '"]'); if(p) p.classList.add('acceso'); }
+}
+document.addEventListener('pointerdown', function(e){
+  if(e.button !== 0 || e.target.closest('button,a,input,textarea,[contenteditable],.rf,.velo')) return;
+  var t = e.target.closest('#bl .bk:not(.gia)'), b = e.target.closest('#blocchi .bk'), src = null;
+  if(t) src = {da:'lib', id:t.dataset.b, nome:t.querySelector('.bk-n span').textContent};
+  else if(b) src = {da:'sed', id:b.dataset.key, i:+b.parentNode.dataset.i, nome:b.querySelector('.bk-n span').textContent};
+  if(!src) return;
+  drag = {src:src, x0:e.clientX, y0:e.clientY, on:false, sig:null, tgt:null, res:null}; e.preventDefault();
+});
+document.addEventListener('pointermove', function(e){
+  if(!drag) return;
+  var g = document.getElementById('ghost');
+  if(!drag.on){
+    if(Math.abs(e.clientX - drag.x0) + Math.abs(e.clientY - drag.y0) < 5) return;
+    drag.on = true; zittoClic = true; document.body.classList.add('trascina');
+    g.querySelector('.nm').textContent = drag.src.nome; g.style.display = 'flex';
+    if(drag.src.da === 'sed'){ var k = document.querySelector('#blocchi .bk[data-key="' + drag.src.id + '"]'); if(k) k.classList.add('alzato'); }
+    else { var t0 = document.querySelector('#bl .bk[data-b="' + drag.src.id + '"]'); if(t0) t0.classList.add('alzato'); }
+  }
+  g.style.transform = 'translate(' + (e.clientX + 14) + 'px,' + (e.clientY - 22) + 'px) rotate(' + Math.max(-4, Math.min(4, (e.clientX - drag.x0) / 60)) + 'deg)';
+  var tgt = bersaglio(e.clientX, e.clientY), sig = tgt ? tgt.dove + (tgt.i == null ? '' : tgt.i) : '';
+  if(sig === drag.sig) return;
+  drag.sig = sig; drag.tgt = tgt;
+  var res = mossa(drag.src, tgt); drag.res = res;
+  g.classList.toggle('fuori', !!(res && res.torna));
+  anteprima = res ? res.posti : null;
+  scivola(disegna, 0.32);          /* gli altri blocchi si spostano davvero mentre trascini */
+  segni(tgt, !!res);
+});
+function vola(id, da){   /* il blocco torna al suo posto nell'elenco */
+  var t = document.querySelector('#bl .bk[data-b="' + id + '"]'); if(!t) return;
+  var a = t.getBoundingClientRect(), f = t.cloneNode(true);
+  f.classList.remove('gia', 'alzato');
+  f.style.cssText += ';position:fixed;left:' + a.left + 'px;top:' + a.top + 'px;width:' + a.width + 'px;height:' + a.height + 'px;margin:0;z-index:5000;pointer-events:none;transform:translate(' + (da.left - a.left) + 'px,' + (da.top - a.top) + 'px);transition:transform .45s cubic-bezier(.2,.8,.2,1),box-shadow .45s;box-shadow:0 18px 40px rgba(0,0,0,.6);';
+  t.parentNode.appendChild(f); t.style.opacity = '0';
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ f.style.transform = 'translate(0,0)'; f.style.boxShadow = 'none'; }); });
+  setTimeout(function(){ t.style.opacity = ''; f.remove(); }, 480);
+}
+document.addEventListener('pointerup', function(){
+  if(!drag) return;
+  var d = drag; drag = null;
+  if(!d.on) return;
+  setTimeout(function(){ zittoClic = false; }, 0);
+  document.body.classList.remove('trascina'); segni(null);
+  var g = document.getElementById('ghost'), gr = g.getBoundingClientRect(); g.style.display = 'none'; g.classList.remove('fuori');
+  anteprima = null;
+  if(d.res){ SED = d.res.posti; }
+  scivola(disegna, 0.42); blElenco();
+  if(d.res && d.res.torna) vola(d.res.torna, {left:gr.left, top:gr.top});
+});
+document.getElementById('blocchi').addEventListener('click', function(e){
+  if(zittoClic){ zittoClic = false; return; }
+  var v = e.target.closest('[data-via]');
+  if(v){
+    var id = v.dataset.via, k = v.closest('.bk'), da = k.getBoundingClientRect(), a = posti(SED);
+    a.forEach(function(x, i){ if(x && x.id === id) a[i] = null; });
+    SED = a; scivola(disegna, 0.42); blElenco(); vola(id, {left:da.left, top:da.top}); return;
+  }
+  var o = e.target.closest('[data-ok]'); if(!o) return;
+  SED.forEach(function(x){ if(x && x.id === o.dataset.ok) x.fatto = !x.fatto; }); disegna();
+});
 disegna();
 /* ═══ RED FLAGS ═══ Stesso elenco e stessi testi di Open e Load (RF_DATA copiato da Load). Stato per cliente: attivo + nota, più la Custom.
    Nella prova lo stato è in memoria con un esempio; nella pagina vera è state.redFlags del cliente aperto. */
@@ -265,11 +403,17 @@ function rfSunto(){
 }
 function rfLista(){ document.getElementById('rf-lista').innerHTML = RF_DATA.map(function(f){ return rfScheda(f, false); }).join('') + rfCustom(false); }
 function rfTocca(e, dentroFinestra){
-  /* GLI INTERRUTTORI QUI NON SI MUOVONO. La regola della Sandbox è: per ACCENDERE un red flag serve la password di accesso,
-     per TOGLIERLO serve la password admin (rfChiedi). Questa pagina di prova non ha né accesso né password, quindi non accende e non toglie niente:
-     mostra soltanto. Nella pagina vera l'interruttore chiamerà rfChiedi, come nella finestra del cliente. */
+  /* L'INTERRUTTORE CHIEDE LA PASSWORD LÌ, con la finestra della Sandbox (rfChiedi): per ACCENDERE la password di accesso, per TOGLIERE la password admin.
+     La password la controlla la Sandbox, non questa pagina: qui non c'è nessuna password scritta e nessun controllo fatto in casa.
+     Per questo funziona quando la seduta è aperta dentro la Sandbox. Aperta da sola (dal link diretto) la Sandbox non c'è, e l'interruttore non può muoversi. */
   var o = e.target.closest('[data-rfo]');
-  if(o){ avviso(o, RF[o.dataset.rfo] && RF[o.dataset.rfo].attivo ? 'Per toglierlo serve la password admin, dalla Sandbox' : 'Per accenderlo serve la password di accesso, dalla Sandbox'); return true; }
+  if(o){
+    var k = o.dataset.rfo, acceso = !!(RF[k] && RF[k].attivo), nome = k === '__custom' ? ((RF.__custom && RF.__custom.nome) || 'Custom') : (RF_DATA.filter(function(f){ return f.id === k; })[0] || {}).name;
+    var sb = null; try{ if(window.parent && window.parent !== window && typeof window.parent.rfChiedi === 'function') sb = window.parent; }catch(x){ sb = null; }
+    if(!sb){ avviso(o, 'La password la chiede la Sandbox: apri la seduta da lì (Sandbox › Move › Seduta)'); return true; }
+    sb.rfChiedi(!acceso, function(){ RF[k] = RF[k] || {}; RF[k].attivo = !acceso; if(RF[k].attivo && dentroFinestra) RF[k].aperta = true; rfLista(); rfSunto(); }, nome + ' · ' + document.querySelector('.chi .nome').textContent);
+    return true;
+  }
   var x = e.target.closest('[data-rfx]');
   if(x && dentroFinestra){ var k2 = x.dataset.rfx; RF[k2] = RF[k2] || {}; RF[k2].aperta = !RF[k2].aperta; rfLista(); return true; }
   if(x && !dentroFinestra){ var k3 = x.dataset.rfx; RF[k3] = RF[k3] || {}; RF[k3].aperta = true; apri('velo-rf'); rfLista(); return true; }   /* dal sunto: clic sul nome apre la finestra su quella */
@@ -310,7 +454,7 @@ var ESEMPI = [
 ];
 var LIB = []; try{ LIB = JSON.parse(localStorage.getItem('move-blocchi') || '[]') || []; }catch(e){ LIB = []; }
 var VERI = LIB.length > 0; if(!VERI) LIB = ESEMPI;
-if(VERI){ BLOCCHI.length = 0; disegna(); }   /* con i blocchi veri dell'editor la seduta parte vuota: i tre di esempio servono solo se l'editor è vuoto */
+if(VERI){ SED = []; disegna(); }   /* con i blocchi veri dell'editor la seduta parte vuota: i tre di esempio servono solo se l'editor è vuoto */
 var VOCI = ['Tutti','In piedi','Seduto','Prono/Sup.','Quadrupedia'], filtro = 'Tutti';
 function blElenco(){
   var q = document.getElementById('bq').value.trim().toLowerCase(), par = q.split(/\s+/).filter(Boolean);
@@ -318,49 +462,14 @@ function blElenco(){
   var l = LIB.filter(function(b){ var t = (b.nome + ' ' + (b.e || []).join(' ') + ' ' + (b.cardio || '')).toLowerCase(); return par.every(function(w){ return t.indexOf(w) !== -1; }) && (filtro === 'Tutti' || b.pos === filtro); });
   document.getElementById('bl-n').textContent = '· ' + LIB.length;
   document.getElementById('bl').innerHTML = l.length ? l.map(function(b){
-    var gia = BLOCCHI.some(function(x){ return x.id === b.id; });
-    return '<div class="bk' + (gia ? ' gia' : '') + '" data-b="' + b.id + '" draggable="true" title="Trascinalo nella seduta"><div class="bk-n"><span>' + (b.nome || 'Senza nome') + '</span></div>' + righe(b) + '</div>';
+    var gia = inSeduta(b.id);
+    return '<div class="bk' + (gia ? ' gia' : '') + '" data-b="' + b.id + '"><div class="bk-n"><span>' + (b.nome || 'Senza nome') + '</span></div>' + righe(b) + '</div>';
   }).join('') : '<div class="niente">Nessun blocco.</div>';
 }
 document.getElementById('bq').addEventListener('input', blElenco);
 document.getElementById('filtri').addEventListener('click', function(e){ var f = e.target.closest('[data-f]'); if(f){ filtro = f.dataset.f; blElenco(); } });
 function daLib(id){ var x = LIB.filter(function(q){ return q.id === id; })[0]; return x ? {id:x.id, nome:x.nome || 'Senza nome', fatto:false, e:(x.e || []).slice(), cardio:x.cardio || ''} : null; }
-/* un clic sul blocco lo mette in fondo alla seduta (per chi non trascina) */
-document.getElementById('bl').addEventListener('click', function(e){ var b = e.target.closest('[data-b]'); if(!b) return; var n = daLib(b.dataset.b); if(n){ BLOCCHI.push(n); disegna(); blElenco(); } });
-
-/* ═══ TRASCINARE ═══ Dall'elenco alla seduta (il blocco entra dove lo lasci), e dentro la seduta per cambiare l'ordine. */
-var presa = null;   /* {da:'lib', id} oppure {da:'sed', i} */
-document.addEventListener('dragstart', function(e){
-  var k = e.target.closest && e.target.closest('.bk'); if(!k) return;
-  if(k.parentNode.id === 'bl') presa = {da:'lib', id:k.dataset.b};
-  else if(k.parentNode.id === 'blocchi'){ presa = {da:'sed', i:+k.dataset.i}; k.classList.add('preso'); }
-  else return;
-  e.dataTransfer.effectAllowed = 'copyMove'; try{ e.dataTransfer.setData('text/plain', 'blocco'); }catch(x){}
-});
-function dove(y){   /* in che posto della seduta cade: prima del primo blocco che ha il centro sotto il mouse */
-  var ks = [].slice.call(document.querySelectorAll('#blocchi > .bk')), i = ks.length;
-  for(var q = 0; q < ks.length; q++){ var r = ks[q].getBoundingClientRect(); if(y < r.top + r.height / 2){ i = q; break; } }
-  return i;
-}
-var zona = document.getElementById('blocchi');
-zona.addEventListener('dragover', function(e){
-  if(!presa) return; e.preventDefault(); e.dataTransfer.dropEffect = presa.da === 'lib' ? 'copy' : 'move';
-  zona.classList.add('sopra');
-  var i = dove(e.clientY), m = zona.querySelector('.qui'); if(!m){ m = document.createElement('div'); m.className = 'qui'; }
-  var ks = zona.querySelectorAll(':scope > .bk'); if(ks[i]) zona.insertBefore(m, ks[i]); else zona.appendChild(m);
-});
-function pulisci(){ zona.classList.remove('sopra'); var m = zona.querySelector('.qui'); if(m) m.remove(); [].forEach.call(document.querySelectorAll('.bk.preso'), function(k){ k.classList.remove('preso'); }); }
-zona.addEventListener('dragleave', function(e){ if(!zona.contains(e.relatedTarget)) pulisci(); });
-zona.addEventListener('drop', function(e){
-  if(!presa) return; e.preventDefault();
-  var i = dove(e.clientY);
-  if(presa.da === 'lib'){ var n = daLib(presa.id); if(n) BLOCCHI.splice(i, 0, n); }
-  else { var x = BLOCCHI.splice(presa.i, 1)[0]; if(presa.i < i) i--; BLOCCHI.splice(i, 0, x); }
-  presa = null; pulisci(); disegna(); blElenco();
-});
-document.addEventListener('dragend', function(){ presa = null; pulisci(); });
 blElenco();
-document.getElementById('blocchi').addEventListener('click', function(e){ var v = e.target.closest('.via'); if(v){ BLOCCHI.splice(+v.dataset.via, 1); disegna(); blElenco(); return; } var b = e.target.closest('.ok'); if(!b) return; var x = BLOCCHI[+b.dataset.i]; x.fatto = !x.fatto; disegna(); });
 /* i quattro comandi delle note: elenco puntato, elenco numerato, sottolineato, colore */
 document.querySelector('.barra').addEventListener('mousedown', function(e){
   var b = e.target.closest('button'); if(!b) return; e.preventDefault();   /* non togliere il cursore dal testo */

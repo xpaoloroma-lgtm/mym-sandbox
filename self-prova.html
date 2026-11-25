@@ -1058,6 +1058,10 @@ body.dragging .rconf{pointer-events:none!important;opacity:.15;}
 .block .luci i{left:-0.5px!important;}
 .slot .estrip{width:1px!important;background:repeating-linear-gradient(180deg,rgba(180,195,210,0.34) 0 2px,transparent 2px 5px)!important;}
 .slot.hot .estrip{background:rgba(212,168,74,0.75)!important;}
+/* MENO COLORE: il fondo resta com'è; si abbassano le tre cose che portano colore acceso: il filo a sinistra, il trattino delle note, la scritta della famiglia */
+.block .neon{opacity:.45!important;}
+.block .card:not(.omb) .notebox:not(.note-empty)::before{opacity:.5!important;width:1px!important;}
+.block .card:not(.omb) .fl{opacity:.78;}
 </style>
 </head>
 <body>

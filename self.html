@@ -1768,8 +1768,21 @@ function standings(){
     return {fam:f.k, id:S.prop[f.k], ps:ps, n:n, avg:avg};
   }).sort(function(a, b){
     if(a.avg == null && b.avg == null) return 0; if(a.avg == null) return 1; if(b.avg == null) return -1;
-    return a.avg - b.avg || FAM[a.fam].label.localeCompare(FAM[b.fam].label);
+    return primaDi(a, b) || FAM[a.fam].label.localeCompare(FAM[b.fam].label);
   });
+}
+/* CHI STA PIÙ IN ALTO (25/11). Prima la media delle posizioni, come sempre. A PARI MEDIA c'è lo spareggio:
+   sta più in alto chi è stato più volte primo; se ancora pari, chi è stato più volte secondo; e così via fino al quinto posto.
+   Restano pari solo due famiglie che hanno fatto le stesse posizioni lo stesso numero di volte (per esempio uno scambio continuo fra loro).
+   Torna un numero negativo se a sta sopra b, positivo se sta sotto, 0 se sono pari davvero. */
+function primaDi(a, b){
+  if(Math.abs(a.avg - b.avg) > 1e-9) return a.avg - b.avg;
+  for(var p = 1; p <= 5; p++){
+    var ca = 0, cb = 0;
+    a.ps.forEach(function(x){ if(x.p === p) ca++; }); b.ps.forEach(function(x){ if(x.p === p) cb++; });
+    if(ca !== cb) return cb - ca;
+  }
+  return 0;
 }
 /* ═══ FA ANCORA IN TEMPO? ═══
    Per ogni famiglia: c'è ancora un modo, nei round che mancano, per cui finisca in cima quando il ciclo si chiude?
@@ -1788,8 +1801,8 @@ function reachability(){
   var prev0 = fatti.length ? famOf(fatti[fatti.length - 1][0]) : lastFirstFam(), budget = {n:400000}, can = {};
   keys.forEach(function(F){ can[F] = m === 0 ? null : canWin(F, keys.filter(function(k){ return k !== F; }), SP, W, prev0, budget); });
   if(m === 0){   /* ciclo finito: dentro solo chi è in cima (o pari) */
-    var best = Math.min.apply(null, keys.map(function(k){ return SP[k]; }));
-    keys.forEach(function(k){ can[k] = SP[k] <= best; });
+    var fin = standings();   /* ciclo finito: dentro solo chi è in cima, spareggio compreso */
+    keys.forEach(function(k){ var x = fin.filter(function(q){ return q.fam === k; })[0]; can[k] = !!(x && x.avg != null && primaDi(x, fin[0]) === 0); });
   }
   return {m:m, can:can};
 }
@@ -1873,7 +1886,7 @@ function renderSide(){
     }
     row.style.setProperty('--fc', f.txt);
     row.querySelector('.avg').textContent = x.avg == null ? '—' : pct(x) + '%';
-    row.classList.toggle('lead', x.avg != null && Math.abs(x.avg - st[0].avg) < 1e-9);
+    row.classList.toggle('lead', x.avg != null && primaDi(x, st[0]) === 0);   /* sopra la linea: il primo, e chi è pari con lui anche dopo lo spareggio */
     row.classList.toggle('out', !!(RCH && !RCH.can[x.fam]));
     row.classList.toggle('sure', !!(RCH && RCH.can[x.fam] && FAMS.every(function(g){ return g.k === x.fam || !RCH.can[g.k]; })));
     box.appendChild(row);
@@ -2051,7 +2064,7 @@ function placeRank(box, st, pct){
     var hh = horiz ? el.offsetWidth : el.offsetHeight;
     return {el:el, h:hh, y:(top - pct(x)) / span * (L - hh)};
   });
-  var GAP = horiz ? 14 : 8, GAPL = 26;   /* GAPL: lo spazio dove passa la linea del cambio */
+  var GAP = horiz ? 14 : 8, GAPL = 44;   /* GAPL: lo spazio dove passa la linea del cambio */
   function sopra(i){ return rows[i].el.classList.contains('lead'); }
   /* da qui in giù: le famiglie che non possono più arrivare al cambio, qualunque cosa succeda nei round che mancano */
   var salvi = rows.length; while(salvi > 0 && rows[salvi - 1].el.classList.contains('out')) salvi--;

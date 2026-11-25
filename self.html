@@ -1063,23 +1063,28 @@ body.dragging .rconf{pointer-events:none!important;opacity:.15;}
 .block .card:not(.omb) .notebox:not(.note-empty)::before{opacity:.5!important;width:1px!important;}
 .block .card:not(.omb) .fl{opacity:.78;}
 
-/* ═════════ VERSO IL CAMBIO, SNELLO (25/11) ═════════
-   Si vede solo chi andrà al cambio e, più piccolo sotto, chi viene subito dopo. Niente linee, niente corsie, niente medie.
-   Se due famiglie sono pari davvero, in alto ci sono tutte e due. Vale a ogni larghezza: il righello di prima non si usa più. */
+/* ═════════ VERSO IL CAMBIO: UNA COSA SOLA, A BARRE (25/11) ═════════
+   Cinque barre, una per famiglia. La barra dice quanto quella famiglia è stata fatta nel ciclo:
+   è la media delle posizioni (chi sta in fondo al round lavora di più) divisa per 5. Barra più corta = fatta di meno = va al cambio.
+   È lo stesso numero che decide il cambio, quindi le due cose non possono contraddirsi.
+   Sostituisce sia la classifica sia "oggi rispetto alle ultime 5" (aerobico, intensità, forza upper, forza lower), che non si mostra più. */
 #rk-col #rank{display:none !important;}
-#corsa{display:flex;flex-direction:column;gap:14px;flex:none;}
-#corsa .cp{position:relative;padding-left:16px;}
-#corsa .cp::before{content:'';position:absolute;left:0;top:5px;width:8px;height:8px;border-radius:50%;background:var(--fc);box-shadow:0 0 0 3px rgba(222,190,120,0.24),0 0 10px rgba(222,190,120,0.45);}
-#corsa .cp b{display:block;font-size:17px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--fc);line-height:1.1;}
-#corsa .cp small{display:block;margin-top:5px;font-size:13px;color:rgba(240,235,220,0.86);}
-#corsa .cq{font-size:8.5px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold-txt);}
+#rk-col #mixbox{display:none !important;}
+#corsa{display:flex;flex-direction:column;gap:13px;flex:none;}
+#corsa .br{position:relative;}
+#corsa .br b{display:block;font-size:10.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--fc);opacity:.8;}
+#corsa .br .ba{display:block;height:3px;margin-top:6px;background:rgba(180,195,210,0.08);}
+#corsa .br .ba i{display:block;height:100%;background:var(--fc);opacity:.75;transition:width .7s cubic-bezier(.3,.7,.2,1);}
+#corsa .br.primo{padding-bottom:13px;margin-bottom:1px;border-bottom:1px solid var(--line);}
+#corsa .br.primo b{font-size:17px;font-weight:600;letter-spacing:2.5px;line-height:1.1;opacity:1;}
+#corsa .br.primo small{display:block;margin-top:5px;font-size:13px;color:rgba(240,235,220,0.86);}
+#corsa .br.primo .ba{height:4px;margin-top:9px;} #corsa .br.primo .ba i{opacity:1;box-shadow:0 0 8px rgba(222,190,120,0.45);}
+#corsa .br .cq{display:block;margin-top:9px;font-size:8.5px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold-txt);}
 #rk-col.prep #corsa .cq{opacity:.6;}
-#corsa .cs{position:relative;padding:12px 0 0 16px;border-top:1px solid var(--line);opacity:.62;}
-#corsa .cs::before{content:'';position:absolute;left:1px;top:19px;width:5px;height:5px;border-radius:50%;background:var(--fc);}
-#corsa .cs b{font-size:10.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--fc);}
 @media (max-width:860px){
-  #corsa{flex:1;flex-direction:row;align-items:center;gap:22px;min-width:0;}
-  #corsa .cs{border-top:0;border-left:1px solid var(--line);padding:0 0 0 32px;} #corsa .cs::before{left:17px;top:5px;}
+  #corsa{flex:1;flex-direction:row;align-items:flex-end;gap:16px;min-width:0;}
+  #corsa .br{flex:1;min-width:0;} #corsa .br.primo{flex:1.7;padding-bottom:0;margin-bottom:0;border-bottom:0;}
+  #corsa .br.primo small{display:inline;margin:0 0 0 8px;font-size:11px;} #corsa .br.primo b{display:inline;font-size:13px;} #corsa .br .cq{margin-top:4px;}
 }
 </style>
 </head>
@@ -2144,15 +2149,18 @@ function trendOf(fk){
   if(a0 == null || a1 == null) return 0;
   return a0 - a1 > 0.25 ? 1 : a1 - a0 > 0.25 ? -1 : 0;
 }
-/* ═══ VERSO IL CAMBIO, SNELLO ═══ chi andrà al cambio (anche due, se pari davvero) e chi viene subito dopo */
+/* ═══ VERSO IL CAMBIO: UNA COSA SOLA, A BARRE ═══ (il perché è scritto nello stile, in "VERSO IL CAMBIO: UNA COSA SOLA, A BARRE") */
 function renderCorsa(st, RCH){
   var box = $('corsa'); if(!box) return;
   var con = st.filter(function(x){ return x.avg != null; });
   if(!con.length){ box.innerHTML = ''; return; }
-  var primi = con.filter(function(x){ return primaDi(x, con[0]) === 0; }), dopo = con[primi.length];
-  var h = primi.map(function(x){ var f = FAM[x.fam]; return '<div class="cp" style="--fc:' + f.txt + '"><b>' + esc(f.short) + '</b><small>' + esc(x.id != null ? DB[x.id].nome : '—') + '</small></div>'; }).join('');
-  h += '<div class="cq">' + esc(changeText()) + '</div>';
-  if(dopo){ var g = FAM[dopo.fam]; h += '<div class="cs" style="--fc:' + g.txt + '"><b>' + esc(g.short) + '</b></div>'; }
+  var h = con.map(function(x, i){
+    var f = FAM[x.fam], primo = primaDi(x, con[0]) === 0;
+    return '<div class="br' + (primo ? ' primo' : '') + '" data-k="' + x.fam + '" style="--fc:' + f.txt + '"><b>' + esc(f.short) + '</b>'
+      + (primo ? '<small>' + esc(x.id != null ? DB[x.id].nome : '—') + '</small>' : '')
+      + '<span class="ba"><i style="width:' + (x.avg / 5 * 100).toFixed(1) + '%"></i></span>'
+      + (i === 0 ? '<span class="cq">' + esc(changeText()) + '</span>' : '') + '</div>';
+  }).join('');
   if(box.innerHTML !== h) box.innerHTML = h;
 }
 /* Rivedi il ciclo: la classifica rifà il percorso round per round, poi torna a oggi. */

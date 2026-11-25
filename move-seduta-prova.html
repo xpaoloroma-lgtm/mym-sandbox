@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="it"><head><meta charset="utf-8"><title>Move · seduta (prova)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* PROVA: la seduta di Move con il cliente. È una prima idea di disposizione, con dati di esempio scritti a mano:
+   non legge i blocchi veri, non salva niente. Serve per decidere dove stanno le cose e quanto sono grandi. */
+:root{--gold:#d4a84a;--gold-txt:#deba6e;--move:#78cd9b;--red:#e5484d;--line:rgba(180,195,210,.16);--txt:#ece6d6;--lo:rgba(190,204,218,.62);}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{margin:0;background:#0d0c0a;color:var(--txt);font-family:"Exo 2","Segoe UI",Arial,sans-serif;display:flex;flex-direction:column;}
+header{flex:none;height:56px;display:flex;align-items:center;gap:10px;padding:0 24px;border-bottom:1px solid rgba(222,190,120,.22);font-size:12px;letter-spacing:3px;text-transform:uppercase;}
+header .g{color:var(--gold-txt);} header .m{color:var(--move);} header .s{color:var(--lo);} header .d{margin-left:auto;color:var(--lo);letter-spacing:2px;}
+main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.28fr) minmax(0,1fr);gap:12px;padding:12px;}
+.col{min-height:0;display:flex;flex-direction:column;gap:12px;}
+.et{font-size:9px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--lo);}
+
+/* ── I BLOCCHI: uno sopra l'altro. Dentro, i tre posti in riga come nell'editor: Esercizio 1, Esercizio 2, Cardio. ── */
+.blocchi{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;}
+.blocco{flex:1 1 0;min-height:128px;display:flex;flex-direction:column;border:1px solid var(--line);background:#12110f;padding:10px 12px 12px;}
+.blocco.fatto{border-color:rgba(120,205,155,.45);}
+.b-su{display:flex;align-items:baseline;gap:12px;margin-bottom:9px;}
+.b-su .n{font-size:28px;font-weight:200;line-height:1;color:var(--gold-txt);width:22px;}
+.b-su .nome{font-size:15px;font-weight:500;letter-spacing:.3px;}
+.b-su .ok{margin-left:auto;height:28px;padding:0 14px;border:1px solid rgba(212,168,74,.5);background:none;color:var(--gold-txt);font:600 10px "Exo 2",sans-serif;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;}
+.blocco.fatto .b-su .ok{border-color:rgba(120,205,155,.45);color:var(--move);}
+.posti{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+/* la cella dell'esercizio, stessa identità di Self/Load/Open: piano scuro, un punto luce, filo a sinistra, nome grande. Qui il colore è il verde di Move. */
+.cella{position:relative;display:flex;flex-direction:column;justify-content:center;gap:5px;padding:8px 10px 8px 16px;background-color:rgb(18,17,15);
+  background-image:radial-gradient(circle 1.6px at 1px 50%,color-mix(in srgb,var(--move) 40%,#fff) 0 55%,transparent 100%),linear-gradient(color-mix(in srgb,var(--move) 45%,transparent),color-mix(in srgb,var(--move) 45%,transparent)),radial-gradient(circle 230px at 0 50%,color-mix(in srgb,var(--move) 7%,transparent),transparent 100%);
+  background-size:auto,1px 100%,auto;background-repeat:no-repeat;}
+.cella .et{letter-spacing:2.5px;color:var(--move);opacity:.78;}
+.cella .nm{font-size:20px;font-weight:400;line-height:1.15;color:rgb(250,246,236);text-shadow:0 .6px .6px rgba(0,0,0,.9),2px 1px 3px rgba(0,0,0,.6);}
+.cella .nt{font-size:14px;font-weight:500;color:rgb(246,236,210);padding-left:10px;border-left:1px solid color-mix(in srgb,var(--move) 50%,transparent);}
+.piu{flex:none;height:40px;border:1px dashed rgba(180,195,210,.28);background:none;color:var(--lo);font:600 10px "Exo 2",sans-serif;letter-spacing:3px;text-transform:uppercase;cursor:pointer;}
+
+/* ── IL CLIENTE ── */
+.chi{flex:none;border:1px solid var(--line);background:#12110f;padding:12px 14px;display:grid;grid-template-columns:1fr auto;gap:4px 14px;align-items:baseline;}
+.chi .nome{font-size:26px;font-weight:300;line-height:1.1;}
+.chi .dati{grid-column:1 / -1;display:flex;gap:22px;margin-top:8px;}
+.chi .dati div{display:flex;flex-direction:column;gap:3px;} .chi .dati b{font-size:16px;font-weight:400;}
+/* ── LE RED FLAG: il riquadro più visibile della colonna ── */
+.rf{flex:none;border:1px solid rgba(229,72,77,.75);border-left:5px solid var(--red);background:rgba(229,72,77,.07);padding:12px 14px 13px;}
+.rf .et{color:var(--red);opacity:1;letter-spacing:3.5px;font-size:10px;}
+.rf ul{list-style:none;margin:9px 0 0;padding:0;display:flex;flex-direction:column;gap:7px;}
+.rf li{font-size:19px;font-weight:500;line-height:1.2;color:#fff1f0;padding-left:16px;position:relative;}
+.rf li::before{content:'';position:absolute;left:0;top:9px;width:7px;height:7px;background:var(--red);}
+.rf li small{display:block;font-size:13px;font-weight:400;color:rgba(255,230,228,.72);margin-top:2px;}
+/* ── LE NOTE: campo grande, carattere grosso, quattro comandi ── */
+.note{flex:1;min-height:150px;display:flex;flex-direction:column;border:1px solid var(--line);background:#12110f;}
+.note:focus-within{border-color:rgba(212,168,74,.55);}
+.barra{flex:none;display:flex;align-items:center;gap:4px;padding:7px 10px;border-bottom:1px solid var(--line);}
+.barra .et{margin-right:auto;}
+.barra button{height:30px;min-width:32px;padding:0 8px;border:1px solid transparent;background:none;color:var(--txt);font:500 14px "Exo 2",sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;}
+.barra button:hover{border-color:rgba(212,168,74,.5);color:var(--gold-txt);}
+.barra .u{text-decoration:underline;text-underline-offset:3px;}
+.barra .col i{width:14px;height:14px;border-radius:50%;display:block;}
+.barra .sep{width:1px;height:18px;background:var(--line);margin:0 4px;}
+.carta{flex:1;min-height:0;overflow:auto;padding:12px 16px 16px;font-size:18px;font-weight:400;line-height:1.5;color:rgb(246,236,210);outline:0;scrollbar-width:thin;scrollbar-color:rgba(212,168,74,.4) transparent;}
+.carta ul,.carta ol{margin:4px 0;padding-left:26px;} .carta li{margin:2px 0;}
+.carta:empty::before{content:'Note';color:rgba(190,204,218,.3);}
+
+@media (max-width:880px){ main{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);} .cella .nm{font-size:17px;} .rf li{font-size:17px;} .chi .nome{font-size:22px;} .carta{font-size:17px;} .b-su .nome{font-size:14px;} }
+</style></head><body>
+<header><span class="g">Sandbox</span><span class="s">›</span><span class="m">Move</span><span class="s">›</span><span>Cliente di esempio</span><span class="d">gio 26 nov</span></header>
+<main>
+  <div class="col">
+    <div class="blocchi" id="blocchi"></div>
+    <button class="piu" type="button">+ blocco</button>
+  </div>
+  <div class="col">
+    <div class="chi">
+      <div class="nome">Cliente di esempio</div><span class="et">seduta 14</span>
+      <div class="dati"><div><span class="et">Dal</span><b>set 2026</b></div><div><span class="et">Ultima</span><b>lun 23 nov</b></div><div><span class="et">PT</span><b>PR</b></div></div>
+    </div>
+    <div class="rf">
+      <span class="et">Red flag</span>
+      <ul>
+        <li>Protesi anca destra<small>niente flessione oltre 90°</small></li>
+        <li>Vertigini nei cambi di posizione<small>alzarsi in due tempi</small></li>
+        <li>Pressione alta<small>niente apnee</small></li>
+      </ul>
+    </div>
+    <div class="note">
+      <div class="barra">
+        <span class="et">Note</span>
+        <button type="button" data-c="insertUnorderedList" title="Elenco puntato">• —</button>
+        <button type="button" data-c="insertOrderedList" title="Elenco numerato">1. —</button>
+        <button type="button" data-c="underline" class="u" title="Sottolineato">S</button>
+        <span class="sep"></span>
+        <button type="button" class="col" data-col="rgb(246,236,210)" title="Colore normale"><i style="background:rgb(246,236,210)"></i></button>
+        <button type="button" class="col" data-col="#deba6e" title="Dorato"><i style="background:#deba6e"></i></button>
+        <button type="button" class="col" data-col="#78cd9b" title="Verde"><i style="background:#78cd9b"></i></button>
+        <button type="button" class="col" data-col="#ff8a80" title="Rosso"><i style="background:#ff8a80"></i></button>
+      </div>
+      <div class="carta" id="carta" contenteditable="true" spellcheck="false"><div>Arriva sempre con la figlia, che aspetta fuori.</div><ul><li>cammina meglio <u>dopo</u> il primo blocco</li><li>la sedia alta, non quella bassa</li></ul><div><font color="#deba6e">Chiedere del controllo del 3 dicembre.</font></div></div>
+    </div>
+  </div>
+</main>
+<script>
+/* dati di esempio: tre blocchi, ognuno con Esercizio 1, Esercizio 2 e Cardio, come nell'editor */
+var BLOCCHI = [
+  {nome:'In piedi alla sbarra', fatto:true,  p:[['Esercizio 1','Sit to stand','3 × 8 · sedia alta'],['Esercizio 2','Alzate sui talloni','3 × 10'],['Cardio','Marcia sul posto','3 minuti']]},
+  {nome:'Seduto',               fatto:false, p:[['Esercizio 1','Estensione ginocchio','3 × 10 per gamba'],['Esercizio 2','Tirate con elastico','3 × 10'],['Cardio','Pedaliera','4 minuti']]},
+  {nome:'A terra',              fatto:false, p:[['Esercizio 1','Ponte','3 × 8'],['Esercizio 2','Quadrupedia, braccio avanti','3 × 6 per lato'],['Cardio','Camminata','5 minuti']]}
+];
+function disegna(){
+  document.getElementById('blocchi').innerHTML = BLOCCHI.map(function(b, i){
+    return '<section class="blocco' + (b.fatto ? ' fatto' : '') + '"><div class="b-su"><span class="n">' + (i + 1) + '</span><span class="nome">' + b.nome + '</span><button class="ok" type="button" data-i="' + i + '">' + (b.fatto ? '✓ fatto' : 'Fatto') + '</button></div>'
+      + '<div class="posti">' + b.p.map(function(c){ return '<div class="cella"><span class="et">' + c[0] + '</span><span class="nm">' + c[1] + '</span><span class="nt">' + c[2] + '</span></div>'; }).join('') + '</div></section>';
+  }).join('');
+}
+disegna();
+document.getElementById('blocchi').addEventListener('click', function(e){ var b = e.target.closest('.ok'); if(!b) return; var x = BLOCCHI[+b.dataset.i]; x.fatto = !x.fatto; disegna(); });
+document.querySelector('.piu').addEventListener('click', function(){ BLOCCHI.push({nome:'Blocco da scegliere', fatto:false, p:[['Esercizio 1','—',''],['Esercizio 2','—',''],['Cardio','—','']]}); disegna(); });
+/* i quattro comandi delle note: elenco puntato, elenco numerato, sottolineato, colore */
+document.querySelector('.barra').addEventListener('mousedown', function(e){
+  var b = e.target.closest('button'); if(!b) return; e.preventDefault();   /* non togliere il cursore dal testo */
+  document.getElementById('carta').focus();
+  if(b.dataset.c) document.execCommand(b.dataset.c, false, null);
+  else if(b.dataset.col) document.execCommand('foreColor', false, b.dataset.col);
+});
+</script>
+</body></html>

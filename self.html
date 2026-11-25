@@ -2681,7 +2681,10 @@ function closeSession(){
   if(!S.sess) return null;
   if(!S.conf) S.conf = [null, null];
   var date = S.sess.date, pt = S.sess.pt, ph = phase(), at = S.rounds.length, n = 0;
-  var full = function(r){ return !!S.conf[r] && S.today[r].every(function(x){ return x != null; }); };   /* fatto = pieno E confermato */
+  /* (25/11) FATTO = PIENO. Al cambio di giorno un round completo si salva SEMPRE, anche se nessuno ha premuto Conferma:
+     meglio un round salvato senza PT che un cambio sbagliato. Prima il round pieno ma non confermato si buttava,
+     e chi andava al cambio cambiava da solo premendo "giorno dopo". Un round a metà invece si butta, come prima. */
+  var full = function(r){ return S.today[r].every(function(x){ return x != null; }); };
   if(full(0)){ S.rounds.push({date:date, pt:pt, o:S.today[0].slice()}); n++; }
   if(!S.skip2 && full(1)){
     if(ph === 'straddle' && S.pend && n === 1){
@@ -2702,8 +2705,12 @@ function openDay(){
   var closed = null, dropped = false;
   /* cambio di giorno: la sessione confermata si chiude e conta; quello fatto in sola consultazione non conta e si svuota */
   if(S.sess && S.sess.date !== S.simDate){ closed = closeSession(); save(); }
+  else if(!S.sess && S.dayOf && S.dayOf !== S.simDate && S.today.some(function(r, R){ return !(R === 1 && S.skip2) && r.every(function(x){ return x != null; }); })){
+    /* giorno nuovo, niente di confermato, ma c'è almeno un round completo: si salva lo stesso, senza PT (vedi closeSession) */
+    S.sess = {date:S.dayOf, pt:''}; closed = closeSession(); save();
+  }
   else if(!S.sess && S.dayOf && S.dayOf !== S.simDate && S.today.some(function(r){ return r.some(function(x){ return x != null; }); })){
-    /* giorno nuovo senza niente di confermato: i blocchi tornano vuoti */
+    /* giorno nuovo con solo round a metà: i blocchi tornano vuoti */
     S.today = [[null,null,null,null,null],[null,null,null,null,null]]; S.conf = [null, null]; S.skip2 = false; S.pend = null; S.copies = syncCopies(S.today, {});
   }
 

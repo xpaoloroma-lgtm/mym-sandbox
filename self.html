@@ -1063,42 +1063,24 @@ body.dragging .rconf{pointer-events:none!important;opacity:.15;}
 .block .card:not(.omb) .notebox:not(.note-empty)::before{opacity:.5!important;width:1px!important;}
 .block .card:not(.omb) .fl{opacity:.78;}
 
-/* ═════════ VERSO IL CAMBIO: I NOMI CORRONO (25/11) ═════════
-   Ogni famiglia ha la sua riga, sempre la stessa. Si muove solo in orizzontale.
-   Due linee verticali ferme: a destra il CAMBIO, a sinistra NON CAMBIA PIÙ.
-   Chi va al cambio sta oltre la linea di destra; chi non può più arrivarci sta oltre quella di sinistra.
-   In mezzo: più si è vicini alla linea del cambio, meno si è indietro rispetto a chi è primo.
-   Il nome sta dalla parte dove c'è posto: pallino nella metà sinistra → nome a destra; pallino nella metà destra → nome a sinistra.
-   Vale quando la colonna è in piedi (finestra da 861 in su). Sotto, resta il righello orizzontale di prima. */
-#corsa{display:none;}
-@media (min-width:861px){
-  #rk-col #rank{display:none !important;}
-  #corsa{display:block;position:relative;flex:1;min-height:0;margin:0 -10px 0 -12px;overflow:hidden;}
+/* ═════════ VERSO IL CAMBIO, SNELLO (25/11) ═════════
+   Si vede solo chi andrà al cambio e, più piccolo sotto, chi viene subito dopo. Niente linee, niente corsie, niente medie.
+   Se due famiglie sono pari davvero, in alto ci sono tutte e due. Vale a ogni larghezza: il righello di prima non si usa più. */
+#rk-col #rank{display:none !important;}
+#corsa{display:flex;flex-direction:column;gap:14px;flex:none;}
+#corsa .cp{position:relative;padding-left:16px;}
+#corsa .cp::before{content:'';position:absolute;left:0;top:5px;width:8px;height:8px;border-radius:50%;background:var(--fc);box-shadow:0 0 0 3px rgba(222,190,120,0.24),0 0 10px rgba(222,190,120,0.45);}
+#corsa .cp b{display:block;font-size:17px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--fc);line-height:1.1;}
+#corsa .cp small{display:block;margin-top:5px;font-size:13px;color:rgba(240,235,220,0.86);}
+#corsa .cq{font-size:8.5px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold-txt);}
+#rk-col.prep #corsa .cq{opacity:.6;}
+#corsa .cs{position:relative;padding:12px 0 0 16px;border-top:1px solid var(--line);opacity:.62;}
+#corsa .cs::before{content:'';position:absolute;left:1px;top:19px;width:5px;height:5px;border-radius:50%;background:var(--fc);}
+#corsa .cs b{font-size:10.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--fc);}
+@media (max-width:860px){
+  #corsa{flex:1;flex-direction:row;align-items:center;gap:22px;min-width:0;}
+  #corsa .cs{border-top:0;border-left:1px solid var(--line);padding:0 0 0 32px;} #corsa .cs::before{left:17px;top:5px;}
 }
-#corsa .cz{position:absolute;top:0;bottom:0;background:linear-gradient(90deg,rgba(222,190,120,0.10),rgba(222,190,120,0.02));}
-#corsa .cl{position:absolute;top:0;bottom:0;width:0;border-left:1px solid rgba(222,190,120,0.8);}
-#corsa .cl.no{border-left-color:rgba(180,195,210,0.30);}
-#rk-col.prep #corsa .cl:not(.no){border-left-style:dashed;}
-#corsa .cl.sicuro{border-left-width:2px;border-left-style:solid !important;box-shadow:0 0 12px rgba(222,190,120,0.5);}
-#corsa .ct{position:absolute;font-size:8.5px;font-weight:600;letter-spacing:1.8px;text-transform:uppercase;white-space:nowrap;}
-#corsa .ct.c{top:0;right:31px;color:var(--gold-txt);}
-#corsa .ct.n{bottom:0;left:29px;color:rgba(190,204,218,0.55);}
-#corsa .cr{position:absolute;left:0;right:0;}
-#corsa .cr .via{position:absolute;left:0;right:0;top:50%;height:0;border-top:1px solid rgba(180,195,210,0.09);}
-#corsa .mossa{transition:left .9s cubic-bezier(.3,.7,.2,1),opacity .6s,transform .9s cubic-bezier(.3,.7,.2,1);}
-#corsa .pal{position:absolute;top:50%;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;background:var(--fc);}
-#corsa .cr.primo .pal{width:9px;height:9px;margin:-4.5px 0 0 -4.5px;box-shadow:0 0 0 4px rgba(222,190,120,0.26),0 0 12px rgba(222,190,120,0.5);}
-#corsa .cr.fuori .pal{background:none;box-shadow:inset 0 0 0 1.5px var(--fc);opacity:.55;}
-#corsa .scia{position:absolute;top:50%;width:3px;height:3px;margin:-1.5px 0 0 -1.5px;border-radius:50%;background:var(--fc);opacity:0;}
-#corsa .et{position:absolute;top:50%;white-space:nowrap;line-height:1;}
-#corsa .et b{display:block;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--fc);}
-#corsa .et small{display:block;margin-top:4px;font-size:10.5px;color:rgba(190,204,218,0.72);}
-#corsa .et small.q{font-size:8px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:var(--gold-txt);margin-top:5px;}
-#corsa .et.sx{transform:translate(calc(-100% - 10px),-50%);text-align:right;}
-#corsa .et.dx{transform:translate(11px,-50%);text-align:left;}
-#corsa .cr.primo .et.sx{transform:translate(calc(-100% - 17px),-50%);}
-#corsa .cr.fuori .et.dx{transform:translate(17px,-50%);}
-#corsa .cr.fuori .et{opacity:.42;}
 </style>
 </head>
 <body>
@@ -2162,63 +2144,17 @@ function trendOf(fk){
   if(a0 == null || a1 == null) return 0;
   return a0 - a1 > 0.25 ? 1 : a1 - a0 > 0.25 ? -1 : 0;
 }
-/* ═══ VERSO IL CAMBIO: I NOMI CORRONO ═══ (il perché è scritto nello stile, in "VERSO IL CAMBIO: I NOMI CORRONO") */
-function fmMedia(v){ return v.toFixed(1).replace('.', ','); }
-/* i round che contano nel ciclo, in ordine: quelli salvati più i round di oggi già pieni */
-function roundContati(){
-  var o = S.rounds.slice(cycStart()).map(function(rd){ return rd.o; });
-  if(phase() !== 'closed') shown().forEach(function(r, R){ if(todayInCycle(R) && r.every(function(x){ return x != null; })) o.push(r); });
-  return o;
-}
-/* dove stava ogni famiglia dopo i primi n round contati: serve solo per la scia */
-function corsaPrima(n, fatti){
-  var o = FAMS.map(function(f){ var ps = []; for(var i = 0; i < n; i++){ var q = famIdx(fatti[i], f.k); if(q !== -1) ps.push({p:q + 1}); } var t = 0; ps.forEach(function(x){ t += x.p; }); return {fam:f.k, ps:ps, avg:ps.length ? t / ps.length : null}; });
-  var ord = o.filter(function(x){ return x.avg != null; }).sort(primaDi), top = ord[0], m = {};
-  o.forEach(function(x){ m[x.fam] = (!top || x.avg == null) ? null : {primo:primaDi(x, top) === 0, gap:x.avg - top.avg}; });
-  return m;
-}
+/* ═══ VERSO IL CAMBIO, SNELLO ═══ chi andrà al cambio (anche due, se pari davvero) e chi viene subito dopo */
 function renderCorsa(st, RCH){
   var box = $('corsa'); if(!box) return;
-  var W = box.clientWidth, H = box.clientHeight; if(!W || !H) return;
-  var LN = 22, LC = W - 24, META = (LN + LC) / 2, SU = 18, GIU = 16;   /* le due linee ferme; SU e GIU: lo spazio per le due scritte */
-  var ARRIVO = LC - 9, PARTENZA = LN + 9, PASSO = (ARRIVO - PARTENZA) / 3;   /* SCELTA: 3 punti di media di distacco occupano tutta la corsia */
-  var hr = Math.min(96, (H - SU - GIU) / FAMS.length);
-  if(!box.querySelector('.cl')){
-    box.innerHTML = '<div class="cz"></div><div class="cl no"></div><div class="cl si"></div><span class="ct c"></span><span class="ct n">non cambia più</span>'
-      + FAMS.map(function(f){ return '<div class="cr" data-k="' + f.k + '"><div class="via"></div><i class="scia mossa"></i><i class="scia mossa"></i><div class="pal mossa"></div><div class="et dx mossa"></div></div>'; }).join('');
-  }
-  box.querySelector('.cz').style.left = LC + 'px'; box.querySelector('.cz').style.right = '0';
-  box.querySelector('.cl.no').style.left = LN + 'px';
-  var si = box.querySelector('.cl.si'); si.style.left = LC + 'px';
-  var top = st[0] && st[0].avg != null ? st[0] : null;
-  var sicuro = !!(RCH && top && RCH.can[top.fam] && FAMS.every(function(g){ return g.k === top.fam || !RCH.can[g.k]; }));
-  si.classList.toggle('sicuro', sicuro);
-  box.querySelector('.ct.c').textContent = sicuro ? 'cambio sicuro' : 'cambio';
-  function xDi(primo, fuori, gap){ return primo ? LC + 11 : fuori ? LN - 11 : Math.max(PARTENZA, ARRIVO - gap * PASSO); }
-  var fatti = roundContati(), N = fatti.length, prima = [N - 1, N - 2].map(function(n){ return n >= 1 ? corsaPrima(n, fatti) : null; });
-  FAMS.forEach(function(f, i){
-    var x = st.filter(function(q){ return q.fam === f.k; })[0], c = box.querySelector('.cr[data-k="' + f.k + '"]');
-    c.style.top = (SU + i * hr) + 'px'; c.style.height = hr + 'px'; c.style.setProperty('--fc', f.txt);
-    var haDati = !!(top && x && x.avg != null);
-    var primo = haDati && primaDi(x, top) === 0, fuori = haDati && !primo && !!(RCH && !RCH.can[f.k]);
-    var px = haDati ? xDi(primo, fuori, x.avg - top.avg) : PARTENZA;
-    c.classList.toggle('primo', primo); c.classList.toggle('fuori', fuori);
-    c.querySelector('.pal').style.left = px + 'px';
-    var et = c.querySelector('.et'), dx = px < META;   /* pallino nella metà sinistra: nome a destra; nella metà destra: nome a sinistra */
-    var h = '<b>' + esc(f.short) + '</b>' + (!haDati ? '' : primo
-      ? '<small>' + esc(x.id != null ? DB[x.id].nome : '—') + ' · ' + fmMedia(x.avg) + '</small>' + (x === top ? '<small class="q">' + esc(changeText()) + '</small>' : '')
-      : '<small>' + fmMedia(x.avg) + '</small>');
-    if(et.innerHTML !== h) et.innerHTML = h;
-    et.classList.toggle('dx', dx); et.classList.toggle('sx', !dx); et.style.left = px + 'px';
-    /* la scia: dove stava il pallino uno e due round fa. Si vede solo dalla parte libera, mai sotto al nome. */
-    [].forEach.call(c.querySelectorAll('.scia'), function(sc, q){
-      var v = prima[q] && prima[q][f.k]; if(!v || !haDati){ sc.style.opacity = 0; return; }
-      var y = xDi(v.primo, false, v.gap), libera = dx ? y < px - 5 : y > px + 5;
-      sc.style.left = y + 'px'; sc.style.opacity = libera ? [0.45, 0.22][q] : 0;
-    });
-  });
+  var con = st.filter(function(x){ return x.avg != null; });
+  if(!con.length){ box.innerHTML = ''; return; }
+  var primi = con.filter(function(x){ return primaDi(x, con[0]) === 0; }), dopo = con[primi.length];
+  var h = primi.map(function(x){ var f = FAM[x.fam]; return '<div class="cp" style="--fc:' + f.txt + '"><b>' + esc(f.short) + '</b><small>' + esc(x.id != null ? DB[x.id].nome : '—') + '</small></div>'; }).join('');
+  h += '<div class="cq">' + esc(changeText()) + '</div>';
+  if(dopo){ var g = FAM[dopo.fam]; h += '<div class="cs" style="--fc:' + g.txt + '"><b>' + esc(g.short) + '</b></div>'; }
+  if(box.innerHTML !== h) box.innerHTML = h;
 }
-window.addEventListener('resize', function(){ if($('corsa')) renderSide(); });
 /* Rivedi il ciclo: la classifica rifà il percorso round per round, poi torna a oggi. */
 var REPLAY = null;
 function replayCycle(){

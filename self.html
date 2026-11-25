@@ -1063,28 +1063,45 @@ body.dragging .rconf{pointer-events:none!important;opacity:.15;}
 .block .card:not(.omb) .notebox:not(.note-empty)::before{opacity:.5!important;width:1px!important;}
 .block .card:not(.omb) .fl{opacity:.78;}
 
-/* ═════════ VERSO IL CAMBIO: LA FETTA CHE SCENDE (25/11) ═════════
-   In alto una ciambella: una fetta per famiglia, grande quanto quella famiglia è stata fatta nel ciclo
-   (la sua media delle posizioni sul totale: chi sta in fondo al round lavora di più). Le fette stanno sempre nello stesso ordine.
-   La fetta più piccola è la famiglia che andrà al cambio: esce dal suo posto, scende lungo la lineetta e si ferma sopra il nome
-   della famiglia e dell'esercizio. Dove stava resta il vuoto tratteggiato. Se cambia chi è primo, la fetta risale e scende l'altra.
-   "Andrà al cambio" vuol dire: se il ciclo finisse adesso. Non c'è più la distinzione con "cambio sicuro".
-   È lo stesso numero che decide il cambio (media + spareggio). "Oggi rispetto alle ultime 5" non si mostra più. */
+/* ═════════ VERSO IL CAMBIO: I NUMERI (25/11) ═════════
+   Per ogni famiglia due cose: il POSTO MEDIO nel round (il numero grande, quello che decide il cambio: il più basso cambia)
+   e, sotto, la fila dei POSTI fatti round per round, da cui quel numero viene. Gli "1" sono più accesi; i puntini sono i round che mancano.
+   In alto, grande, chi andrà al cambio (se il ciclo finisse adesso), con l'esercizio. Sotto la riga, le altre, in ordine.
+   Mentre si prepara un round a metà: chi è posato ha il suo numero, chi non lo è ancora ha un trattino (nel conto vale la media dei posti liberi).
+   "Oggi rispetto alle ultime 5" non si mostra più. */
 #rk-col #rank{display:none !important;}
 #rk-col #mixbox{display:none !important;}
-#corsa{display:flex;flex-direction:column;align-items:center;flex:none;margin:auto -10px auto -12px;}
-#corsa svg{display:block;overflow:visible;}
-#corsa svg text{font-family:inherit;font-size:7.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;}
-#corsa .nomi{display:flex;justify-content:center;gap:14px;width:100%;margin-top:10px;text-align:center;transition:opacity .45s;}
-#corsa .nomi b{display:block;font-size:17px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--fc);line-height:1.1;}
-#corsa .nomi.due b{font-size:12px;letter-spacing:1.5px;}
-#corsa .nomi small{display:block;margin-top:6px;font-size:13px;color:rgba(240,235,220,0.86);}
-#corsa .nomi.due small{font-size:11px;}
-#corsa .cq{margin-top:12px;font-size:8.5px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold-txt);text-align:center;transition:opacity .45s;}
+#corsa{display:flex;flex-direction:column;align-items:stretch;flex:none;margin:auto 0;transition:opacity .3s;}
+#corsa .np{text-align:center;padding-bottom:4px;}
+#corsa .np + .np{margin-top:22px;}
+#corsa .np b{display:block;font-size:17px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--fc);line-height:1.1;}
+#corsa .np .ex{display:block;margin-top:6px;font-size:13px;color:rgba(240,235,220,0.86);}
+#corsa .np .md{display:block;margin-top:14px;font-size:60px;font-weight:200;line-height:1;color:var(--fc);font-variant-numeric:tabular-nums;}
+#corsa.due .np .md{font-size:42px;}
+#corsa .cosa{display:block;margin-top:8px;font-size:7.5px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;color:rgba(190,204,218,0.6);}
+#corsa .fila{display:flex;justify-content:center;gap:0;margin-top:14px;font-variant-numeric:tabular-nums;}
+#corsa .fila i{font-style:normal;width:17px;text-align:center;font-size:19px;font-weight:300;color:var(--fc);opacity:.7;}
+#corsa .fila i.uno{opacity:1;font-weight:500;}
+#corsa .fila i.oggi{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px;text-decoration-color:rgba(222,190,120,0.7);}
+#corsa .fila i.no{opacity:.28;}
+#corsa .fila i.resta{color:rgba(180,195,210,0.9);opacity:.22;}
+#corsa .cq{margin-top:16px;font-size:8.5px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold-txt);text-align:center;}
+#corsa .riga{height:0;border-top:1px solid rgba(222,190,120,0.4);margin:20px 18px 18px;}
+#corsa .na{display:grid;grid-template-columns:1fr auto;align-items:baseline;padding:0 6px;}
+#corsa .na + .na{margin-top:18px;}
+#corsa .na b{font-size:10.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--fc);opacity:.9;}
+#corsa .na .md{font-size:22px;font-weight:200;line-height:1;color:var(--fc);font-variant-numeric:tabular-nums;}
+#corsa .na .fila{grid-column:1 / -1;justify-content:flex-start;margin-top:5px;}
+#corsa .na .fila i{width:13px;font-size:12px;font-weight:400;opacity:.6;text-align:left;}
+#corsa .na .fila i.uno{opacity:1;}
+#corsa .na .fila i.resta{opacity:.2;}
 @media (max-width:860px){
-  /* finestra stretta: la colonna è una striscia bassa, la ciambella non ci sta. Restano il nome, l'esercizio e quando. */
-  #corsa{flex:1;flex-direction:row;justify-content:flex-start;gap:20px;margin:0;min-width:0;}
-  #corsa svg{display:none;} #corsa .nomi{width:auto;margin:0;text-align:left;} #corsa .cq{margin:0;}
+  /* finestra stretta: la colonna è una striscia bassa. Resta solo chi andrà al cambio, messo in riga. */
+  #corsa{flex:1;flex-direction:row;align-items:center;gap:18px;margin:0;min-width:0;}
+  #corsa .riga,#corsa .na,#corsa .cosa{display:none;}
+  #corsa .np{display:flex;align-items:baseline;gap:12px;text-align:left;padding:0;} #corsa .np + .np{margin:0;}
+  #corsa .np b{font-size:13px;} #corsa .np .ex{margin:0;font-size:11px;} #corsa .np .md,#corsa.due .np .md{margin:0;font-size:26px;}
+  #corsa .fila{margin:0;} #corsa .fila i{width:12px;font-size:12px;} #corsa .cq{margin:0;}
 }
 </style>
 </head>
@@ -2160,69 +2177,31 @@ function trendOf(fk){
   if(a0 == null || a1 == null) return 0;
   return a0 - a1 > 0.25 ? 1 : a1 - a0 > 0.25 ? -1 : 0;
 }
-/* ═══ VERSO IL CAMBIO: LA FETTA CHE SCENDE ═══ (il perché è scritto nello stile, in "VERSO IL CAMBIO: LA FETTA CHE SCENDE") */
-var FETTA = {cx:106, cy:92, R:66, r0:40, YT:292, W:212, H:330, cur:null, da:null, a:null, t0:0, raf:0, chi:null, attesa:0};
-var FETTA_SALE = 550, FETTA_PAUSA = 300, FETTA_SCENDE = 900;   /* millisecondi: prima risale chi non è più primo, poi scende il nuovo. SCELTE. */
-function fettaDisegna(){
-  var F = FETTA, c = F.cur, h = '', sopra = '';
-  FAMS.forEach(function(f){
-    var q = c[f.k]; if(!q || q.a1 - q.a0 < 0.001) return;
-    var g = Math.min(0.035, (q.a1 - q.a0) / 4), a0 = q.a0 + g, a1 = q.a1 - g, mid = (q.a0 + q.a1) / 2, rm = (F.R + F.r0) / 2, big = (a1 - a0) > Math.PI ? 1 : 0;
-    var hx = F.cx + rm * Math.cos(mid), hy = F.cy + rm * Math.sin(mid), dx = q.off * (q.tx - hx), dy = q.off * (F.YT - hy);
-    function d(ox, oy){ function P(a, r){ return (F.cx + ox + r * Math.cos(a)).toFixed(1) + ' ' + (F.cy + oy + r * Math.sin(a)).toFixed(1); }
-      return 'M' + P(a0, F.R) + ' A' + F.R + ' ' + F.R + ' 0 ' + big + ' 1 ' + P(a1, F.R) + ' L' + P(a1, F.r0) + ' A' + F.r0 + ' ' + F.r0 + ' 0 ' + big + ' 0 ' + P(a0, F.r0) + ' Z'; }
-    if(q.off > 0.02){
-      h += '<path d="' + d(0, 0) + '" fill="none" stroke="rgba(222,190,120,' + (0.55 * q.off).toFixed(2) + ')" stroke-dasharray="3 3"/>';                    /* il vuoto dove stava */
-      h += '<line x1="' + hx.toFixed(1) + '" y1="' + hy.toFixed(1) + '" x2="' + (hx + dx).toFixed(1) + '" y2="' + (hy + dy).toFixed(1) + '" stroke="rgba(222,190,120,' + (0.7 * q.off).toFixed(2) + ')" stroke-dasharray="1 5" stroke-linecap="round"/>';   /* la lineetta */
-      sopra += '<path d="' + d(dx, dy) + '" fill="' + f.txt + '" fill-opacity="' + (0.45 + 0.5 * q.off).toFixed(2) + '" stroke="rgba(222,190,120,' + q.off.toFixed(2) + ')"/>';
-    } else h += '<path d="' + d(0, 0) + '" fill="' + f.txt + '" fill-opacity="0.45"/>';
-    if(q.off < 0.6){ var lr = F.R + 13; h += '<text x="' + (F.cx + lr * Math.cos(mid)).toFixed(1) + '" y="' + (F.cy + lr * Math.sin(mid) + 3).toFixed(1) + '" text-anchor="middle" fill="' + f.txt + '" opacity="' + (0.85 * (1 - q.off / 0.6)).toFixed(2) + '">' + esc(f.short) + '</text>'; }
-  });
-  $('corsa').querySelector('svg').innerHTML = h + sopra;
-}
-function fettaPasso(now){
-  var F = FETTA, el = now - F.t0, fine = true;
-  if(!F.cur || !F.a || !$('corsa') || !$('corsa').querySelector('svg')){ F.raf = 0; return; }   /* la colonna è stata svuotata mentre l'animazione girava */
-  function ease(p){ p = Math.max(0, Math.min(1, p)); return p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2; }
-  var sale = FAMS.some(function(f){ var d = F.da[f.k], a = F.a[f.k]; return d && a && a.off < d.off; });
-  FAMS.forEach(function(f){
-    var d = F.da[f.k], a = F.a[f.k]; if(!a) return;
-    if(!d){ F.cur[f.k] = a; return; }
-    var p = ease(el / 700), po;
-    if(a.off < d.off) po = ease(el / FETTA_SALE);
-    else if(a.off > d.off){ var parte = sale ? FETTA_SALE + FETTA_PAUSA : 150; po = ease((el - parte) / FETTA_SCENDE); if(el < parte + FETTA_SCENDE) fine = false; }
-    else po = 1;
-    F.cur[f.k] = {a0:d.a0 + (a.a0 - d.a0) * p, a1:d.a1 + (a.a1 - d.a1) * p, tx:d.tx + (a.tx - d.tx) * p, off:d.off + (a.off - d.off) * po};
-  });
-  if(el < 760) fine = false;
-  fettaDisegna();
-  F.raf = fine ? 0 : requestAnimationFrame(fettaPasso);
-}
+/* ═══ VERSO IL CAMBIO: I NUMERI ═══ (il perché è scritto nello stile, in "VERSO IL CAMBIO: I NUMERI") */
+var NUMERI = {chi:null, attesa:0};
+function fmMedia(v){ return v.toFixed(1).replace('.', ','); }
 function renderCorsa(st, RCH){
-  var box = $('corsa'), F = FETTA; if(!box) return;
-  var con = st.filter(function(x){ return x.avg != null; });
-  /* ciclo appena cominciato (subito dopo un cambio): ancora nessun round. La ciambella c'è lo stesso, con cinque fette uguali e nessuna scesa. */
-  var vuoto = !con.length;
-  if(!box.querySelector('svg')){ box.innerHTML = '<svg viewBox="0 0 ' + F.W + ' ' + F.H + '" width="' + F.W + '" height="' + F.H + '" aria-hidden="true"></svg><div class="nomi"></div><div class="cq"></div>'; F.cur = null; F.chi = null; }
-  var primi = vuoto ? [] : con.filter(function(x){ return primaDi(x, con[0]) === 0; }), tot = 0; con.forEach(function(x){ tot += x.avg; });
-  var arr = {}, ang = -Math.PI / 2;
-  FAMS.forEach(function(f){
-    var x = con.filter(function(q){ return q.fam === f.k; })[0]; if(!x && !vuoto) return;
-    var a1 = ang + (vuoto ? 1 / FAMS.length : x.avg / tot) * 2 * Math.PI, ip = vuoto ? -1 : primi.indexOf(x);
-    arr[f.k] = {a0:ang, a1:a1, off:ip === -1 ? 0 : 1, tx:ip === -1 ? F.cx : F.W * (ip + 1) / (primi.length + 1)}; ang = a1;
-  });
-  /* la prima volta le fette sono tutte al loro posto, e quella che cambia scende: così si vede da dove viene */
-  if(!F.cur){ F.cur = {}; FAMS.forEach(function(f){ if(arr[f.k]) F.cur[f.k] = {a0:arr[f.k].a0, a1:arr[f.k].a1, tx:arr[f.k].tx, off:0}; }); }
-  F.da = {}; FAMS.forEach(function(f){ if(F.cur[f.k]) F.da[f.k] = F.cur[f.k]; }); F.a = arr; F.t0 = performance.now();
-  if(!F.raf) F.raf = requestAnimationFrame(fettaPasso);
-  /* il nome sotto: scompare quando la fetta di prima risale, ricompare quando la nuova è arrivata */
-  var nomi = box.querySelector('.nomi'), cq = box.querySelector('.cq'), chi = primi.map(function(x){ return x.fam; }).join(',');
-  var hN = primi.map(function(x){ var f = FAM[x.fam]; return '<div style="--fc:' + f.txt + '"><b>' + esc(f.short) + '</b><small>' + esc(x.id != null ? DB[x.id].nome : '—') + '</small></div>'; }).join('');
-  function metti(){ nomi.innerHTML = hN; nomi.classList.toggle('due', primi.length > 1); cq.textContent = primi.length ? changeText() : ''; nomi.style.opacity = 1; cq.style.opacity = 1; }
-  clearTimeout(F.attesa);
-  if(F.chi === chi) metti();
-  else { var prima = F.chi != null; nomi.style.opacity = 0; cq.style.opacity = 0; F.attesa = setTimeout(metti, prima ? FETTA_SALE + FETTA_PAUSA + FETTA_SCENDE - 250 : 800); }
-  F.chi = chi;
+  var box = $('corsa'); if(!box) return;
+  var con = st.filter(function(x){ return x.avg != null; }), vuoto = !con.length;
+  var tutti = vuoto ? FAMS.map(function(f){ return {fam:f.k, id:S.prop[f.k], ps:[], avg:null}; }) : con;
+  var primi = vuoto ? [] : con.filter(function(x){ return primaDi(x, con[0]) === 0; });
+  function fila(x){
+    var h = x.ps.map(function(q){ return q.stima ? '<i class="no">–</i>' : '<i class="' + (q.p === 1 ? 'uno' : '') + (q.today ? ' oggi' : '') + '">' + q.p + '</i>'; }).join('');
+    for(var k = x.ps.length; k < CICLO; k++) h += '<i class="resta">·</i>';
+    return '<span class="fila">' + h + '</span>';
+  }
+  var h = primi.map(function(x){ var f = FAM[x.fam];
+    return '<div class="np" style="--fc:' + f.txt + '"><b>' + esc(f.short) + '</b><span class="ex">' + esc(x.id != null ? DB[x.id].nome : '—') + '</span><span class="md">' + fmMedia(x.avg) + '</span><span class="cosa">posto medio nel round</span>' + fila(x) + '</div>'; }).join('');
+  if(primi.length) h += '<div class="cq">' + esc(changeText()) + '</div><div class="riga"></div>';
+  h += tutti.filter(function(x){ return primi.indexOf(x) === -1; }).map(function(x){ var f = FAM[x.fam];
+    return '<div class="na" style="--fc:' + f.txt + '"><b>' + esc(f.short) + '</b><span class="md">' + (x.avg != null ? fmMedia(x.avg) : '') + '</span>' + fila(x) + '</div>'; }).join('');
+  var chi = primi.map(function(x){ return x.fam; }).join(',');
+  function metti(){ box.classList.toggle('due', primi.length > 1); if(box.innerHTML !== h) box.innerHTML = h; box.style.opacity = 1; }
+  clearTimeout(NUMERI.attesa);
+  /* quando cambia chi andrà al cambio, la colonna si spegne un attimo e si riaccende con il nuovo: così l'occhio ci va */
+  if(NUMERI.chi != null && NUMERI.chi !== chi && box.innerHTML){ box.style.opacity = 0; NUMERI.attesa = setTimeout(metti, 320); }
+  else metti();
+  NUMERI.chi = chi;
 }
 /* Rivedi il ciclo: la classifica rifà il percorso round per round, poi torna a oggi. */
 var REPLAY = null;

@@ -965,6 +965,8 @@ header .hdr-r{flex:none;}
 .block .card.omb,.block .card.omb *{color:transparent!important;-webkit-text-fill-color:transparent!important;border-color:transparent!important;}
 .block .card.omb svg,.block .card.omb .pen{visibility:hidden!important;}
 .block .card:not(.omb){z-index:2;}
+/* i due tastini (cambia esercizio, togli) stanno SOPRA la scritta: con la stessa altezza la scritta, che viene dopo, li copriva e il clic non arrivava */
+.block .rm,.block .cg{z-index:4!important;}
 /* ═══ LE NOTE (24/11): si usano tutto il giorno, quasi ogni esercizio ne ha una. Devono leggersi.
    - più grandi e più piene del resto, in un bianco caldo
    - rientrate di un passo rispetto al nome, con un trattino del colore della famiglia

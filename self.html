@@ -993,6 +993,75 @@ header .hdr-r{flex:none;}
 .block .card .nm{font-size:24px;font-weight:400;}
 .block .card .fl{white-space:nowrap;}
 .block .nm .pa{white-space:nowrap;}
+
+/* ═════════ PROVA 25/11 · quarto giro — la parte alta torna al linguaggio della Sandbox: fondo scuro, righe sottili, dorato.
+   La fisicità (luce, ombre, rilievo) resta solo nei blocchi, che sono la cosa che si lavora. ═════════ */
+.round{position:relative;gap:6px!important;}
+/* niente riga "Round 1 / Round 2" */
+.round-hd{height:0!important;min-height:0!important;padding:0!important;border:0!important;margin:0!important;overflow:visible;}
+.round-hd .rname{display:none!important;}
+.rbody{order:1;}
+/* le carte: cinque in fila, riquadro sottile come gli altri della Sandbox */
+.rdisp{order:0;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:4px!important;height:86px;box-sizing:border-box;padding:6px 34px 6px 5px!important;
+  background:rgba(6,6,5,0.30)!important;border:1px solid var(--line-soft)!important;border-radius:2px!important;box-shadow:none!important;}
+.rdisp .tile{height:auto!important;min-height:0!important;padding:10px 3px 5px 5px!important;flex-direction:column!important;align-items:flex-start!important;justify-content:flex-start!important;gap:0!important;overflow:hidden;border-radius:2px!important;transform:none!important;box-shadow:none!important;}
+.rdisp .tile .fam-name{display:none!important;}
+.rdisp .tile .nm{font-size:13.5px!important;letter-spacing:0!important;font-weight:400!important;line-height:1.18!important;white-space:normal!important;display:-webkit-box!important;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;overflow-wrap:anywhere;max-width:100%;text-shadow:none!important;}
+.rdisp .tile::before{left:0!important;right:0!important;top:0!important;bottom:auto!important;width:auto!important;height:2px!important;border-radius:0!important;background:var(--fc)!important;box-shadow:none!important;opacity:.8;}
+.rdisp .tile::after{display:none!important;}
+.rdisp .tile:not(.used){background:var(--raised)!important;border:1px solid rgba(180,195,210,0.26)!important;}
+.rdisp .tile:not(.used) .nm{color:var(--text-hi)!important;}
+.rdisp .tile:not(.used):hover{border-color:rgba(200,175,90,0.75)!important;background:rgba(212,168,74,0.07)!important;transform:translateY(-1px)!important;}
+.rdisp .tile.used{background:transparent!important;border:1px dashed rgba(180,195,210,0.16)!important;}
+.rdisp .tile.used::before{opacity:.2;}
+.rdisp .tile.used .nm{color:var(--text-xlo)!important;opacity:.6;}
+/* i due tastini: tasti della Sandbox (riga sottile), con l'icona che si vede */
+.round-hd .clear,.round-hd .skip2{position:absolute!important;right:20px;z-index:3;width:24px;height:34px!important;min-width:0!important;padding:0!important;margin:0!important;font-size:0!important;gap:0!important;opacity:1!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;background:none!important;border:1px solid rgba(180,195,210,0.20)!important;border-radius:2px!important;box-shadow:none!important;color:rgba(210,222,232,0.80)!important;}
+.round-hd .clear svg,.round-hd .skip2 svg{width:15px!important;height:15px!important;flex:none;display:block;}
+.round-hd .clear,.round-hd .skip2{width:26px!important;height:35px!important;right:19px!important;}
+.round-hd .clear{top:18px;} .round-hd .skip2{top:57px;}
+.round-hd .clear:hover,.round-hd .skip2:hover{border-color:rgba(200,175,90,0.75)!important;color:var(--gold-txt)!important;}
+.round-hd .skip2 .off-t,.round-hd .skip2 .on-t{display:none!important;}
+/* CONFERMA: il tasto dorato della Sandbox, sopra le carte quando il round è pieno. Unica cosa in più: il led rosso che lampeggia */
+.rconf.si{position:absolute!important;left:20px;right:50px;top:18px;height:74px!important;margin:0!important;justify-content:center;gap:14px;font-size:12px!important;letter-spacing:4px!important;z-index:4;border-radius:2px!important;overflow:hidden;}
+.rconf.si:not(.ok){padding:0 18px!important;background:rgba(18,16,12,0.94)!important;border:1px solid rgba(212,168,74,0.80)!important;color:var(--gold-txt)!important;box-shadow:0 0 18px rgba(212,168,74,0.14)!important;text-shadow:none!important;}
+.rconf.si:not(.ok):hover{background:rgba(40,33,20,0.96)!important;border-color:#f0d28c!important;}
+.rconf.si:not(.ok)::before{display:none!important;}
+@keyframes ledTic{0%,49%{background:#ff2d1f;box-shadow:0 0 4px 1px rgba(255,60,40,0.95),0 0 12px 3px rgba(255,40,20,0.55);}50%,100%{background:#3a0d09;box-shadow:none;}}
+.rconf.si:not(.ok)::after{content:''!important;position:static!important;order:-1;flex:none;width:7px!important;height:7px!important;margin:0!important;border-radius:50%;transform:none!important;opacity:1!important;
+  animation:ledTic 0.9s steps(1,end) infinite!important;}
+.rconf.ok{background:rgba(10,10,9,0.86)!important;box-shadow:none!important;border:1px solid rgba(120,200,150,0.30)!important;}
+body.dragging .rconf{pointer-events:none!important;opacity:.15;}
+/* I POSTI VUOTI: non più incavi scuri (sembravano loculi). Un posto vuoto è solo spazio libero:
+   niente fondo, niente ombra dentro; resta la riga a puntini grigia a sinistra (la stessa della preparazione, senza colore) e il numero. */
+.slot .empty{inset:3px 0!important;background:none!important;border:0!important;box-shadow:none!important;border-radius:2px;}
+.slot .estrip{display:block!important;left:0!important;top:3px!important;bottom:3px!important;width:3px!important;
+  background:radial-gradient(circle at 50% 50%,rgba(180,195,210,0.34) 0 0.9px,transparent 1.3px) 0 0 / 3px 5px repeat-y!important;}
+.slot .erow .pnum{color:rgba(220,185,110,0.30);}
+.slot .erow .hint{color:rgba(180,195,210,0.42);}
+.slot.hot .empty{background:linear-gradient(90deg,rgba(212,168,74,0.13),rgba(212,168,74,0) 70%)!important;border:0!important;}
+.slot.hot .estrip{background:rgba(212,168,74,0.75)!important;}
+
+/* ═════════ PROVA 25/11 · quinto giro ═════════ */
+/* I DUE TASTI (svuota, non fatto): la cella di prima (26×35, dentro il riquadro, a destra). L'icona è centrata nella cella con le coordinate,
+   non col testo nascosto: "svuota" a grandezza zero aveva ancora la spaziatura delle lettere e spingeva il cestino a sinistra. */
+.round-hd .clear,.round-hd .skip2{letter-spacing:0!important;word-spacing:0!important;text-indent:0!important;line-height:0!important;}
+.round-hd .clear svg,.round-hd .skip2 svg{position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;margin:0!important;}
+.round-hd .clear svg{width:17px!important;height:17px!important;}
+.round-hd .skip2 svg{width:13px!important;height:13px!important;}
+.round-hd .clear:not(.has){opacity:.35!important;}
+.rdisp{padding-right:42px!important;}   /* le carte non finiscono sotto i due tasti */
+/* LA BARRA COLORATA A SINISTRA DEI BLOCCHI: un filo (1px), senza alone. In preparazione il filo è tratteggiato. */
+.block .neon{width:1px!important;border-radius:0!important;box-shadow:none!important;}
+.round.prep .block .neon{background:repeating-linear-gradient(180deg,color-mix(in srgb,var(--fc) 85%,transparent) 0 2px,transparent 2px 5px)!important;}
+.block .luci i{left:-0.5px!important;}
+.slot .estrip{width:1px!important;background:repeating-linear-gradient(180deg,rgba(180,195,210,0.34) 0 2px,transparent 2px 5px)!important;}
+.slot.hot .estrip{background:rgba(212,168,74,0.75)!important;}
+/* MENO COLORE: il fondo resta com'è; si abbassano le tre cose che portano colore acceso: il filo a sinistra, il trattino delle note, la scritta della famiglia */
+.block .neon{opacity:.45!important;}
+.block .card:not(.omb) .notebox:not(.note-empty)::before{opacity:.5!important;width:1px!important;}
+.block .card:not(.omb) .fl{opacity:.78;}
 </style>
 </head>
 <body>
@@ -1320,6 +1389,7 @@ function normalize(){
   /* conferma dei round: se un round confermato viene toccato, torna da confermare */
   if(!S.conf) S.conf = [null, null];
   [0, 1].forEach(function(r){ if(S.conf[r] && S.conf[r] !== S.today[r].join(',')) S.conf[r] = null; });
+  if(S.sess && !S.conf[0] && !S.conf[1]) S.sess = null;   /* nessun round confermato: il PT si richiede alla prossima conferma */
   if(S.pend && (ph !== 'straddle' || S.pend.fam !== LEAD)) S.pend = null;
   [0, 1].forEach(function(r){
     S.today[r] = S.today[r].map(function(x){
@@ -1418,7 +1488,7 @@ function renderBlocks(r, anim){
    Più la lettera è lontana dalla luce, più l'ombra è lunga, sfumata e debole. Con più luci ogni ombra è più leggera,
    perché le altre luci la rischiarano. Sotto ogni lettera resta un filo d'ombra di contatto.
    Anche il chiarore colorato del blocco viene dagli stessi punti. Tutti i numeri qui sono scelte, non misure. */
-var OMBRA_LUCE = 95, OMBRA_META = 240, OMBRA_MAX = 9, LUCE_FORZA = 5, LUCE_BUIO = 70, LUCE_PUNTO_H = OMBRA_LUCE, LUCE_PUNTO = 24;   /* una sola altezza della luce, per il cerchio sul piano e per le ombre */   /* LUCE_BUIO: quanto resta luminosa (in %) una scritta lontana da ogni luce */
+var OMBRA_LUCE = 95, OMBRA_META = 240, OMBRA_MAX = 9, LUCE_FORZA = 1.5, LUCE_BUIO = 70, LUCE_PUNTO_H = OMBRA_LUCE, LUCE_PUNTO = 6.9;   /* una sola altezza della luce, per il cerchio sul piano e per le ombre */   /* LUCE_BUIO: quanto resta luminosa (in %) una scritta lontana da ogni luce */
 function lettere(t){ return String(t).split(' ').map(function(w){ return '<span class="pa">' + w.split('').map(function(c){ return '<span>' + esc(c) + '</span>'; }).join('') + '</span>'; }).join(' '); }
 function ombraDi(x, y, luci, rilievo, forza, soloSfumata){
   /* il fianco della lettera che guarda le luci prende un filo del colore della famiglia */

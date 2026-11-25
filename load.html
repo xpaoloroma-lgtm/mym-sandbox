@@ -1945,6 +1945,27 @@ header > #breadcrumb, header > .bc{margin-right:auto!important;}
 #warm .w-k span{color:rgba(225,232,240,.92)!important}
 .w-k i{display:none!important}
 </style>
+
+<style id="cella-css">
+/* ═════════ LA CELLA DELL'ESERCIZIO, come in Self ═════════
+   Stessa regola di Self: la luce è bianca calda, il piano è del colore della famiglia e la luce lo fa vedere.
+   Qui non c'è un numero di posizione: ogni cella ha UN punto luce, a metà del bordo sinistro.
+   Filo a sinistra da 1px, punto luce e chiarore sono disegnati nel fondo della cella (li calcola cella(), in fondo alla pagina). */
+#zlist .slotbox,#zlist .row.z-open{border-left-color:transparent!important;background-origin:border-box!important;background-clip:border-box!important;}
+/* la scritta della famiglia: piccola, larga, senza pallino */
+#zlist .rlab .dot{display:none!important;}
+#zlist .rlab > .n{font-size:9px!important;font-weight:600!important;letter-spacing:3px!important;opacity:.78;}
+/* il nome dell'esercizio: grande e bianco */
+#zlist .dd .v{font-size:22px!important;font-weight:400!important;letter-spacing:.2px!important;}
+#zlist .srow.sub .dd .v{font-size:18px!important;}
+#zlist .dd .v.none{font-weight:300!important;}
+/* la nota: bianco caldo, senza riquadro, rientrata dietro al suo trattino */
+#zlist .cel.note{position:relative;}
+#zlist .cel.note textarea{background:none!important;border:0!important;box-shadow:none!important;outline:0!important;font-size:15px!important;font-weight:500!important;color:rgb(246,236,210);padding:2px 6px 2px 12px!important;line-height:1.35!important;}
+#zlist .cel.note::before{content:'';position:absolute;left:0;top:12px;bottom:12px;width:1px;background:var(--fc,rgba(180,195,210,.5));opacity:.5;}
+#zlist .cel.note:focus-within::before{background:var(--gold);opacity:.9;}
+#zlist .cel.note textarea::placeholder{color:rgba(180,195,210,.30)!important;font-weight:400!important;letter-spacing:2px;text-transform:uppercase;font-size:10px!important;}
+</style>
 </head>
 <body>
 
@@ -3839,6 +3860,64 @@ function ddClose(){
   }
   function parti(){ [].forEach.call(document.querySelectorAll('#tl-panel'), monta); }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', parti); else parti();
+})();
+</script>
+
+<script id="cella-js">
+/* LA CELLA DELL'ESERCIZIO: luce e ombre calcolate, stessa legge di Self (self.html), con un punto luce solo. */
+(function(){
+  var OMBRA_LUCE = 95, OMBRA_META = 240, OMBRA_MAX = 9, LUCE_FORZA = 1.5, LUCE_BUIO = 70, LUCE_PUNTO = 6.9, FILO = 45;
+  function ombraDi(x, y, l, rilievo, forza){
+    var vx = l.x - x, vy = l.y - y, vl = Math.sqrt(vx * vx + vy * vy) || 1;
+    var bordo = (0.5 / (1 + vl / OMBRA_META)).toFixed(2);
+    var out = [(vx / vl * 0.8).toFixed(2) + 'px ' + (vy / vl * 0.8).toFixed(2) + 'px 0.5px rgba(255,240,205,' + bordo + ')', '0 0.6px 0.6px rgba(0,0,0,0.9)'];
+    var k = rilievo / (OMBRA_LUCE - rilievo), dx = k * (x - l.x), dy = k * (y - l.y), len = Math.sqrt(dx * dx + dy * dy);
+    if(len > OMBRA_MAX){ dx *= OMBRA_MAX / len; dy *= OMBRA_MAX / len; len = OMBRA_MAX; }
+    var a = forza / (1 + vl / OMBRA_META);
+    out.push((dx * 0.5).toFixed(2) + 'px ' + (dy * 0.5).toFixed(2) + 'px ' + (0.3 + len * 0.10).toFixed(2) + 'px rgba(0,0,0,' + Math.min(0.9, a + 0.08).toFixed(2) + ')');
+    out.push(dx.toFixed(2) + 'px ' + dy.toFixed(2) + 'px ' + (0.6 + len * 0.32).toFixed(2) + 'px rgba(0,0,0,' + a.toFixed(2) + ')');
+    return out.join(',');
+  }
+  var passi = [0, 0.25, 0.5, 0.75, 1, 1.3, 1.6, 2, 2.5, 3.1, 3.8, 4.6], fine = passi[passi.length - 1] * OMBRA_LUCE;
+  var stops = passi.map(function(q){ var e = 1 / Math.pow(1 + q * q, 1.5); return 'color-mix(in srgb,var(--fc) ' + (LUCE_PUNTO * e).toFixed(2) + '%,transparent) ' + (q * OMBRA_LUCE / fine * 100).toFixed(1) + '%'; }).join(',') + ',transparent 100%';
+  function una(b){
+    var R = b.getBoundingClientRect(); if(!R.height) return;
+    var s = (typeof SLOT !== 'undefined') && SLOT.filter(function(q){ return q.id === (b.dataset.s || (b.querySelector('[data-s]') || {dataset:{}}).dataset.s); })[0];
+    if(!s) return;
+    b.style.setProperty('--fc', 'rgb(var(--' + s.h + '))');
+    var l = {x:0.5, y:R.height / 2};
+    b.style.setProperty('background-image', [
+      'radial-gradient(circle 1.6px at 1px ' + l.y.toFixed(1) + 'px,color-mix(in srgb,var(--fc) 40%,#fff) 0 55%,transparent 100%)',                 /* il punto luce */
+      'linear-gradient(color-mix(in srgb,var(--fc) ' + FILO + '%,transparent),color-mix(in srgb,var(--fc) ' + FILO + '%,transparent))',               /* il filo a sinistra */
+      'radial-gradient(circle ' + Math.round(fine) + 'px at ' + l.x + 'px ' + l.y.toFixed(1) + 'px,' + stops + ')',                                  /* il cerchio di luce sul piano */
+      'linear-gradient(90deg,color-mix(in srgb,var(--fc) ' + LUCE_FORZA + '%,transparent) 0%,color-mix(in srgb,var(--fc) ' + (LUCE_FORZA * 0.45).toFixed(1) + '%,transparent) 30%,color-mix(in srgb,var(--fc) ' + (LUCE_FORZA * 0.12).toFixed(1) + '%,transparent) 58%,transparent 80%)'
+    ].join(','), 'important');
+    b.style.setProperty('background-size', 'auto,1px 100%,auto,auto', 'important');
+    b.style.setProperty('background-repeat', 'no-repeat', 'important');
+    b.style.setProperty('background-position', '0 0', 'important');
+    function pezzo(el, h, f, base){
+      var q = el.getBoundingClientRect(); if(!q.width) return;
+      /* per l'ombra conta dove comincia la scritta, non il centro del suo campo: i campi sono larghi e quasi vuoti */
+      var x = q.left - R.left + Math.min(q.width / 2, 40), y = q.top + q.height / 2 - R.top;
+      el.style.textShadow = ombraDi(x, y, l, h, f);
+      if(base){
+        var d2 = ((x - l.x) * (x - l.x) + (y - l.y) * (y - l.y)) / (OMBRA_LUCE * OMBRA_LUCE), e = 1 / Math.pow(1 + d2, 1.5);
+        el.style.color = 'color-mix(in srgb,' + base + ' ' + Math.round(LUCE_BUIO + (100 - LUCE_BUIO) * Math.min(1, e * 1.3)) + '%,rgb(96,92,84))';
+      }
+    }
+    b.querySelectorAll('.rlab > .n').forEach(function(e){ pezzo(e, 3, 0.7); });
+    b.querySelectorAll('.dd .v:not(.none)').forEach(function(e){ pezzo(e, 4.6, 0.7, 'rgb(250,246,236)'); });
+    b.querySelectorAll('input.big, .kgw input, .fld input').forEach(function(e){ pezzo(e, 4.6, 0.7); });
+    b.querySelectorAll('.cel.note textarea').forEach(function(e){ pezzo(e, 2.3, 0.6, 'rgb(246,236,210)'); });
+  }
+  var inCoda = false;
+  function tutte(){ inCoda = false; document.querySelectorAll('#zlist .slotbox, #zlist .row.z-open').forEach(una); }
+  function chiedi(){ if(!inCoda){ inCoda = true; requestAnimationFrame(tutte); } }
+  var z = document.getElementById('zlist');
+  if(z) new MutationObserver(chiedi).observe(z, {childList:true, subtree:true});   /* solo quando la lista viene ridisegnata */
+  window.addEventListener('resize', chiedi);
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(chiedi);
+  chiedi();
 })();
 </script>
 </body>

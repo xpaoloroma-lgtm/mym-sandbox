@@ -91,7 +91,8 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
 #b-posti{flex:1;min-width:0;display:flex;gap:12px;}
 .vuoto{padding:14px 6px;font-size:12px;color:var(--text-xlo);line-height:1.6;}
 /* un blocco fatto */
-.bk{border:1px solid var(--line);border-left:3px solid var(--move);border-radius:2px;padding:12px 14px;margin-bottom:10px;cursor:pointer;background:rgba(26,24,21,0.5);}
+/* barra neutra (26/11): in Move il colore non ha ancora un significato; uguale al blocco nella seduta */
+.bk{border:1px solid var(--line);border-left:3px solid rgba(200,196,186,.55);border-radius:2px;padding:12px 14px;margin-bottom:10px;cursor:pointer;background:rgba(26,24,21,0.5);}
 .bk:hover{border-color:rgba(120,205,155,0.55);}
 .bk.sel{background:rgba(120,205,155,0.07);border-color:rgba(120,205,155,0.7);}
 .bk-n{display:flex;align-items:center;gap:8px;font-size:17px;color:var(--text-hi);letter-spacing:.5px;margin-bottom:6px;}
@@ -213,7 +214,8 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
 <body>
 <header>
   <div class="bc"><a class="sb" href="index.html" title="Torna a Sandbox">Sandbox</a><span class="sep">›</span><span class="proto" style="color:#78cd9b">Move</span><span class="sep">›</span><span class="cli">Blocchi</span></div>
-  <div class="hdr-r"></div>
+  <!-- passaggio alla seduta con il cliente (per ora la pagina di prova) -->
+  <div class="hdr-r"><a href="move-seduta-prova.html" style="display:flex;align-items:center;height:32px;padding:0 14px;border:1px solid var(--line);border-radius:2px;color:var(--text-lo);font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;text-decoration:none">← Seduta</a></div>
 </header>
 
 <div id="main">

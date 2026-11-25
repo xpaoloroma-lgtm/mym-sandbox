@@ -15,27 +15,30 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.28fr) min
 .col{min-height:0;display:flex;flex-direction:column;gap:12px;}
 .et{font-size:9px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--lo);}
 
-/* ── I BLOCCHI: uno sopra l'altro. Dentro, i tre posti in riga come nell'editor: Esercizio 1, Esercizio 2, Cardio. ── */
-.blocchi{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;}
-.blocco{flex:1 1 0;min-height:128px;display:flex;flex-direction:column;border:1px solid var(--line);background:#12110f;padding:10px 12px 12px;}
-.blocco.fatto{border-color:rgba(120,205,155,.45);}
-.b-su{display:flex;align-items:baseline;gap:12px;margin-bottom:9px;}
-.b-su .n{font-size:28px;font-weight:200;line-height:1;color:var(--gold-txt);width:22px;}
-.b-su .nome{font-size:15px;font-weight:500;letter-spacing:.3px;}
-.b-su .ok{margin-left:auto;height:28px;padding:0 14px;border:1px solid rgba(212,168,74,.5);background:none;color:var(--gold-txt);font:600 10px "Exo 2",sans-serif;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;}
-.blocco.fatto .b-su .ok{border-color:rgba(120,205,155,.45);color:var(--move);}
-.b-su .via{width:28px;height:28px;margin-left:6px;border:1px solid var(--line);background:none;color:var(--lo);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
-.b-su .via:hover{border-color:rgba(212,168,74,.6);color:var(--gold-txt);}
-.b-su .via svg{width:12px;height:12px;display:block;}
-.posti{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
-/* la cella dell'esercizio, stessa identità di Self/Load/Open: piano scuro, un punto luce, filo a sinistra, nome grande.
-   Qui è NEUTRA (--cl: grigio caldo): in Move il colore non ha ancora un significato. Quando l'editor darà un senso ai colori, basta cambiare --cl sulla cella. */
-.cella{--cl:rgb(200,196,186);position:relative;display:flex;flex-direction:column;justify-content:center;gap:5px;padding:8px 10px 8px 16px;background-color:rgb(18,17,15);
-  background-image:radial-gradient(circle 1.6px at 1px 50%,color-mix(in srgb,var(--cl) 40%,#fff) 0 55%,transparent 100%),linear-gradient(color-mix(in srgb,var(--cl) 45%,transparent),color-mix(in srgb,var(--cl) 45%,transparent)),radial-gradient(circle 230px at 0 50%,color-mix(in srgb,var(--cl) 7%,transparent),transparent 100%);
-  background-size:auto,1px 100%,auto;background-repeat:no-repeat;}
-.cella .et{letter-spacing:2.5px;color:var(--cl);opacity:.7;}
-.cella .nm{font-size:20px;font-weight:400;line-height:1.15;color:rgb(250,246,236);text-shadow:0 .6px .6px rgba(0,0,0,.9),2px 1px 3px rgba(0,0,0,.6);}
-.cella .nt{font-size:14px;font-weight:500;color:rgb(246,236,210);padding-left:10px;border-left:1px solid color-mix(in srgb,var(--cl) 50%,transparent);}
+/* ── I BLOCCHI ── Il blocco è LO STESSO dell'editor (move.html, ".bk"): riquadro con la barra a sinistra, il nome, e tre righe
+   "1 · 2 · Cardio" con l'esercizio. Nella seduta è solo più grande; nell'elenco per sceglierlo è alla misura dell'editor.
+   La barra è neutra: in Move il colore non ha ancora un significato. */
+.blocchi{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(212,168,74,.4) transparent;}
+.bk{border:1px solid var(--line);border-left:3px solid rgba(200,196,186,.55);border-radius:2px;padding:12px 14px;background:rgba(26,24,21,.5);}
+.bk-n{display:flex;align-items:center;gap:8px;font-size:17px;color:var(--txt);letter-spacing:.5px;margin-bottom:6px;}
+.bk-r{font-size:14px;color:var(--lo);line-height:1.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bk-r i{font-style:normal;display:inline-block;width:60px;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(190,204,218,.45);}
+/* nella seduta: lo stesso blocco, ingrandito, e alto quanto gli tocca */
+.blocchi .bk{flex:1 1 0;min-height:150px;display:flex;flex-direction:column;justify-content:center;padding:14px 18px 16px;}
+.blocchi .bk-n{font-size:24px;font-weight:300;margin-bottom:12px;}
+.blocchi .bk-r{font-size:21px;color:rgb(250,246,236);line-height:1.75;}
+.blocchi .bk-r i{width:84px;font-size:11px;letter-spacing:2px;}
+.blocchi .bk.fatto{border-color:rgba(120,205,155,.5);border-left-color:rgba(120,205,155,.9);}
+.blocchi .bk.fatto .bk-r{color:rgba(250,246,236,.55);}
+.bk-n .ok{margin-left:auto;height:28px;padding:0 14px;border:1px solid rgba(212,168,74,.5);background:none;color:var(--gold-txt);font:600 10px "Exo 2",sans-serif;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;}
+.bk.fatto .bk-n .ok{border-color:rgba(120,205,155,.45);color:var(--move);}
+.bk-n .via{width:28px;height:28px;border:1px solid var(--line);background:none;color:var(--lo);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
+.bk-n .via:hover{border-color:rgba(212,168,74,.6);color:var(--gold-txt);}
+.bk-n .via svg{width:12px;height:12px;display:block;}
+.sotto{flex:none;display:flex;gap:10px;}
+.sotto .piu{flex:1;}
+.sotto .ed{flex:none;height:40px;padding:0 16px;display:flex;align-items:center;border:1px solid var(--line);color:var(--lo);font:600 10px "Exo 2",sans-serif;letter-spacing:3px;text-transform:uppercase;text-decoration:none;}
+.sotto .ed:hover{border-color:rgba(212,168,74,.6);color:var(--gold-txt);}
 .piu{flex:none;height:40px;border:1px dashed rgba(180,195,210,.28);background:none;color:var(--lo);font:600 10px "Exo 2",sans-serif;letter-spacing:3px;text-transform:uppercase;cursor:pointer;}
 
 /* ── IL CLIENTE ── */
@@ -43,15 +46,64 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.28fr) min
 .chi .nome{font-size:26px;font-weight:300;line-height:1.1;}
 .chi .dati{grid-column:1 / -1;display:flex;gap:22px;margin-top:8px;}
 .chi .dati div{display:flex;flex-direction:column;gap:3px;} .chi .dati b{font-size:16px;font-weight:400;}
-/* ── LE RED FLAG: il riquadro più visibile della colonna ── */
-.rf{flex:none;border:1px solid rgba(229,72,77,.75);border-left:5px solid var(--red);background:rgba(229,72,77,.07);padding:12px 14px 13px;}
-.rf .et{color:var(--red);opacity:1;letter-spacing:3.5px;font-size:10px;}
-.rf ul{list-style:none;margin:9px 0 0;padding:0;display:flex;flex-direction:column;gap:7px;}
-.rf li{font-size:19px;font-weight:500;line-height:1.2;color:#fff1f0;padding-left:16px;position:relative;}
-.rf li::before{content:'';position:absolute;left:0;top:9px;width:7px;height:7px;background:var(--c,var(--red));}
-.rf li em{display:block;font-style:normal;font-size:13px;font-weight:500;color:rgb(246,236,210);margin-top:3px;padding-left:9px;border-left:1px solid rgba(229,72,77,.6);}
-.rf .nessuna{font-size:14px;color:var(--lo);margin-top:8px;}
-.rf li small{display:block;font-size:13px;font-weight:400;color:rgba(255,230,228,.72);margin-top:2px;}
+/* ── LE RED FLAG ── Non è un'interfaccia nuova: sono le stesse schede con l'interruttore della finestra Red Flags (stile copiato da Load, che è quello di Open).
+   Qui nella colonna c'è il SUNTO: solo quelle accese, ognuna con il suo interruttore. Tutto l'elenco, con i testi e le note, si apre da "Tutte". */
+:root{--text-hi:#ece6d6;--text-lo:rgba(190,204,218,.62);--text-xlo:rgba(190,204,218,.45);--font:"Exo 2","Segoe UI",Arial,sans-serif;}
+.rf{flex:none;border:1px solid rgba(220,100,100,.55);border-left:5px solid rgba(235,110,110,1);background:linear-gradient(90deg,rgba(220,100,100,.10),rgba(220,100,100,.03));padding:10px 12px 12px;}
+.rf-su{display:flex;align-items:center;gap:10px;}
+.rf-su .et{color:rgba(240,150,150,1);font-size:10px;letter-spacing:3.5px;}
+.rf-su i{width:9px;height:9px;border-radius:50%;background:rgba(235,110,110,1);color:rgba(235,110,110,.6);animation:rfPulse 2.6s ease-out infinite;}
+.rf.vuota{border-color:var(--line);border-left-color:rgba(180,195,210,.3);background:#12110f;} .rf.vuota .rf-su i{background:rgba(180,195,210,.3);animation:none;} .rf.vuota .rf-su .et{color:var(--lo);}
+@keyframes rfPulse{0%{box-shadow:0 0 0 0 currentColor}70%{box-shadow:0 0 0 7px transparent}100%{box-shadow:0 0 0 0 transparent}}
+.rf-tutte{margin-left:auto;height:26px;padding:0 12px;border:1px solid rgba(220,100,100,.45);background:none;color:rgba(240,170,170,1);font:600 9.5px "Exo 2",sans-serif;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;}
+.rf.vuota .rf-tutte{border-color:var(--line);color:var(--lo);}
+.rf .rf-lista{margin-top:10px;}
+.rf .rfc-t b{font-size:17px;} .rf .rfc-t em{font-size:13px;color:rgba(225,232,240,.8);} .rf .rfc-h{padding:9px 12px;} .rf .rfc-n{display:none;}
+.rf .rfc-nt{display:block;font-size:13px;font-weight:500;color:rgb(246,236,210);margin-top:3px;}
+.rf-lista{margin-top:16px;display:flex;flex-direction:column;gap:6px}
+.rfc{border-radius:5px;border:1px solid rgba(180,195,210,.12);border-left:3px solid rgba(180,195,210,.18);background:rgba(180,195,210,.02)}
+.rfc.on{border-color:color-mix(in srgb,var(--c) 45%,transparent);border-left-color:var(--c);background:color-mix(in srgb,var(--c) 8%,transparent)}
+.rfc-h{display:flex;align-items:center;gap:12px;padding:10px 12px;cursor:pointer}
+.rfc-n{font-size:12px;font-weight:600;color:var(--text-xlo);width:18px}
+.rfc-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.rfc-t b{font-size:14px;font-weight:600;color:rgba(225,232,240,.92)}
+.rfc.on .rfc-t b{color:var(--c)}
+.rfc-t em{font-style:normal;font-size:12px;font-weight:300;color:var(--text-lo)}
+.rfc-sw{width:38px;height:20px;border-radius:10px;border:1px solid rgba(180,195,210,.3);background:rgba(180,195,210,.06);
+  position:relative;cursor:pointer;flex-shrink:0;padding:0}
+.rfc-sw i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:rgba(200,214,228,.55);transition:left .15s}
+.rfc.on .rfc-sw{border-color:var(--c);background:color-mix(in srgb,var(--c) 30%,transparent)}
+.rfc.on .rfc-sw i{left:20px;background:var(--c)}
+.rfc-b{display:none;padding:0 14px 14px 42px;flex-direction:column;gap:10px}
+.rfc.ap .rfc-b{display:flex}
+.rfc-d{font-size:12.5px;font-weight:300;line-height:1.55;color:rgba(210,222,232,.88)}
+.rfc-d span{display:block;font-size:9.5px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--text-xlo);margin-bottom:2px}
+.rfc-d.fai span{color:var(--c)}
+.rfc-nota,.rfc-in{width:100%;box-sizing:border-box;border-radius:4px;border:1px solid rgba(180,195,210,.18);background:rgba(255,255,255,.03);
+  color:var(--text-hi);font-family:var(--font);font-size:13px;padding:8px 10px;resize:vertical}
+.rfc-nota{min-height:56px}
+.rfc-nota:focus,.rfc-in:focus{outline:0;border-color:rgba(212,168,74,.6)}
+
+
+/* le due finestre: tutte le red flag, e la scelta del blocco */
+.velo{position:fixed;inset:0;z-index:300;display:none;align-items:center;justify-content:center;background:rgba(4,4,3,.72);backdrop-filter:blur(3px);}
+.velo.open{display:flex;}
+.fin{width:680px;max-width:calc(100vw - 32px);max-height:calc(100vh - 40px);display:flex;flex-direction:column;background:#16140f;border:1px solid rgba(222,190,120,.3);}
+.fin-su{flex:none;display:flex;align-items:center;gap:12px;padding:16px 20px 12px;}
+.fin-su b{font-size:20px;font-weight:300;letter-spacing:.5px;}
+.fin-x{margin-left:auto;height:30px;padding:0 14px;border:1px solid var(--line);background:none;color:var(--txt);font:600 10px "Exo 2",sans-serif;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;}
+.fin-x:hover{border-color:rgba(212,168,74,.6);color:var(--gold-txt);}
+.fin-b{flex:1;min-height:0;overflow-y:auto;padding:0 20px 20px;scrollbar-width:thin;scrollbar-color:rgba(212,168,74,.4) transparent;}
+.fin-b .rf-lista{margin-top:0;}
+/* ── LA SCELTA DEL BLOCCO: ricerca, filtri, elenco. Un clic sul blocco lo mette nella seduta di oggi. ── */
+#bq{width:100%;height:42px;padding:0 14px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:var(--txt);font:400 16px "Exo 2",sans-serif;outline:0;}
+#bq:focus{border-color:rgba(212,168,74,.6);}
+.filtri{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 12px;}
+.filtri button{height:32px;padding:0 14px;border:1px solid var(--line);background:none;color:var(--lo);font:600 10px "Exo 2",sans-serif;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;}
+.filtri button.on{border-color:rgba(212,168,74,.75);color:var(--gold-txt);background:rgba(212,168,74,.08);}
+.bl{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.bl .bk{cursor:pointer;} .bl .bk:hover{border-color:rgba(212,168,74,.6);} .bl .bk.gia{opacity:.45;}
+.bl .niente{grid-column:1 / -1;font-size:14px;color:var(--lo);padding:14px 2px;}
 /* ── LE NOTE: campo grande, carattere grosso, quattro comandi ── */
 .note{flex:1;min-height:150px;display:flex;flex-direction:column;border:1px solid var(--line);background:#12110f;}
 .note:focus-within{border-color:rgba(212,168,74,.55);}
@@ -72,7 +124,7 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.28fr) min
 <main>
   <div class="col">
     <div class="blocchi" id="blocchi"></div>
-    <button class="piu" type="button">+ blocco</button>
+    <div class="sotto"><button class="piu" type="button">+ blocco</button><a class="ed" href="move.html" title="L'editor dove si costruiscono i blocchi">Editor blocchi →</a></div>
   </div>
   <div class="col">
     <div class="chi">
@@ -96,43 +148,166 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.28fr) min
     </div>
   </div>
 </main>
+<div class="velo" id="velo-rf"><div class="fin" role="dialog" aria-modal="true"><div class="fin-su"><b>Red Flags</b><button class="fin-x" type="button" data-chiudi>Chiudi</button></div><div class="fin-b"><div class="rf-lista" id="rf-lista"></div></div></div></div>
+<div class="velo" id="velo-bl"><div class="fin" role="dialog" aria-modal="true"><div class="fin-su"><b>Blocchi</b><button class="fin-x" type="button" data-chiudi>Chiudi</button></div><div class="fin-b"><input id="bq" type="text" placeholder="Cerca blocco o esercizio" autocomplete="off"><div class="filtri" id="filtri"></div><div class="bl" id="bl"></div></div></div></div>
 <script>
 /* dati di esempio: tre blocchi, ognuno con Esercizio 1, Esercizio 2 e Cardio, come nell'editor */
 var BLOCCHI = [
-  {nome:'In piedi alla sbarra', fatto:true,  p:[['Esercizio 1','Sit to stand','3 × 8 · sedia alta'],['Esercizio 2','Alzate sui talloni','3 × 10'],['Cardio','Marcia sul posto','3 minuti']]},
-  {nome:'Seduto',               fatto:false, p:[['Esercizio 1','Estensione ginocchio','3 × 10 per gamba'],['Esercizio 2','Tirate con elastico','3 × 10'],['Cardio','Pedaliera','4 minuti']]},
-  {nome:'A terra',              fatto:false, p:[['Esercizio 1','Ponte','3 × 8'],['Esercizio 2','Quadrupedia, braccio avanti','3 × 6 per lato'],['Cardio','Camminata','5 minuti']]}
+  {id:'x1', nome:'In piedi alla sbarra', fatto:true,  e:['Sit to stand','Alzate sui talloni'], cardio:'Marcia sul posto'},
+  {id:'x2', nome:'Seduto',               fatto:false, e:['Estensione ginocchio','Tirate con elastico'], cardio:'Pedaliera'},
+  {id:'x3', nome:'A terra',              fatto:false, e:['Ponte','Quadrupedia, braccio avanti'], cardio:'Camminata'}
 ];
+function righe(b){ return '<div class="bk-r"><i>1</i>' + (b.e[0] || '—') + '</div><div class="bk-r"><i>2</i>' + (b.e[1] || '—') + '</div><div class="bk-r"><i>Cardio</i>' + (b.cardio || '—') + '</div>'; }
 function disegna(){
   document.getElementById('blocchi').innerHTML = BLOCCHI.map(function(b, i){
-    return '<section class="blocco' + (b.fatto ? ' fatto' : '') + '"><div class="b-su"><span class="n">' + (i + 1) + '</span><span class="nome">' + b.nome + '</span><button class="ok" type="button" data-i="' + i + '">' + (b.fatto ? '✓ fatto' : 'Fatto') + '</button><button class="via" type="button" data-via="' + i + '" title="Togli il blocco" aria-label="Togli il blocco ' + (i + 1) + '"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7"/></svg></button></div>'
-      + '<div class="posti">' + b.p.map(function(c){ return '<div class="cella"><span class="et">' + c[0] + '</span><span class="nm">' + c[1] + '</span><span class="nt">' + c[2] + '</span></div>'; }).join('') + '</div></section>';
+    return '<div class="bk' + (b.fatto ? ' fatto' : '') + '"><div class="bk-n"><span>' + (b.nome || 'Senza nome') + '</span><button class="ok" type="button" data-i="' + i + '">' + (b.fatto ? '✓ fatto' : 'Fatto') + '</button>'
+      + '<button class="via" type="button" data-via="' + i + '" title="Togli il blocco" aria-label="Togli il blocco"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7"/></svg></button></div>' + righe(b) + '</div>';
   }).join('');
 }
 disegna();
-/* LE RED FLAG: non sono inventate qui. È lo stesso elenco della Sandbox (RF_DATA: nome, colore, "cosa fai" in breve),
-   e lo stato è fatto come quello salvato nella scheda del cliente (state.redFlags: flags{id:{attivo,note}} + custom).
-   Nella prova lo stato è un esempio; nella pagina vera si leggerà quello del cliente aperto. */
+/* ═══ RED FLAGS ═══ Stesso elenco e stessi testi di Open e Load (RF_DATA copiato da Load). Stato per cliente: attivo + nota, più la Custom.
+   Nella prova lo stato è in memoria con un esempio; nella pagina vera è state.redFlags del cliente aperto. */
 var RF_DATA = [
-  {id:'beta-bloccanti', name:'Beta-bloccanti',  color:'rgba(200,120,120,1)', shortDo:'programma a sensazione, FC inaffidabile'},
-  {id:'statine',        name:'Statine',         color:'rgba(220,180,80,1)',  shortDo:'volume dimezzato i primi 30 giorni, no formati competitivi'},
-  {id:'diabete',        name:'Diabete',         color:'rgba(200,160,100,1)', shortDo:'glucometro pre/post, niente glicolitico se <90 mg/dL'},
-  {id:'ipertensione',   name:'Ipertensione',    color:'rgba(200,100,100,1)', shortDo:'no Valsalva, no cedimento, no isometrie prolungate'},
-  {id:'osteoporosi',    name:'Osteoporosi',     color:'rgba(180,195,210,1)', shortDo:'no impatti, no flessione spinale sotto carico'},
-  {id:'asma',           name:'Asma da sforzo',  color:'rgba(120,180,220,1)', shortDo:'warm-up 10-15 min, inalatore a portata di mano'},
-  {id:'post-malattia',  name:'Post-malattia',   color:'rgba(200,150,80,1)',  shortDo:'min 7 gg senza sintomi, no HIIT 2 settimane'}
+  {id:'beta-bloccanti', num:'01', name:'Beta-bloccanti', slug:'Limitano l\'accelerazione cardiaca',
+   color:'rgba(200,120,120,0.85)',
+   shortDo:'programma a sensazione, FC inaffidabile',
+   trigger:'Il cliente prende farmaci per la pressione o per il cuore (atenololo, bisoprololo, metoprololo, propranololo).',
+   whyMatters:'Questi farmaci mettono un tetto alla frequenza cardiaca. Tutte le zone FC che usi per programmare diventano inaffidabili: se programmi sulla FC rischi di farlo lavorare troppo pensando che stia facendo poco.',
+   whatYouDo:'Programmi interamente a sensazione e Talk Test. Ignori la frequenza cardiaca come strumento di programmazione.',
+   patterns:'Qualsiasi formato basato su zone FC o soglie cardiache'},
+  {id:'statine', num:'02', name:'Statine', slug:'Sensibilizzano il muscolo al danno',
+   color:'rgba(220,180,80,0.85)',
+   shortDo:'volume dimezzato i primi 30 giorni, no formati competitivi',
+   trigger:'Il cliente prende farmaci per il colesterolo (atorvastatina, simvastatina, rosuvastatina) ed è sedentario.',
+   whyMatters:'In una persona decondizionata che fa movimenti nuovi e intensi, il rischio di danno muscolare serio (rabdomiolisi) è quasi triplo. Dolore sproporzionato 24-72h dopo, urine scure.',
+   whatYouDo:'Primo mese a metà volume. Zero formati competitivi. Progressione massima 10%/sett. Segnali rossi: dolore che non passa in 3 giorni, urine color tè scuro → medico subito.',
+   patterns:'AMRAP / For Time nelle prime 4-8 settimane, alto volume eccentrico'},
+  {id:'diabete', num:'03', name:'Diabete', slug:'Glicemia instabile sotto sforzo',
+   color:'rgba(200,160,100,0.85)',
+   shortDo:'glucometro pre/post, niente glicolitico se <90 mg/dL',
+   trigger:'Il cliente prende insulina, metformina, sulfaniluree o altri farmaci per la glicemia.',
+   whyMatters:'I circuiti glicolitici bruciano zucchero velocemente. Combinati col farmaco possono far crollare la glicemia durante o dopo la sessione. Sintomi senza preavviso: tremori, confusione, sudore freddo.',
+   whatYouDo:'Glucometro pre/post. Qualcosa di zuccherato a portata di mano. No circuiti glicolitici intensi se la glicemia pre-sessione è sotto 90 mg/dL.',
+   patterns:'Circuiti glicolitici senza monitoraggio, sessioni lunghe senza possibilità di fermarsi'},
+  {id:'ipertensione', num:'04', name:'Ipertensione', slug:'Picchi pressori sotto sforzo',
+   color:'rgba(200,100,100,0.85)',
+   shortDo:'no Valsalva, no cedimento, no isometrie prolungate',
+   trigger:'Il cliente ha la pressione alta, anche se controllata con farmaci.',
+   whyMatters:'Anche con farmaci, certi movimenti creano picchi enormi di pressione arteriosa. Sled push o cedimento → Valsalva → pressione pericolosa.',
+   whatYouDo:'Eviti il cedimento muscolare completo. Istruzioni precise sulla respirazione. Se arriva strano (mal di testa, ronzio, vertigini) non lo fai allenare.',
+   patterns:'Sled push massimale, carry pesanti a cedimento, isometriche prolungate sotto fatica'},
+  {id:'osteoporosi', num:'05', name:'Osteoporosi', slug:'Fragilità ossea agli impatti',
+   color:'rgba(180,195,210,0.88)',
+   shortDo:'no impatti, no flessione spinale sotto carico',
+   trigger:'Diagnosi di osteoporosi (T-score ≤ -2.5) o uso prolungato di cortisone.',
+   whyMatters:'Le ossa non reggono le forze d\'impatto. La flessione spinale sotto carico può causare fratture vertebrali. Attenzione: osteopenia è diversa, lì l\'impatto controllato è benefico.',
+   whatYouDo:'Elimini impatto e flessione spinale sotto carico. Il resistance training è raccomandato. Post-menopausa o fratture recenti senza densitometria → medico prima.',
+   patterns:'Box jump, burpees, plyometria, atterraggi, flessione spinale sotto carico'},
+  {id:'asma', num:'06', name:'Asma da sforzo', slug:'Broncocostrizione post-esercizio',
+   color:'rgba(120,180,220,0.85)',
+   shortDo:'warm-up 10-15 min, inalatore a portata di mano',
+   trigger:'Fiato corto o sibili durante/dopo sforzo intenso. Colpisce il 10-50% della popolazione — molti non lo sanno.',
+   whyMatters:'La ventilazione alta secca i bronchi che si restringono. Il sibilo arriva 5-10 minuti dopo lo sforzo, non durante. Il cliente sembra ok nel circuito e si trova in difficoltà nel cooldown.',
+   whatYouDo:'Warm-up progressivo 10-15 min: terapeutico, crea il periodo refrattario. Se ha un inalatore deve averlo a portata di mano, non nello zaino.',
+   patterns:'Partenza a freddo con circuiti intensi, sessioni in ambienti freddi e secchi'},
+  {id:'post-malattia', num:'07', name:'Post-malattia', slug:'Rischio cardiologico nelle settimane al rientro',
+   color:'rgba(200,150,80,0.85)',
+   shortDo:'min 7 gg senza sintomi, no HIIT 2 settimane',
+   trigger:'Cliente stato male di recente — influenza, COVID, febbre, qualsiasi infezione virale.',
+   whyMatters:'Non la malattia in sé ma l\'infiammazione che può lasciare al cuore (miocardite). Si sente guarito, ma il cuore potrebbe essere ancora infiammato. HIIT in quella finestra è veramente rischioso.',
+   whatYouDo:'Minimo 7 giorni completamente senza sintomi. Al rientro: niente formati competitivi per almeno 2 settimane. Se durante la malattia ha avuto dolore al petto, palpitazioni o vertigini → ok medico prima.',
+   patterns:'Ritorno immediato a HIIT dopo malattia, formati competitivi nella prima settimana di rientro'}
 ];
-var REDFLAGS = {flags:{ipertensione:{attivo:true, note:'ramipril 5 mg'}, osteoporosi:{attivo:true, note:''}}, custom:{attivo:true, nome:'Protesi anca destra', cosaFare:'niente flessione oltre 90°'}};
-function rfDisegna(){
-  var a = RF_DATA.filter(function(f){ return REDFLAGS.flags[f.id] && REDFLAGS.flags[f.id].attivo; }).map(function(f){ return {name:f.name, color:f.color, fai:f.shortDo, nota:REDFLAGS.flags[f.id].note}; });
-  if(REDFLAGS.custom && REDFLAGS.custom.attivo) a.push({name:REDFLAGS.custom.nome || 'Custom', color:'rgba(190,170,140,1)', fai:REDFLAGS.custom.cosaFare || '', nota:''});
-  document.getElementById('rf').innerHTML = '<span class="et">Red flag</span>' + (a.length
-    ? '<ul>' + a.map(function(f){ return '<li style="--c:' + f.color + '">' + f.name + (f.fai ? '<small>' + f.fai + '</small>' : '') + (f.nota ? '<em>' + f.nota + '</em>' : '') + '</li>'; }).join('') + '</ul>'
-    : '<div class="nessuna">Nessuna</div>');
+var RF = { ipertensione:{attivo:true, note:'ramipril 5 mg'}, osteoporosi:{attivo:true, note:''}, __custom:{attivo:true, nome:'Protesi anca destra', cosaFare:'niente flessione oltre 90°'} };
+function rfScheda(f, breve){
+  var st = RF[f.id] || {}, on = !!st.attivo, ap = !!st.aperta && !breve;
+  return '<div class="rfc' + (on ? ' on' : '') + (ap ? ' ap' : '') + '" style="--c:' + f.color + '">'
+    + '<div class="rfc-h" data-rfx="' + f.id + '"><span class="rfc-n">' + f.num + '</span>'
+    + '<span class="rfc-t"><b>' + f.name + '</b><em>' + (breve ? f.shortDo : f.slug) + '</em>' + (breve && st.note ? '<span class="rfc-nt">' + String(st.note).replace(/</g, '&lt;') + '</span>' : '') + '</span>'
+    + '<button class="rfc-sw" data-rfo="' + f.id + '" aria-label="' + (on ? 'Spegni ' : 'Accendi ') + f.name + '"><i></i></button></div>'
+    + (breve ? '' : '<div class="rfc-b">'
+      + '<div class="rfc-d"><span>Come lo riconosci</span>' + f.trigger + '</div>'
+      + '<div class="rfc-d"><span>Perché ti riguarda</span>' + f.whyMatters + '</div>'
+      + '<div class="rfc-d fai"><span>Cosa fai</span>' + f.whatYouDo + '</div>'
+      + '<div class="rfc-d"><span>Pattern a rischio</span>' + f.patterns + '</div>'
+      + '<textarea class="rfc-nota" data-rfn="' + f.id + '" placeholder="Note specifiche del cliente (es. atenololo 50mg, diagnosi 2023)">' + (st.note || '').replace(/</g, '&lt;') + '</textarea></div>')
+    + '</div>';
 }
-rfDisegna();
+function rfCustom(breve){
+  var c = RF.__custom || {}, ap = !!c.aperta && !breve;
+  return '<div class="rfc custom' + (c.attivo ? ' on' : '') + (ap ? ' ap' : '') + '" style="--c:rgba(190,170,140,0.85)">'
+    + '<div class="rfc-h" data-rfx="__custom"><span class="rfc-n">+</span>'
+    + '<span class="rfc-t"><b>' + (breve ? (c.nome || 'Custom').replace(/</g, '&lt;') : 'Custom') + '</b><em>' + (breve ? (c.cosaFare || '').replace(/</g, '&lt;') : 'condizione non standard, definita dal PT') + '</em></span>'
+    + '<button class="rfc-sw" data-rfo="__custom" aria-label="Custom"><i></i></button></div>'
+    + (breve ? '' : '<div class="rfc-b"><input class="rfc-in" data-rfc="nome" placeholder="Nome (es. Ernia discale L4-L5)" value="' + (c.nome || '').replace(/"/g, '&quot;') + '">'
+      + '<textarea class="rfc-nota" data-rfc="cosaFare" placeholder="Cosa fai: cosa modifichi nel programma">' + (c.cosaFare || '').replace(/</g, '&lt;') + '</textarea></div>')
+    + '</div>';
+}
+/* il sunto nella colonna: solo quelle accese */
+function rfSunto(){
+  var acc = RF_DATA.filter(function(f){ return RF[f.id] && RF[f.id].attivo; }), cu = RF.__custom && RF.__custom.attivo, n = acc.length + (cu ? 1 : 0), el = document.getElementById('rf');
+  el.classList.toggle('vuota', !n);
+  el.innerHTML = '<div class="rf-su"><i></i><span class="et">Red Flags' + (n ? ' · ' + n : '') + '</span><button class="rf-tutte" type="button" data-rftutte>Tutte</button></div>'
+    + (n ? '<div class="rf-lista">' + acc.map(function(f){ return rfScheda(f, true); }).join('') + (cu ? rfCustom(true) : '') + '</div>' : '');
+}
+function rfLista(){ document.getElementById('rf-lista').innerHTML = RF_DATA.map(function(f){ return rfScheda(f, false); }).join('') + rfCustom(false); }
+function rfTocca(e, dentroFinestra){
+  var o = e.target.closest('[data-rfo]');
+  if(o){ var k = o.dataset.rfo; RF[k] = RF[k] || {}; RF[k].attivo = !RF[k].attivo; if(RF[k].attivo && dentroFinestra) RF[k].aperta = true; rfLista(); rfSunto(); return true; }
+  var x = e.target.closest('[data-rfx]');
+  if(x && dentroFinestra){ var k2 = x.dataset.rfx; RF[k2] = RF[k2] || {}; RF[k2].aperta = !RF[k2].aperta; rfLista(); return true; }
+  if(x && !dentroFinestra){ var k3 = x.dataset.rfx; RF[k3] = RF[k3] || {}; RF[k3].aperta = true; apri('velo-rf'); rfLista(); return true; }   /* dal sunto: clic sul nome apre la finestra su quella */
+  return false;
+}
+document.getElementById('rf').addEventListener('click', function(e){ if(e.target.closest('[data-rftutte]')){ rfLista(); apri('velo-rf'); return; } rfTocca(e, false); });
+document.getElementById('velo-rf').addEventListener('click', function(e){ rfTocca(e, true); });
+document.getElementById('velo-rf').addEventListener('input', function(e){
+  var n = e.target.dataset.rfn, c = e.target.dataset.rfc;
+  if(n){ RF[n] = RF[n] || {}; RF[n].note = e.target.value; }
+  if(c){ RF.__custom = RF.__custom || {}; RF.__custom[c] = e.target.value; if(c === 'nome' && e.target.value) RF.__custom.attivo = true; }
+  rfSunto();
+});
+function apri(id){ document.getElementById(id).classList.add('open'); }
+function chiudi(){ [].forEach.call(document.querySelectorAll('.velo.open'), function(v){ v.classList.remove('open'); }); }
+document.addEventListener('click', function(e){ if(e.target.closest('[data-chiudi]') || (e.target.classList && e.target.classList.contains('velo'))) chiudi(); });
+document.addEventListener('keydown', function(e){ if(e.key === 'Escape') chiudi(); });
+rfSunto();
+
+/* ═══ LA SCELTA DEL BLOCCO ═══
+   L'elenco è quello dei blocchi salvati con l'editor di Move (stesso posto nel browser: 'move-blocchi', fatti così: {id, nome, e:[es1, es2], cardio}).
+   Se nell'editor non ce n'è ancora nessuno, la prova mostra blocchi di esempio.
+   I FILTRI sono da decidere: qui ci sono le posizioni dell'editor, e funzionano solo sui blocchi di esempio (quelli veri non hanno ancora una posizione). */
+var ESEMPI = [
+  {id:'x1', nome:'In piedi alla sbarra', e:['Sit to stand','Alzate sui talloni'], cardio:'Marcia sul posto', pos:'In piedi'},
+  {id:'x2', nome:'Seduto', e:['Estensione ginocchio','Tirate con elastico'], cardio:'Pedaliera', pos:'Seduto'},
+  {id:'x3', nome:'A terra', e:['Ponte','Quadrupedia, braccio avanti'], cardio:'Camminata', pos:'Quadrupedia'},
+  {id:'x4', nome:'Equilibrio', e:['Tandem alla sbarra','Appoggio su un piede'], cardio:'Step basso', pos:'In piedi'},
+  {id:'x5', nome:'Spalle da seduto', e:['Alzate laterali','Spinte sopra la testa'], cardio:'Pedaliera braccia', pos:'Seduto'},
+  {id:'x6', nome:'Supino', e:['Ponte a una gamba','Dead bug'], cardio:'Camminata', pos:'Prono/Sup.'},
+  {id:'x7', nome:'Camminata con ostacoli', e:['Passo laterale','Scavalco'], cardio:'Corridoio', pos:'In piedi'}
+];
+var LIB = []; try{ LIB = JSON.parse(localStorage.getItem('move-blocchi') || '[]') || []; }catch(e){ LIB = []; }
+var VERI = LIB.length > 0; if(!VERI) LIB = ESEMPI;
+var VOCI = ['Tutti','In piedi','Seduto','Prono/Sup.','Quadrupedia'], filtro = 'Tutti';
+function blElenco(){
+  var q = document.getElementById('bq').value.trim().toLowerCase(), par = q.split(/\s+/).filter(Boolean);
+  document.getElementById('filtri').innerHTML = VOCI.map(function(v){ return '<button type="button" class="' + (v === filtro ? 'on' : '') + '" data-f="' + v + '">' + v + '</button>'; }).join('');
+  var l = LIB.filter(function(b){ var t = (b.nome + ' ' + (b.e || []).join(' ') + ' ' + (b.cardio || '')).toLowerCase(); return par.every(function(w){ return t.indexOf(w) !== -1; }) && (filtro === 'Tutti' || b.pos === filtro); });
+  document.getElementById('bl').innerHTML = l.length ? l.map(function(b){
+    var gia = BLOCCHI.some(function(x){ return x.id === b.id; });
+    return '<div class="bk' + (gia ? ' gia' : '') + '" data-b="' + b.id + '" role="button" tabindex="0"><div class="bk-n"><span>' + (b.nome || 'Senza nome') + '</span>' + (gia ? '<span class="et" style="margin-left:auto">già in seduta</span>' : '') + '</div>' + righe(b) + '</div>';
+  }).join('') : '<div class="niente">Nessun blocco.</div>';
+}
+document.getElementById('bq').addEventListener('input', blElenco);
+document.getElementById('velo-bl').addEventListener('click', function(e){
+  var f = e.target.closest('[data-f]'); if(f){ filtro = f.dataset.f; blElenco(); return; }
+  var b = e.target.closest('[data-b]'); if(!b) return;
+  var x = LIB.filter(function(q){ return q.id === b.dataset.b; })[0]; if(!x) return;
+  BLOCCHI.push({id:x.id, nome:x.nome || 'Senza nome', fatto:false, e:(x.e || []).slice(), cardio:x.cardio || ''});
+  disegna(); chiudi();
+});
 document.getElementById('blocchi').addEventListener('click', function(e){ var v = e.target.closest('.via'); if(v){ BLOCCHI.splice(+v.dataset.via, 1); disegna(); return; } var b = e.target.closest('.ok'); if(!b) return; var x = BLOCCHI[+b.dataset.i]; x.fatto = !x.fatto; disegna(); });
-document.querySelector('.piu').addEventListener('click', function(){ BLOCCHI.push({nome:'Blocco da scegliere', fatto:false, p:[['Esercizio 1','—',''],['Esercizio 2','—',''],['Cardio','—','']]}); disegna(); });
+document.querySelector('.piu').addEventListener('click', function(){ document.getElementById('bq').value = ''; filtro = 'Tutti'; blElenco(); apri('velo-bl'); document.getElementById('bq').focus(); });
 /* i quattro comandi delle note: elenco puntato, elenco numerato, sottolineato, colore */
 document.querySelector('.barra').addEventListener('mousedown', function(e){
   var b = e.target.closest('button'); if(!b) return; e.preventDefault();   /* non togliere il cursore dal testo */

@@ -2209,9 +2209,9 @@ function renderCorsa(st, RCH){
   if(primi.length) h += '<div class="cq">' + esc(changeText()) + '</div><div class="riga"></div>';
   var chi = primi.map(function(x){ return x.fam; }).join(',');
   function scalaMetti(){
-    /* SCELTA: 3 punti di posto medio di distacco occupano tutta l'altezza libera; chi è più indietro di così sta in fondo */
+    /* 4 punti di posto medio di distacco occupano tutta l'altezza libera: è il distacco più grande che può esistere (dal 1° al 5° posto), quindi nessuno finisce schiacciato in fondo */
     var H = scala.clientHeight, RIGA = 46, SU = 16, altri = tutti.filter(function(x){ return primi.indexOf(x) === -1; }), top0 = primi.length ? con[0].avg : null;
-    var ys = altri.map(function(x){ return SU + (top0 == null || x.avg == null ? 0 : Math.min(1, (x.avg - top0) / 3)) * Math.max(0, H - SU - RIGA); });
+    var ys = altri.map(function(x){ return SU + (top0 == null || x.avg == null ? 0 : Math.min(1, (x.avg - top0) / 4)) * Math.max(0, H - SU - RIGA); });
     var fuori = altri.map(function(x){ return !!(RCH && RCH.can && RCH.can[x.fam] === false); });
     /* in fondo, di fila, quelle che non possono più: tra loro e le altre passa la riga grigia, e serve il suo posto */
     var primoFuori = altri.length; for(var i = altri.length - 1; i >= 0 && fuori[i]; i--) primoFuori = i;

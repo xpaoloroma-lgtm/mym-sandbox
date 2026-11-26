@@ -11308,14 +11308,18 @@ function pasNellaFinestra(c, proto){
     var q = _pasApre, lib = q.a ? pasLibero(c, proto, q.a) : false;
     if(lib && proto === 'open') q.motivo = 'finita';
     var esito = q.motivo ? pasControllo(c, proto, q.motivo) : '';
+    /* in ordine: dov'è adesso, dove va, perché, e in fondo la riga che dice cosa succede con il tasto */
     h += '<div class="pas-box">'
-       + '<div class="pas-r"><span class="pas-k">Adesso</span><span class="pas-punto">' + clEsc(pasPunto(c, proto)) + '</span></div>'
-       + '<div class="pas-r"><span class="pas-k">Verso</span>' + PAS_PROTO.filter(function(p){ return p !== proto; }).map(function(p){ return '<button type="button" class="pas-c' + (q.a === p ? ' sel' : '') + '" data-pas-a="' + p + '" style="--lc:' + CL_COLORE[p] + '">' + CL_NOME[p] + '</button>'; }).join('') + '</div>'
-       + '<div class="pas-r"><span class="pas-k">Motivo</span>' + PAS_MOTIVI.map(function(m){ return '<button type="button" class="pas-c' + (q.motivo === m.id ? ' sel' : '') + '" data-pas-m="' + m.id + '">' + clEsc(m.nome) + '</button>'; }).join('')
-         + '<button type="button" class="pas-c' + (q.motivo === 'nota' ? ' sel' : '') + '" data-pas-m="nota">Nota</button>' + (esito ? '<span class="pas-esito">' + clEsc(esito) + '</span>' : '') + '</div>'
-       + (q.motivo === 'nota' ? '<div class="pas-r"><span class="pas-k"></span><input id="pas-nota" spellcheck="false" autocomplete="off" value="' + clEsc(q.nota || '').replace(/"/g, '&quot;') + '"></div>' : '')
-       + '<div class="pas-r"><span class="pas-k"></span><button type="button" class="cl-entra" data-pas-manda="' + clEsc(c.id) + '"' + (pasPronto(q) ? '' : ' disabled') + '>' + (lib ? 'Cambia' : 'Chiedi il cambio') + '</button>'
-       + (q.a ? '<span class="pas-esito">' + (lib ? 'questo cambio è libero: avviene subito, l’Admin viene avvisato' : 'il cliente resta in ' + CL_NOME[proto] + ' finché l’Admin non approva') + '</span>' : '') + '</div>'
+       + '<div class="pas-su"><span class="pas-k">Adesso</span><span class="pas-punto">' + clEsc(pasPunto(c, proto)) + '</span></div>'
+       + '<div class="pas-k">Verso</div>'
+       + '<div class="pas-g pas-verso">' + PAS_PROTO.filter(function(p){ return p !== proto; }).map(function(p){ return '<button type="button" class="pas-c' + (q.a === p ? ' sel' : '') + '" data-pas-a="' + p + '" style="--lc:' + CL_COLORE[p] + '">' + CL_NOME[p] + '</button>'; }).join('') + '</div>'
+       + '<div class="pas-k">Motivo</div>'
+       + '<div class="pas-g pas-motivi">' + PAS_MOTIVI.map(function(m){ return '<button type="button" class="pas-c' + (q.motivo === m.id ? ' sel' : '') + '" data-pas-m="' + m.id + '">' + clEsc(m.nome) + '</button>'; }).join('')
+         + '<button type="button" class="pas-c' + (q.motivo === 'nota' ? ' sel' : '') + '" data-pas-m="nota">Nota</button></div>'
+       + (esito ? '<div class="pas-esito">' + clEsc(esito) + '</div>' : '')
+       + (q.motivo === 'nota' ? '<input id="pas-nota" spellcheck="false" autocomplete="off" value="' + clEsc(q.nota || '').replace(/"/g, '&quot;') + '">' : '')
+       + '<div class="pas-giu"><span class="pas-esito">' + (q.a ? (lib ? 'questo cambio è libero: avviene subito, l\u2019Admin viene avvisato' : 'il cliente resta in ' + CL_NOME[proto] + ' finché l\u2019Admin non approva') : '') + '</span>'
+       + '<button type="button" class="cl-entra" data-pas-manda="' + clEsc(c.id) + '"' + (pasPronto(q) ? '' : ' disabled') + '>' + (lib ? 'Cambia' : 'Chiedi il cambio') + '</button></div>'
        + '</div>';
   }
   return h;
@@ -12165,17 +12169,27 @@ header > #breadcrumb, header > .bc{margin-right:auto!important;}
 .pas-riga b{font-weight:600;color:#f0ebdc;}
 .pas-riga .pk{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(190,204,218,.6);}
 .pas-riga .pas-nota{flex:1 1 100%;color:rgba(225,232,240,.8);}
-.pas-box{margin-top:10px;padding:12px;border:1px solid rgba(200,175,90,.45);border-radius:2px;display:grid;gap:10px;}
-.pas-r{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px;min-width:0;}
-.pas-k{flex:none;width:86px;font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(190,204,218,.6);}
-.pas-c{height:28px;padding:0 10px;background:none;border:1px solid rgba(180,195,210,.25);border-radius:2px;cursor:pointer;font-family:var(--font);font-size:12px;color:rgba(215,225,235,.9);}
+.pas-box{margin-top:10px;padding:14px 14px 12px;border:1px solid rgba(200,175,90,.45);border-radius:2px;display:flex;flex-direction:column;}
+.pas-k{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(190,204,218,.6);}
+.pas-box > .pas-k{margin:14px 0 7px;}
+.pas-su{display:flex;align-items:baseline;gap:12px;padding-bottom:12px;border-bottom:1px solid rgba(180,195,210,.14);}
+.pas-punto{font-size:14px;color:#f0ebdc;}
+/* le scelte stanno in colonne uguali: niente a capo a caso */
+.pas-g{display:grid;gap:6px;}
+.pas-verso{grid-template-columns:repeat(auto-fit,minmax(64px,1fr));}
+.pas-motivi{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));grid-auto-rows:1fr;}
+.pas-c{min-height:32px;padding:5px 10px;background:none;border:1px solid rgba(180,195,210,.25);border-radius:2px;cursor:pointer;font-family:var(--font);font-size:12px;line-height:1.25;color:rgba(215,225,235,.9);}
+.pas-verso .pas-c{text-align:center;padding:5px 4px;}
+.pas-motivi .pas-c{text-align:left;}
 .pas-c:hover{border-color:rgba(180,195,210,.6);}
 .pas-c.sel{border-color:rgba(228,184,90,.9);color:#E4B85A;background:rgba(212,168,74,.12);}
 .pas-c[data-pas-a].sel{border-color:var(--lc);color:var(--lc);background:none;}
-.pas-c i{font-style:normal;font-size:10px;margin-left:6px;opacity:.7;}
-#pas-nota{flex:1 1 260px;min-width:0;height:30px;padding:0 10px;background:rgba(0,0,0,.25);border:1px solid rgba(180,195,210,.25);border-radius:2px;color:#f0ebdc;font-family:var(--font);font-size:13px;}
-.pas-punto{font-size:12.5px;color:#f0ebdc;}
-.pas-esito{font-size:11px;color:rgba(190,204,218,.75);}
+#pas-nota{margin-top:8px;height:34px;padding:0 10px;background:rgba(0,0,0,.25);border:1px solid rgba(228,184,90,.55);border-radius:2px;color:#f0ebdc;font-family:var(--font);font-size:13px;}
+.pas-esito{font-size:11px;line-height:1.35;color:rgba(190,204,218,.75);}
+.pas-box > .pas-esito{margin-top:8px;}
+.pas-giu{display:flex;align-items:center;gap:14px;margin-top:14px;padding-top:12px;border-top:1px solid rgba(180,195,210,.14);}
+.pas-giu .pas-esito{flex:1;min-width:0;}
+.pas-giu .cl-entra{flex:none;}
 /* il piede della finestra va su due righe quando non ci sta: sopra i simboli e "Cambia protocollo", sotto chi sei, Dettagli ed Entra */
 .cl-piede{flex-wrap:wrap;row-gap:10px;}
 .cl-piede .cl-azioni{flex-wrap:wrap;justify-content:flex-end;row-gap:8px;max-width:100%;}

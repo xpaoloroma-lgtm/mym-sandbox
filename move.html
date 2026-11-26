@@ -214,8 +214,7 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
 <body>
 <header>
   <div class="bc"><a class="sb" href="index.html" title="Torna a Sandbox">Sandbox</a><span class="sep">›</span><span class="proto" style="color:#78cd9b">Move</span><span class="sep">›</span><span class="cli">Blocchi</span></div>
-  <!-- passaggio alla seduta con il cliente (per ora la pagina di prova) -->
-  <div class="hdr-r"><a href="move-seduta-prova.html" class="btn gold" style="display:flex;align-items:center;height:34px;padding:0 18px;text-decoration:none;white-space:nowrap">Seduta con il cliente →</a></div>
+  <div class="hdr-r"></div>
 </header>
 
 <div id="main">
@@ -225,6 +224,9 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
   <section id="work">
     <div class="col" id="c-blocchi">
       <div class="col-hd"><span class="lbl">Blocchi <span id="bk-n"></span></span><button type="button" class="btn gold" id="bk-nuovo">+ Nuovo blocco</button></div>
+      <!-- il passaggio alla seduta con il cliente (per ora la pagina di prova). Sta QUI e non nella barra in alto,
+           perché dentro Sandbox la barra in alto di questa pagina è nascosta: lì il tasto non si vedeva. -->
+      <a href="move-seduta-prova.html" class="btn gold" id="vai-seduta" style="flex:none;display:flex;align-items:center;justify-content:center;height:38px;margin:12px 12px 0;text-decoration:none;white-space:nowrap">Seduta con il cliente →</a>
       <div class="col-bd" id="bk-lista"></div>
     </div>
     <!-- a destra: sopra il blocco che si sta facendo, in una riga sola; sotto gli esercizi -->

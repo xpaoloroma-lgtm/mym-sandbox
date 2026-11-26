@@ -11104,12 +11104,12 @@ function clFiltri(tutti){
   if(_clProto && !presenti[_clProto]) _clProto = '';
   function t(attr, val, testo, sel){ return '<button type="button" class="cl-f' + (sel ? ' sel' : '') + '" ' + attr + '="' + val + '">' + testo + '</button>'; }
   /* ogni filtro è un gruppo che non si spezza: il suo nome resta attaccato ai suoi tasti quando la riga va a capo */
-  var h = '<span class="cl-fg"><span class="cl-f-nome">protocollo</span>' + t('data-proto', '', 'tutti', !_clProto)
+  var h = '<span class="cl-fg">' + t('data-proto', '', 'tutti', !_clProto)
      + ordine.map(function(p){ return t('data-proto', p, p === 'nuovo' ? 'nuovi' : CL_NOME[p], _clProto === p); }).join('') + '</span>';
-  var opz = [['', 'tutti'], ['si', 'con red flag'], ['no', 'senza red flag']];
+  var opz = [['', 'red flag'], ['si', 'con red flag'], ['no', 'senza red flag']];   /* la prima voce dice cos'è il menu: non serve un'etichetta accanto */
   (window.RF_DATA || []).forEach(function(f){ opz.push([f.id, f.name]); });
   opz.push(['__custom', 'Custom']);
-  h += '<span class="cl-fg"><span class="cl-f-nome">red flag</span><select class="cl-f' + (_clRf ? ' sel' : '') + '" id="cl-f-rf">'
+  h += '<span class="cl-fg cl-fg-rf"><select class="cl-f' + (_clRf ? ' sel' : '') + '" id="cl-f-rf">'
      + opz.map(function(o){ return '<option value="' + o[0] + '"' + (o[0] === _clRf ? ' selected' : '') + '>' + clEsc(o[1]) + '</option>'; }).join('') + '</select></span>';
   box.innerHTML = h;
 }
@@ -11186,7 +11186,9 @@ window.addEventListener('load', function(){
      A metà monitor stanno una sotto l'altra, a schermo intero affiancate. */
   var dx = document.createElement('div'); dx.id = 'pr-dx'; z.appendChild(dx);
   var scheda = document.createElement('div'); scheda.id = 'cl-scheda'; dx.appendChild(scheda);
-  var psp = document.createElement('div'); psp.id = 'ps-pagina'; dx.appendChild(psp);
+  /* "Regole dei passaggi": un tasto accanto al riquadro di Grid, sotto la griglia. Apre lo schema in una finestra; non occupa posto nella pagina. */
+  var leg0 = document.getElementById('mp-leg');
+  if(leg0){ var br = document.createElement('button'); br.type = 'button'; br.id = 'ps-apri'; br.textContent = 'Regole dei passaggi'; br.onclick = function(ev){ ev.stopPropagation(); pasSchemaApri(); }; leg0.appendChild(br); }
   var gr = document.getElementById('proto-chart-wrap'); if(gr) dx.appendChild(gr);
   inp.addEventListener('input', function(){ _clAperto = null; clDisegna(); });
   var filtri = document.getElementById('cl-filtri');
@@ -11540,7 +11542,23 @@ function pasChiave(c){
   var p = (c && c.state && csCurrentProto(c)) || 'nuovo';
   return p === 'open' ? (pasOpenFinita(c) ? 'openFinita' : 'openMeta') : p;
 }
-/* LO SCHEMA NELLA PAGINA PROTOCOLLI, sotto la griglia: accende la riga del cliente su cui sei (mouse sopra) o che hai scelto */
+/* LO SCHEMA IN UNA FINESTRA, aperta dal tasto "Regole dei passaggi" sotto la griglia. Se c'è un cliente aperto, la sua riga è accesa.
+   Si chiude cliccando fuori, con Esc o con "Chiudi". */
+function pasSchemaApri(){
+  var v = document.getElementById('ps-velo');
+  if(!v){
+    v = document.createElement('div'); v.id = 'ps-velo';
+    v.addEventListener('click', function(ev){ if(ev.target === v || ev.target.closest('[data-ps-chiudi]')) pasSchemaChiudi(); });
+    document.addEventListener('keydown', function(ev){ if(ev.key === 'Escape' && v.classList.contains('si')) pasSchemaChiudi(); });
+    document.body.appendChild(v);
+  }
+  var c = _clAperto ? (_csList || []).filter(function(z){ return z && z.id === _clAperto; })[0] : null;
+  v.innerHTML = '<div id="ps-box">' + pasSchema(c ? [pasChiave(c)] : [], true)
+              + '<div class="ps-piede">' + (c ? '<span>accesa la riga di ' + clEsc(c.id) + '</span>' : '<span></span>') + '<button type="button" class="nc-b" data-ps-chiudi="1">Chiudi</button></div></div>';
+  v.classList.add('si');
+}
+function pasSchemaChiudi(){ var v = document.getElementById('ps-velo'); if(v) v.classList.remove('si'); }
+/* (lo schema fisso nella pagina non c'è più: questa resta e non fa niente se il suo contenitore manca) */
 function pasSchemaPagina(chiave){
   var box = document.getElementById('ps-pagina'); if(!box) return;
   if(!box.firstChild) box.innerHTML = pasSchema([], false);
@@ -12222,7 +12240,10 @@ window.addEventListener('load', function(){
   .cs-nome{font-size:19px;font-weight:400;letter-spacing:1px;color:#f0ebdc;}
   #cl-scheda .cl-giu{border-top:0;padding:0;margin-top:12px;}
   /* sotto la griglia: il riquadro di Grid */
-  #mp-leg{display:grid !important;grid-template-columns:1fr;gap:8px;}
+  #mp-leg{display:flex !important;flex-direction:row !important;align-items:stretch;gap:8px;}
+  #mp-leg .mp-r.mp-grid{flex:1 1 auto;min-width:0;}
+  #ps-apri{flex:none;height:46px;padding:0 16px;background:none;border:1px solid rgba(180,195,210,0.18);border-radius:4px;cursor:pointer;font-family:var(--font);font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(200,214,228,0.85);}
+  #ps-apri:hover{border-color:rgba(200,214,228,0.55);color:#f0ebdc;}
   #mp-leg .mp-r.mp-x{height:46px;padding:0 14px 0 0;border:1px solid rgba(180,195,210,0.18) !important;border-radius:4px;}
   #mp-leg .mp-r.mp-x > i{height:100%;margin-right:2px;}
   #mp-leg .mp-r.mp-grid{cursor:pointer !important;}
@@ -12254,7 +12275,13 @@ window.addEventListener('load', function(){
   #cl-scheda .pas-s .pas-m{white-space:normal;}
   /* ── A SINISTRA ── */
   #cl-su #cl-cerca{height:44px !important;padding:0 14px !important;font-size:15px !important;letter-spacing:1.5px !important;}
-  #cl-filtri{margin-top:10px !important;gap:8px 16px !important;}
+  /* i filtri: una riga sola. A sinistra i protocolli, a destra il menu delle red flag. Niente etichette: si capiscono da soli */
+  #cl-filtri{margin-top:10px !important;gap:8px 10px !important;flex-wrap:nowrap !important;}
+  #cl-filtri .cl-fg{gap:4px;}
+  #cl-filtri .cl-fg:first-child{flex:1 1 auto;min-width:0;flex-wrap:wrap;}
+  #cl-filtri .cl-fg-rf{flex:none;margin-left:auto;}
+  #cl-filtri .cl-f{padding:0 8px;letter-spacing:1px;}
+  #cl-filtri select.cl-f{max-width:124px;padding-right:22px;}
   /* le intestazioni: "cliente" e "ultimo" ordinano l'elenco, quella scelta ha la freccia */
   #cl-testa{margin:12px 0 6px !important;}
   #cl-testa button{background:none;border:0;padding:0;margin:0;cursor:pointer;font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit;}
@@ -12546,18 +12573,13 @@ header > #breadcrumb, header > .bc{margin-right:auto!important;}
 .pas-schema.foco .ps-r.on{opacity:1;}
 .pas-schema.foco .ps-r.on > span{color:#E4B85A;font-weight:600;}
 .pas-schema.foco .ps-r.on > i:not(.ps-v){box-shadow:inset 0 0 0 1px currentColor;}
-/* nella pagina Protocolli, sotto la griglia */
-#ps-pagina{display:none;}
-@media (min-width:900px), (pointer:fine){
-  #ps-pagina{display:block;font-family:var(--font);}
-  #ps-pagina .ps-tit{margin:6px 0 8px;color:rgba(190,204,218,.6);}
-  #ps-pagina .pas-schema{max-width:none;}
-  #ps-pagina .ps-r{grid-template-columns:104px repeat(6, minmax(0,1fr));}
-  #ps-pagina .ps-r > span{font-size:12px;}
-  #ps-pagina .ps-r > i{min-height:24px;font-size:8.5px;letter-spacing:.4px;}
-  #ps-pagina .ps-testa > b{font-size:10px;letter-spacing:1.5px;}
-}
-@media (min-width:1500px){ #ps-pagina .ps-r > i{font-size:9.5px;letter-spacing:1px;min-height:28px;} }
+/* la finestra dello schema */
+#ps-velo{display:none;position:fixed;inset:0;z-index:100004;background:rgba(6,6,5,0.78);align-items:center;justify-content:center;font-family:var(--font);}
+#ps-velo.si{display:flex;}
+#ps-box{width:min(760px,94vw);max-height:92vh;overflow-y:auto;box-sizing:border-box;padding:6px 22px 18px;background:rgba(20,19,16,1);border:1px solid rgba(180,195,210,0.18);border-radius:2px;scrollbar-width:thin;}
+#ps-box .ps-r{grid-template-columns:112px repeat(6, minmax(0,1fr));}
+@media (max-width:700px){ #ps-box .ps-r > i{font-size:8px;letter-spacing:.2px;} #ps-box .ps-r{grid-template-columns:92px repeat(6, minmax(0,1fr));} }
+.ps-piede{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;font-size:11px;color:rgba(190,204,218,.7);}
 .nc-schema{margin-top:10px;} .nc-schema .ps-r{grid-template-columns:112px repeat(6, minmax(0,1fr));} .nc-schema .ps-r > i{min-height:24px;font-size:8.5px;letter-spacing:.4px;}
 .ps-r{display:grid;grid-template-columns:128px repeat(6, minmax(0,1fr));gap:3px;align-items:stretch;}
 .ps-r > span{display:flex;align-items:center;font-size:12.5px;color:#f0ebdc;padding-right:8px;}

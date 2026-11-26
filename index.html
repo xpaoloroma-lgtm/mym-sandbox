@@ -10220,6 +10220,12 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   background:rgba(244,190,190,1);animation:riuPunto 1.3s ease-in-out infinite;
 }
 .ing-badge:empty{display:none;}
+/* SUL MONITOR i tre riquadri si adattano alla finestra: a metà monitor stanno tutti e tre in fila senza uscire di lato */
+@media (min-width:900px), (pointer:fine){
+  .ing-carte{gap:clamp(24px, 5vw, 64px);max-width:100%;box-sizing:border-box;padding:0 24px;}
+  .ing-carte .ing-carta{width:clamp(170px, 26vw, 300px);height:clamp(130px, 17vw, 200px);}
+  .ing-carte .ing-carta b{font-size:clamp(19px, 2.5vw, 28px);letter-spacing:clamp(3px, 0.5vw, 6px);text-indent:clamp(3px, 0.5vw, 6px);}
+}
 
 /* ══ LA MAPPA DEI PROTOCOLLI ══ solo sul monitor */
 #home-riga,#home-lato{display:contents;}

@@ -11797,7 +11797,9 @@ function demoGenera(){
     st.demoPercorso = (st.demoPercorso || []).filter(function(t){ return t.da < dal; }).concat([{proto:'move', da:dal, a:iso(0)}]);
   });
   /* I PASSAGGI dei clienti finti: ogni periodo passato fuori da Open ha il suo passaggio di andata (e di ritorno), con un motivo,
-     così sulla timeline si vedono i punti. In più c'è UNA richiesta in attesa, per vedere Admin che lampeggia. I motivi sono scelti a caso. */
+     così sulla timeline si vedono i punti. I motivi sono scelti a caso, ma il tipo di passaggio segue le regole vere (PAS_REGOLE):
+     dove la regola dice "libero" è libero, dove dice "richiesta" risulta approvato. Non c'è nessuna richiesta finta in attesa:
+     Admin si accende solo per quello che si prova davvero. */
   var MOT = ['obiettivo','infortunio','redflag','rientro','frequenza'];
   function quando(isoG){ var p = isoG.split('-'); return new Date(+p[0], +p[1]-1, +p[2], 18).getTime(); }
   out.forEach(function(c){
@@ -11805,11 +11807,9 @@ function demoGenera(){
     (st.demoPercorso || []).forEach(function(t, k){
       var pt = st.pt || uno(PT), t0 = quando(t.da);
       st.passaggi.push({id:'d' + k + 'a', da:'open', a:t.proto, motivo:uno(MOT), nota:'', pt:pt, ts:t0, fatto:t0, punto:'Open', stato:'approvato', soloSegno:true});
-      if(t.a < iso(0)){ var t1 = quando(t.a); st.passaggi.push({id:'d' + k + 'r', da:t.proto, a:'open', motivo:uno(MOT), nota:'', pt:pt, ts:t1, fatto:t1, punto:CL_NOME[t.proto], stato:(t.proto === 'move' ? 'libero' : 'approvato'), visto:true, soloSegno:true}); }
+      if(t.a < iso(0)){ var t1 = quando(t.a); st.passaggi.push({id:'d' + k + 'r', da:t.proto, a:'open', motivo:uno(MOT), nota:'', pt:pt, ts:t1, fatto:t1, punto:CL_NOME[t.proto], stato:((PAS_REGOLE[t.proto] || {}).open === 'L' ? 'libero' : 'approvato'), visto:true, soloSegno:true}); }
     });
   });
-  var inOpen = out.filter(function(c){ var st = c.state; return !st.demoProto && !st.completedAt && st.type && SEQUENCES[st.type] && (st.current || 0) < SEQUENCES[st.type].steps.length && (st.log || []).length; })[0];
-  if(inOpen){ var so = inOpen.state; so.passaggi.push({id:'d-attesa', da:'open', a:'load', motivo:'obiettivo', nota:'', pt:so.pt || PT[0], ts:giorno(2).getTime(), punto:'Open, obiettivo ' + ((so.current || 0) + 1) + ' di ' + SEQUENCES[so.type].steps.length, controllo:'', stato:'attesa'}); }
   if(typeof pasDemoRimetti === 'function') pasDemoRimetti(out);
   window._demoStat = STAT;
   return out;

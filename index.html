@@ -10526,7 +10526,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   <!-- ══ I CLIENTI ══ (solo sul monitor) Si cerca scrivendo; l'elenco è sempre
        aperto. Un clic su un cliente allarga la sua riga con la timeline. -->
   <div id="cl-zona">
-    <div id="cl-su"><input id="cl-cerca" type="text" placeholder="cerca cliente" autocomplete="off" spellcheck="false"><button type="button" id="nc-apri" onclick="ncApri()">+ Nuovo cliente</button></div>
+    <div id="cl-su"><input id="cl-cerca" type="text" placeholder="cerca cliente" autocomplete="off" spellcheck="false"><span id="cl-rf-posto"></span><button type="button" id="nc-apri" onclick="ncApri()">+ Nuovo<span class="nc-lungo"> cliente</span></button></div>
     <div id="cl-filtri"></div>
     <div id="cl-testa"><button type="button" class="a" data-ord="az">cliente</button><span class="b">ultima seduta</span><span class="b">scheda</span><button type="button" class="c" data-ord="ultimo">ultimo</button></div>
     <div id="cl-lista"></div>
@@ -11106,17 +11106,20 @@ function clFiltri(tutti){
   if(!box) return;
   var presenti = {};
   tutti.forEach(function(c){ presenti[clProtoDi(c)] = true; });
-  var ordine = ['open','load','self','lift','move','grid','skip','pace','nuovo'].filter(function(p){ return presenti[p]; });
-  if(_clProto && !presenti[_clProto]) _clProto = '';
+  /* I FILTRI DEI PROTOCOLLI CI SONO SEMPRE TUTTI, anche quando un protocollo non ha ancora nessun cliente: Lift, Load, Self, Open, Move, Grid.
+     (Skip, Pace e "nuovi" compaiono solo se qualcuno c'è davvero.) Scelto un protocollo vuoto, l'elenco dice che non c'è nessuno. */
+  var ordine = ['lift','load','self','open','move','grid'].concat(['skip','pace','nuovo'].filter(function(p){ return presenti[p]; }));
   function t(attr, val, testo, sel){ return '<button type="button" class="cl-f' + (sel ? ' sel' : '') + '" ' + attr + '="' + val + '">' + testo + '</button>'; }
   /* ogni filtro è un gruppo che non si spezza: il suo nome resta attaccato ai suoi tasti quando la riga va a capo */
   var h = '<span class="cl-fg">' + t('data-proto', '', 'tutti', !_clProto)
-     + ordine.map(function(p){ return t('data-proto', p, p === 'nuovo' ? 'nuovi' : CL_NOME[p], _clProto === p); }).join('') + '</span>';
+     + ordine.map(function(p){ return '<button type="button" class="cl-f' + (_clProto === p ? ' sel' : '') + (presenti[p] ? '' : ' vuoto') + '" data-proto="' + p + '" style="--lc:' + (CL_COLORE[p] || '#b4c3d2') + '">' + (p === 'nuovo' ? 'nuovi' : CL_NOME[p]) + '</button>'; }).join('') + '</span>';
   var opz = [['', 'red flag'], ['si', 'con red flag'], ['no', 'senza red flag']];   /* la prima voce dice cos'è il menu: non serve un'etichetta accanto */
   (window.RF_DATA || []).forEach(function(f){ opz.push([f.id, f.name]); });
   opz.push(['__custom', 'Custom']);
-  h += '<span class="cl-fg cl-fg-rf"><select class="cl-f' + (_clRf ? ' sel' : '') + '" id="cl-f-rf">'
-     + opz.map(function(o){ return '<option value="' + o[0] + '"' + (o[0] === _clRf ? ' selected' : '') + '>' + clEsc(o[1]) + '</option>'; }).join('') + '</select></span>';
+  /* il menu delle red flag sta nella riga del cerca: così la riga sotto è tutta dei protocolli */
+  var posto = document.getElementById('cl-rf-posto');
+  if(posto) posto.innerHTML = '<select class="cl-f' + (_clRf ? ' sel' : '') + '" id="cl-f-rf">'
+     + opz.map(function(o){ return '<option value="' + o[0] + '"' + (o[0] === _clRf ? ' selected' : '') + '>' + clEsc(o[1]) + '</option>'; }).join('') + '</select>';
   box.innerHTML = h;
 }
 function clDisegna(){
@@ -11155,7 +11158,7 @@ function clDisegna(){
   if(!visti.length){
     var filtrato = !!(_clProto || _clRf);
     h = (q && !filtrato) ? '<div class="cl-vuoto">Nessun cliente trovato.</div><button type="button" class="cl-nuovo" data-nuovo="' + clEsc(inp.value.trim()) + '">+ aggiungi <b>' + clEsc(inp.value.trim()) + '</b> come nuovo cliente</button>'
-                         : '<div class="cl-vuoto">Nessun cliente' + (q || filtrato ? ' con questi filtri' : '') + '.</div>';
+                         : '<div class="cl-vuoto">Nessun cliente' + (_clProto && !q && !_clRf ? ' in ' + (CL_NOME[_clProto] || _clProto) : (q || filtrato ? ' con questi filtri' : '')) + '.</div>';
   }
   lista.innerHTML = h;
   clScheda();
@@ -11203,7 +11206,7 @@ window.addEventListener('load', function(){
       var e;
       if((e = ev.target.closest('[data-proto]'))){ _clProto = e.getAttribute('data-proto'); _clAperto = null; clDisegna(); lista.scrollTop = 0; }
     });
-    filtri.addEventListener('change', function(ev){
+    document.getElementById('cl-su').addEventListener('change', function(ev){
       if(ev.target && ev.target.id === 'cl-f-rf'){ _clRf = ev.target.value; _clAperto = null; clDisegna(); lista.scrollTop = 0; }
     });
   }
@@ -12274,12 +12277,22 @@ window.addEventListener('load', function(){
   /* ── A SINISTRA ── */
   #cl-su #cl-cerca{height:44px !important;padding:0 14px !important;font-size:15px !important;letter-spacing:1.5px !important;}
   /* i filtri: una riga sola. A sinistra i protocolli, a destra il menu delle red flag. Niente etichette: si capiscono da soli */
-  #cl-filtri{margin-top:10px !important;gap:8px 10px !important;flex-wrap:nowrap !important;}
-  #cl-filtri .cl-fg{gap:4px;}
-  #cl-filtri .cl-fg:first-child{flex:1 1 auto;min-width:0;flex-wrap:wrap;}
-  #cl-filtri .cl-fg-rf{flex:none;margin-left:auto;}
-  #cl-filtri .cl-f{padding:0 8px;letter-spacing:1px;}
-  #cl-filtri select.cl-f{max-width:124px;padding-right:22px;}
+  /* IN ALTO A SINISTRA, due righe:
+     1) cerca cliente · menu red flag · + nuovo cliente
+     2) i protocolli: sette tasti uguali larghi quanto l'elenco (tutti + i sei protocolli), ognuno con il filo del suo colore */
+  #cl-su{gap:6px !important;}
+  #cl-rf-posto{flex:none;display:flex;}
+  #cl-rf-posto select.cl-f{height:44px;width:104px;padding:0 20px 0 10px;letter-spacing:0.8px;font-size:9.5px;border-color:rgba(180,195,210,0.25);}
+  #cl-rf-posto select.cl-f.sel{border-color:rgba(229,100,100,0.8);color:#f0aaaa;}
+  #nc-apri{padding:0 12px !important;}
+  @media (max-width:1250px){ #nc-apri .nc-lungo{display:none;} }
+  #cl-filtri{margin-top:8px !important;display:block !important;}
+  #cl-filtri .cl-fg{display:grid;grid-template-columns:repeat(7, minmax(0,1fr));gap:4px;min-width:0;}
+  #cl-filtri .cl-f{height:30px;padding:0;letter-spacing:1px;font-size:10px;text-align:center;min-width:0;border-bottom:2px solid var(--lc, rgba(180,195,210,0.35));}
+  #cl-filtri .cl-f.sel{border-color:var(--lc, #E4B85A);color:var(--lc, #E4B85A);background:rgba(255,255,255,0.05);}
+  #cl-filtri .cl-f.vuoto:not(.sel){color:rgba(200,214,228,0.45);}
+  /* se compaiono anche Skip, Pace o "nuovi" i tasti vanno su due righe */
+  #cl-filtri .cl-fg:has(.cl-f:nth-child(8)){grid-template-columns:repeat(5, minmax(0,1fr));}
   /* le intestazioni: "cliente" e "ultimo" ordinano l'elenco, quella scelta ha la freccia */
   #cl-testa{margin:12px 0 6px !important;}
   #cl-testa button{background:none;border:0;padding:0;margin:0;cursor:pointer;font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit;}

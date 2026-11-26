@@ -11160,7 +11160,7 @@ window.addEventListener('load', function(){
     if((e = t.closest('[data-nuovo]'))){ var n = e.getAttribute('data-nuovo'); inp.value = ''; if(typeof csSearchAddNew === 'function') csSearchAddNew(n); clDisegna(); return; }
     if((e = t.closest('[data-cl]'))){ var id = e.getAttribute('data-cl'); _clAperto = (_clAperto === id) ? null : id; _clPtScelto = null; _pasApre = null; _pasVisto = null; clDisegna(); }
   });
-  lista.addEventListener('input', function(ev){ if(ev.target && ev.target.id === 'pas-nota' && _pasApre) _pasApre.nota = ev.target.value; });
+  lista.addEventListener('input', function(ev){ if(ev.target && ev.target.id === 'pas-nota' && _pasApre){ _pasApre.nota = ev.target.value; var m = lista.querySelector('[data-pas-manda]'); if(m) m.disabled = !pasPronto(_pasApre); } });
   /* si ridisegna quando arriva l'elenco dei clienti e ogni volta che si torna qui */
   if(typeof gridRifareRender === 'function'){
     var _g = gridRifareRender;
@@ -11182,8 +11182,9 @@ window.addEventListener('load', function(){
 </script>
 <script id="passaggi">
 /* ══ PASSAGGI DI PROTOCOLLO ══
-   Un cliente sta in UN protocollo alla volta. Cambiarlo è un atto, con scritto: da dove a dove, il motivo (da una lista chiusa),
-   una riga del trainer, chi l'ha chiesto, quando, e a che punto era il cliente.
+   Un cliente sta in UN protocollo alla volta. Cambiarlo è un atto, con scritto: da dove a dove, il motivo, chi l'ha chiesto, quando,
+   e a che punto era il cliente. Il motivo si sceglie da una lista: se è lì basta sceglierlo, senza scrivere niente.
+   Solo se nessuna voce va bene si sceglie "Nota", e allora la riga scritta è obbligatoria.
    - Di regola il cambio è una RICHIESTA: il cliente resta dov'è finché dall'Admin (dietro la sua password) non viene approvata o rifiutata.
    - Sono LIBERI, cioè avvengono subito ma lasciano comunque un avviso in Admin:
        · da Open con la progressione finita verso Self, Load o Lift (verso Move no: è una richiesta);
@@ -11207,7 +11208,10 @@ function pasLista(c){ return (c && c.state && Array.isArray(c.state.passaggi)) ?
 function pasFatti(c){ return pasLista(c).filter(function(p){ return (p.stato === 'approvato' || p.stato === 'libero') && p.fatto; }).sort(function(a, b){ return a.fatto - b.fatto; }); }
 function pasUltimo(c){ var f = pasFatti(c); return f.length ? f[f.length - 1] : null; }
 function pasInAttesa(c){ return pasLista(c).filter(function(p){ return p.stato === 'attesa'; })[0] || null; }
-function pasMotivo(id){ var m = PAS_MOTIVI.filter(function(x){ return x.id === id; })[0]; return m ? m.nome : ''; }
+function pasMotivo(id){ var m = PAS_MOTIVI.filter(function(x){ return x.id === id; })[0]; return m ? m.nome : (id === 'nota' ? 'Nota' : ''); }
+/* il motivo come si legge: la voce della lista, oppure la riga scritta */
+function pasMotivoDi(p){ return p.motivo === 'nota' ? (p.nota || 'Nota') : pasMotivo(p.motivo); }
+function pasPronto(q){ return !!(q && q.a && q.motivo && (q.motivo !== 'nota' || (q.nota || '').trim())); }
 function pasQuando(ts){ var d = new Date(ts); return d.getDate() + ' ' + CL_MESI[d.getMonth()] + ' ' + d.getFullYear(); }
 function pasClienti(){ return (typeof _csList !== 'undefined' && Array.isArray(_csList)) ? _csList.filter(function(c){ return c && c.id && c.state; }) : []; }
 function pasDaVedere(){ var n = 0; pasClienti().forEach(function(c){ pasLista(c).forEach(function(p){ if(p.stato === 'attesa' || (p.stato === 'libero' && !p.visto)) n++; }); }); return n; }
@@ -11251,14 +11255,14 @@ function pasEsegui(c, p){
   p.fatto = Date.now();
   if(c.state.demoProto) c.state.demoProto = p.a;
   if(!Array.isArray(c.state.journal)) c.state.journal = [];
-  c.state.journal.push({ts:new Date(p.fatto).toISOString(), kind:'protocol_change', proto:p.a, pt:p.pt, detail:CL_NOME[p.da] + ' → ' + CL_NOME[p.a] + ' · ' + pasMotivo(p.motivo)});
+  c.state.journal.push({ts:new Date(p.fatto).toISOString(), kind:'protocol_change', proto:p.a, pt:p.pt, detail:CL_NOME[p.da] + ' → ' + CL_NOME[p.a] + ' · ' + pasMotivoDi(p)});
 }
 /* il trainer manda la richiesta (o fa il cambio, se è libero) */
 function pasManda(c, pt){
   var da = csCurrentProto(c), q = _pasApre;
-  if(!c || !q || !q.a || !q.motivo || !pt || !da || pasInAttesa(c)) return;
+  if(!c || !pasPronto(q) || !pt || !da || pasInAttesa(c)) return;
   if(!Array.isArray(c.state.passaggi)) c.state.passaggi = [];
-  var p = {id:'p' + Date.now().toString(36), da:da, a:q.a, motivo:q.motivo, nota:(q.nota || '').trim(), pt:pt, ts:Date.now(), punto:pasPunto(c, da), controllo:pasControllo(c, da, q.motivo), stato:'attesa'};
+  var p = {id:'p' + Date.now().toString(36), da:da, a:q.a, motivo:q.motivo, nota:(q.motivo === 'nota' ? (q.nota || '').trim() : ''), pt:pt, ts:Date.now(), punto:pasPunto(c, da), controllo:pasControllo(c, da, q.motivo), stato:'attesa'};
   c.state.passaggi.push(p);
   if(pasLibero(c, da, q.a)){ p.stato = 'libero'; p.visto = false; pasEsegui(c, p); }
   _pasApre = null;
@@ -11275,7 +11279,7 @@ function pasDecidi(clientId, id, come){
     else {
       p.stato = 'rifiutato';
       if(!Array.isArray(c.state.journal)) c.state.journal = [];
-      c.state.journal.push({ts:new Date(p.deciso).toISOString(), kind:'protocol_change_refused', proto:p.da, pt:p.pt, detail:CL_NOME[p.da] + ' → ' + CL_NOME[p.a] + ' · ' + pasMotivo(p.motivo) + ' · rifiutato'});
+      c.state.journal.push({ts:new Date(p.deciso).toISOString(), kind:'protocol_change_refused', proto:p.da, pt:p.pt, detail:CL_NOME[p.da] + ' → ' + CL_NOME[p.a] + ' · ' + pasMotivoDi(p) + ' · rifiutato'});
     }
   }
   pasSalva(c); pasAdmin(); try{ clDisegna(); }catch(e){}
@@ -11283,11 +11287,11 @@ function pasDecidi(clientId, id, come){
 function pasRigaTesto(c, p, conNome){
   return (conNome ? '<b>' + clEsc(c.id) + '</b>' : '')
        + '<span><b>' + CL_NOME[p.da] + ' → ' + CL_NOME[p.a] + '</b></span>'
-       + '<span>' + clEsc(pasMotivo(p.motivo)) + '</span>'
+       + '<span>' + clEsc(pasMotivoDi(p)) + '</span>'
        + '<span class="pk">' + clEsc(p.pt || '') + ' · ' + pasQuando(p.ts) + '</span>'
        + (conNome && p.punto ? '<span class="pk">era: ' + clEsc(p.punto) + '</span>' : '')
        + (conNome && p.controllo ? '<span class="pas-esito">' + clEsc(p.controllo) + '</span>' : '')
-       + (p.nota ? '<span class="pas-nota">' + clEsc(p.nota) + '</span>' : '');
+       + (p.nota && p.motivo !== 'nota' ? '<span class="pas-nota">' + clEsc(p.nota) + '</span>' : '');
 }
 /* dentro la finestra del cliente, sotto la timeline */
 function pasNellaFinestra(c, proto){
@@ -11305,9 +11309,10 @@ function pasNellaFinestra(c, proto){
     h += '<div class="pas-box">'
        + '<div class="pas-r"><span class="pas-k">Adesso</span><span class="pas-punto">' + clEsc(pasPunto(c, proto)) + '</span></div>'
        + '<div class="pas-r"><span class="pas-k">Verso</span>' + PAS_PROTO.filter(function(p){ return p !== proto; }).map(function(p){ return '<button type="button" class="pas-c' + (q.a === p ? ' sel' : '') + '" data-pas-a="' + p + '" style="--lc:' + CL_COLORE[p] + '">' + CL_NOME[p] + '</button>'; }).join('') + '</div>'
-       + '<div class="pas-r"><span class="pas-k">Motivo</span>' + PAS_MOTIVI.map(function(m){ return '<button type="button" class="pas-c' + (q.motivo === m.id ? ' sel' : '') + '" data-pas-m="' + m.id + '">' + clEsc(m.nome) + '</button>'; }).join('') + (esito ? '<span class="pas-esito">' + clEsc(esito) + '</span>' : '') + '</div>'
-       + '<div class="pas-r"><span class="pas-k">Nota</span><input id="pas-nota" spellcheck="false" autocomplete="off" value="' + clEsc(q.nota || '').replace(/"/g, '&quot;') + '"></div>'
-       + '<div class="pas-r"><span class="pas-k"></span><button type="button" class="cl-entra" data-pas-manda="' + clEsc(c.id) + '"' + (q.a && q.motivo ? '' : ' disabled') + '>' + (lib ? 'Cambia' : 'Chiedi il cambio') + '</button>'
+       + '<div class="pas-r"><span class="pas-k">Motivo</span>' + PAS_MOTIVI.map(function(m){ return '<button type="button" class="pas-c' + (q.motivo === m.id ? ' sel' : '') + '" data-pas-m="' + m.id + '">' + clEsc(m.nome) + '</button>'; }).join('')
+         + '<button type="button" class="pas-c' + (q.motivo === 'nota' ? ' sel' : '') + '" data-pas-m="nota">Nota</button>' + (esito ? '<span class="pas-esito">' + clEsc(esito) + '</span>' : '') + '</div>'
+       + (q.motivo === 'nota' ? '<div class="pas-r"><span class="pas-k"></span><input id="pas-nota" spellcheck="false" autocomplete="off" value="' + clEsc(q.nota || '').replace(/"/g, '&quot;') + '"></div>' : '')
+       + '<div class="pas-r"><span class="pas-k"></span><button type="button" class="cl-entra" data-pas-manda="' + clEsc(c.id) + '"' + (pasPronto(q) ? '' : ' disabled') + '>' + (lib ? 'Cambia' : 'Chiedi il cambio') + '</button>'
        + (q.a ? '<span class="pas-esito">' + (lib ? 'questo cambio è libero: avviene subito, l’Admin viene avvisato' : 'il cliente resta in ' + CL_NOME[proto] + ' finché l’Admin non approva') + '</span>' : '') + '</div>'
        + '</div>';
   }
@@ -11321,7 +11326,7 @@ function pasClic(t){
   if((e = t.closest('[data-cambia]'))){ _pasApre = (_pasApre && _pasApre.id === _clAperto) ? null : {id:_clAperto, a:'', motivo:'', nota:''}; clDisegna(); return true; }
   if(!_pasApre) return false;
   if((e = t.closest('[data-pas-a]'))){ _pasApre.a = e.getAttribute('data-pas-a'); clDisegna(); return true; }
-  if((e = t.closest('[data-pas-m]'))){ _pasApre.motivo = e.getAttribute('data-pas-m'); clDisegna(); return true; }
+  if((e = t.closest('[data-pas-m]'))){ _pasApre.motivo = e.getAttribute('data-pas-m'); clDisegna(); if(_pasApre.motivo === 'nota'){ var i = document.getElementById('pas-nota'); if(i) i.focus(); } return true; }
   if((e = t.closest('[data-pas-manda]'))){ if(c) pasManda(c, clPt()); return true; }
   return false;
 }

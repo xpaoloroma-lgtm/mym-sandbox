@@ -12,7 +12,7 @@ body{margin:0;background:#0d0c0a;color:var(--txt);font-family:"Exo 2","Segoe UI"
 header{flex:none;height:56px;display:flex;align-items:center;gap:10px;padding:0 24px;border-bottom:1px solid rgba(222,190,120,.22);font-size:12px;letter-spacing:3px;text-transform:uppercase;}
 header .g{color:var(--gold-txt);} header .m{color:var(--move);} header .s{color:var(--lo);} header .d{margin-left:auto;color:var(--lo);letter-spacing:2px;}
 main{flex:1;min-height:0;display:grid;grid-template-columns:232px minmax(0,1.12fr) minmax(0,1fr);gap:12px;padding:12px;}
-.col{min-height:0;display:flex;flex-direction:column;gap:12px;}
+.col{min-height:0;min-width:0;display:flex;flex-direction:column;gap:12px;}
 .et{font-size:9px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--lo);}
 
 /* ── I BLOCCHI ── Il blocco è LO STESSO dell'editor (move.html, ".bk"): riquadro con la barra a sinistra, il nome, e tre righe
@@ -30,9 +30,9 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:232px minmax(0,1.12f
 .blocchi .bk-r i{width:84px;font-size:11px;letter-spacing:2px;}
 .blocchi .bk.fatto{border-color:rgba(120,205,155,.5);border-left-color:rgba(120,205,155,.9);}
 .blocchi .bk.fatto .bk-r{color:rgba(250,246,236,.55);}
-.bk-n .ok{margin-left:auto;height:28px;padding:0 14px;border:1px solid rgba(212,168,74,.5);background:none;color:var(--gold-txt);font:600 10px "Exo 2",sans-serif;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;}
+.bk-n .ok{margin-left:auto;flex:none;white-space:nowrap;height:28px;padding:0 14px;border:1px solid rgba(212,168,74,.5);background:none;color:var(--gold-txt);font:600 10px "Exo 2",sans-serif;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;}
 .bk.fatto .bk-n .ok{border-color:rgba(120,205,155,.45);color:var(--move);}
-.bk-n .via{width:28px;height:28px;border:1px solid var(--line);background:none;color:var(--lo);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
+.bk-n .via{flex:none;width:28px;height:28px;border:1px solid var(--line);background:none;color:var(--lo);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
 .bk-n .via:hover{border-color:rgba(212,168,74,.6);color:var(--gold-txt);}
 .bk-n .via svg{width:12px;height:12px;display:block;}
 /* ── LA COLONNA DEI BLOCCHI DA PRENDERE: gli stessi blocchi dell'editor, alla stessa misura. Si trascinano nella seduta (o un clic li mette in fondo). ── */
@@ -54,7 +54,12 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:232px minmax(0,1.12f
 /* ── I POSTI DELLA SEDUTA e il trascinamento, come in Self ── */
 .blocchi{overflow:visible;}
 .posto{flex:1 1 0;min-height:150px;display:flex;position:relative;}
-.posto > .bk{flex:1;min-height:0;cursor:grab;}
+.posto{min-width:0;}
+.posto > .bk{flex:1;min-height:0;min-width:0;cursor:grab;}
+/* nella seduta il nome dell'esercizio si legge TUTTO: se è lungo va a capo dentro il blocco, non lo allarga e non si taglia */
+.blocchi .bk-r{display:flex;align-items:baseline;white-space:normal;overflow:visible;line-height:1.25;padding:5px 0;}
+.blocchi .bk-r i{flex:none;}
+.blocchi .bk-n > span{min-width:0;}
 .posto.vuoto{align-items:center;gap:16px;padding-left:20px;}
 .posto.vuoto .pt{position:absolute;left:0;top:3px;bottom:3px;width:1px;background:repeating-linear-gradient(180deg,rgba(180,195,210,.34) 0 2px,transparent 2px 5px);}
 .posto.vuoto .pn{font-size:38px;font-weight:200;line-height:1;color:rgba(222,190,120,.32);}

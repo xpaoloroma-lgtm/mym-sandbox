@@ -10585,7 +10585,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
     <button type="button" class="mp-r" style="--c:#d4a84a" data-fp="open"><i></i><b>Open</b><span><em id="mp-n-open"></em>clienti</span></button>
     <button type="button" class="mp-r" style="--c:#78cd9b" data-fp="move"><i></i><b>Move</b><span><em id="mp-n-move"></em>clienti</span></button>
     <button type="button" class="mp-r mp-x mp-grid" onclick="clSoloGrid(event)"><i></i><b>Grid</b><span><em id="mp-n-grid"></em>clienti</span></button>
-    <!-- SKIP GRUPPO È SPENTO: va rifatto da capo. Il tasto resta qui per non dimenticarlo, ma non si apre; tutto il suo codice è rimasto al suo posto. -->
+    <!-- SKIP GRUPPO È TOLTO DALLA PAGINA: va rifatto da capo. Il tasto resta qui nel codice (nascosto) per non dimenticarlo, e tutto il resto del suo codice è rimasto al suo posto. -->
     <button type="button" class="mp-r mp-x mp-skip" disabled><i></i><b>Skip gruppo</b><span></span></button>
   </div>
   <div class="proto-groups">
@@ -12085,7 +12085,7 @@ window.addEventListener('load', function(){
      A DESTRA, tutto il resto: DOVE. La griglia (larga, con un'altezza sua), e sotto la scheda del cliente aperto;
        La griglia, subito sotto Grid e Skip gruppo affiancati (sono parte della griglia), poi la scheda del cliente aperto, poi il grafico.
      A schermo intero la colonna di destra si divide in due: griglia con Grid e Skip a sinistra, scheda del cliente e grafico a destra.
-     Gli assi della griglia rubano meno: 92 punti a sinistra (erano 124) e 58 sotto (erano 78). */
+     Gli assi della griglia: 104 punti a sinistra (erano 124) e 76 sotto (erano 78), con le scritte più grandi e leggibili. */
   body #proto-select{grid-template-columns:clamp(340px, 36vw, 460px) minmax(0,1fr) !important;gap:0 28px !important;padding:20px 28px 0 !important;}
   #pr-zona{gap:14px !important;align-content:start;}
   #pr-zona > #home-riga{display:contents !important;}
@@ -12094,12 +12094,24 @@ window.addEventListener('load', function(){
   #home-lato{order:2;margin:0 !important;}
   #cl-scheda{order:3;display:none;}
   #pr-zona > #proto-chart-wrap{order:4 !important;margin:0 !important;}
-  #mappa .mp-g{left:92px;right:14px;bottom:58px;}
-  #mappa .mp-ay{left:92px;bottom:58px;} #mappa .mp-ax{left:92px;bottom:58px;}
-  #mappa .mp-ys{width:84px;bottom:58px;} #mappa .mp-ey{width:84px;}
-  #mappa .mp-xs{left:92px;right:14px;height:52px;}
-  #mappa .mp-t[style*="left:136px"]{left:104px !important;}
-  #mappa .mp-t[style*="bottom:86px"]{bottom:64px !important;}
+  #mappa .mp-g{left:104px;right:14px;bottom:76px;}
+  #mappa .mp-ay{left:104px;bottom:76px;} #mappa .mp-ax{left:104px;bottom:76px;}
+  #mappa .mp-ys{width:96px;bottom:76px;} #mappa .mp-ey{width:96px;}
+  #mappa .mp-xs{left:104px;right:14px;height:68px;}
+  #mappa .mp-t[style*="left:136px"]{left:116px !important;}
+  #mappa .mp-t[style*="bottom:86px"]{bottom:82px !important;}
+  /* LE SCRITTE DEGLI ASSI si devono leggere: non più tutte maiuscole e strette, ma scritte normali, più grandi e con più aria tra le righe */
+  #mappa .mp-e{font-size:11.5px !important;font-weight:400 !important;letter-spacing:0.2px !important;line-height:1.32 !important;text-transform:none !important;color:#f0ebdc !important;}
+  #mappa .mp-ex{font-size:11.5px !important;letter-spacing:0.2px !important;}
+  @media (min-width:1500px){ #mappa .mp-e, #mappa .mp-ex{font-size:13px !important;} }
+  /* a finestra stretta le tre frasi sotto vanno su più righe: gli si dà il posto che serve */
+  @media (max-width:900px){
+    #mappa .mp-g, #mappa .mp-ay, #mappa .mp-ax, #mappa .mp-ys{bottom:112px;}
+    #mappa .mp-xs{height:104px;}
+    #mappa .mp-t[style*="bottom:86px"]{bottom:118px !important;}
+    #mappa{height:clamp(380px, 48vh, 600px);}
+    #mappa .mp-e, #mappa .mp-ex{font-size:11px !important;}
+  }
   @media (min-width:1500px){
     #pr-zona{display:grid !important;grid-template-columns:minmax(0,1.3fr) minmax(360px,1fr);grid-auto-rows:min-content;gap:14px 28px !important;}
     #mappa{grid-column:1;grid-row:1;height:clamp(420px, 66vh, 720px);}
@@ -12112,16 +12124,16 @@ window.addEventListener('load', function(){
   .cs-testa{display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;}
   .cs-nome{font-size:19px;font-weight:400;letter-spacing:1px;color:#f0ebdc;}
   #cl-scheda .cl-giu{border-top:0;padding:0;margin-top:12px;}
-  /* Grid e Skip gruppo: due riquadri uguali, affiancati */
-  #mp-leg{display:grid !important;grid-template-columns:1fr 1fr;gap:8px;}
+  /* sotto la griglia: il riquadro di Grid */
+  #mp-leg{display:grid !important;grid-template-columns:1fr;gap:8px;}
   #mp-leg .mp-r.mp-x{height:46px;padding:0 14px 0 0;border:1px solid rgba(180,195,210,0.18) !important;border-radius:4px;}
   #mp-leg .mp-r.mp-x > i{height:100%;margin-right:2px;}
   #mp-leg .mp-r.mp-grid{cursor:pointer !important;}
   #mp-leg .mp-r.mp-grid:hover{border-color:rgba(200,214,228,0.55) !important;}
   #mp-leg .mp-r.mp-grid.scelto{border-color:rgba(228,184,90,0.9) !important;background:rgba(212,168,74,0.10);}
   #mp-leg .mp-r.mp-grid.scelto > b{color:#E4B85A;}
-  #mp-leg .mp-r.mp-skip{cursor:default;opacity:0.45;}
-  #mp-leg .mp-r.mp-skip > span::after{content:'spento';}
+  /* Skip gruppo non si vede più (va rifatto da capo): il tasto e tutto il suo codice restano nel file, solo nascosti */
+  #mp-leg .mp-r.mp-skip{display:none !important;}
   #mp-leg .mp-r.mp-x.io{border-color:#f0ebdc !important;background:rgba(255,255,255,.06);}
   #mp-leg .mp-r.mp-x.verso{border:1px dashed #E4B85A !important;}
   /* due evidenze: LEGGERA col mouse sopra un cliente (il resto si abbassa appena, la zona prende solo il bordo),

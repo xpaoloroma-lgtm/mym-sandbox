@@ -10584,8 +10584,9 @@ tr.ore-scala td{border-top:1px solid var(--border);}
     <button type="button" class="mp-r" style="--c:#e08a6a" data-fp="self"><i></i><b>Self</b><span><em id="mp-n-self"></em>clienti</span></button>
     <button type="button" class="mp-r" style="--c:#d4a84a" data-fp="open"><i></i><b>Open</b><span><em id="mp-n-open"></em>clienti</span></button>
     <button type="button" class="mp-r" style="--c:#78cd9b" data-fp="move"><i></i><b>Move</b><span><em id="mp-n-move"></em>clienti</span></button>
-    <button type="button" class="mp-r mp-x mp-grid" data-fp="grid"><i></i><b>Grid</b><span><em id="mp-n-grid"></em>clienti</span></button>
-    <button type="button" class="mp-r mp-x mp-skip" onclick="protoSelect('skip')"><i></i><b>Skip gruppo</b><span></span></button>
+    <button type="button" class="mp-r mp-x mp-grid" onclick="clSoloGrid(event)"><i></i><b>Grid</b><span><em id="mp-n-grid"></em>clienti</span></button>
+    <!-- SKIP GRUPPO È SPENTO: va rifatto da capo. Il tasto resta qui per non dimenticarlo, ma non si apre; tutto il suo codice è rimasto al suo posto. -->
+    <button type="button" class="mp-r mp-x mp-skip" disabled><i></i><b>Skip gruppo</b><span></span></button>
   </div>
   <div class="proto-groups">
     <!-- ── SANDBOX ─────────────────────────────────────────────
@@ -11073,7 +11074,12 @@ function clRfDi(c){ return (typeof rfActiveFlagsForClient === 'function') ? rfAc
 /* LA GRIGLIA DEI PROTOCOLLI È SOLO UNA SPIEGAZIONE: non fa entrare e i suoi nomi non si cliccano (resta l'effetto del mouse sopra).
    Si entra sempre e solo dalla riga del cliente, nel protocollo in cui è. Per vedere i clienti di un protocollo c'è il filtro dell'elenco.
    (Skip gruppo resta a parte: è una seduta di gruppo, non ha un cliente da scegliere.) */
+/* GRID non sta sulla griglia (è scrittura libera, per i casi particolari) ma è un percorso come gli altri: il cliente ci sta dentro.
+   Il suo riquadro mostra nell'elenco i clienti che sono in Grid; da lì si entra come sempre, dalla riga del cliente.
+   Un cliente che non è in Grid ci arriva con "Cambia protocollo". */
+function clSoloGrid(ev){ if(ev) ev.stopPropagation(); _clProto = (_clProto === 'grid') ? '' : 'grid'; _clAperto = null; _clPtScelto = null; clDisegna(); var l = document.getElementById('cl-lista'); if(l) l.scrollTop = 0; }
 function clFiltri(tutti){
+  var gr = document.querySelector('#mp-leg .mp-grid'); if(gr) gr.classList.toggle('scelto', _clProto === 'grid');
   var box = document.getElementById('cl-filtri');
   if(typeof window.mpConta === 'function') window.mpConta();
   if(!box) return;
@@ -12110,7 +12116,12 @@ window.addEventListener('load', function(){
   #mp-leg{display:grid !important;grid-template-columns:1fr 1fr;gap:8px;}
   #mp-leg .mp-r.mp-x{height:46px;padding:0 14px 0 0;border:1px solid rgba(180,195,210,0.18) !important;border-radius:4px;}
   #mp-leg .mp-r.mp-x > i{height:100%;margin-right:2px;}
-  #mp-leg .mp-r.mp-skip{cursor:pointer;}
+  #mp-leg .mp-r.mp-grid{cursor:pointer !important;}
+  #mp-leg .mp-r.mp-grid:hover{border-color:rgba(200,214,228,0.55) !important;}
+  #mp-leg .mp-r.mp-grid.scelto{border-color:rgba(228,184,90,0.9) !important;background:rgba(212,168,74,0.10);}
+  #mp-leg .mp-r.mp-grid.scelto > b{color:#E4B85A;}
+  #mp-leg .mp-r.mp-skip{cursor:default;opacity:0.45;}
+  #mp-leg .mp-r.mp-skip > span::after{content:'spento';}
   #mp-leg .mp-r.mp-x.io{border-color:#f0ebdc !important;background:rgba(255,255,255,.06);}
   #mp-leg .mp-r.mp-x.verso{border:1px dashed #E4B85A !important;}
   /* due evidenze: LEGGERA col mouse sopra un cliente (il resto si abbassa appena, la zona prende solo il bordo),
@@ -19962,6 +19973,7 @@ function gridRifareEnterClient(clientId){
 }
 
 function protoSelect(proto){
+  if(proto === 'skip') return;   /* Skip gruppo è spento (va rifatto): non si apre da nessuna parte. Il codice resta. */
   /* Skip Gruppo è gated dietro password admin. Se non già autorizzato in
      questa selezione, blocchiamo qui e apriamo la modale password.
      L'intent applicato dopo password ok ri-richiama protoSelect('skip')

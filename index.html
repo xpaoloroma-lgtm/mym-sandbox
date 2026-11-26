@@ -10903,7 +10903,7 @@ function clRiga(c){
      usa già per dire se un cliente è attivo. È una scelta, non una misura. */
   var fermo = n !== null && n > 30, aperta = (_clAperto === c.id);
   var att = (typeof pasInAttesa === 'function') ? pasInAttesa(c) : null;
-  return '<div class="cl-r' + (fermo ? ' fermo' : '') + (aperta ? ' aperta' : '') + '" data-clp="' + (proto || '') + '" data-clv="' + (att ? att.a : '') + '" style="--pc:' + pc + '">'
+  return '<div class="cl-r' + (fermo ? ' fermo' : '') + (aperta ? ' aperta' : '') + '" data-cl-id="' + clEsc(c.id) + '" data-clp="' + (proto || '') + '" data-clv="' + (att ? att.a : '') + '" style="--pc:' + pc + '">'
        + '<button type="button" class="cl-capo" data-cl="' + clEsc(c.id) + '">'
        +   '<div class="cl-chi"><div class="cl-nome">' + clEsc(c.id) + (c.state && c.state.nick ? '<span class="cl-nick">' + clEsc(c.state.nick) + '</span>' : '') + '</div><div class="cl-sotto"><span class="cl-proto">' + (proto ? CL_NOME[proto] : 'nuovo') + '</span>' + (att ? '<span class="cl-att" style="--vc:' + CL_COLORE[att.a] + '" title="Cambio di protocollo in attesa dell\u2019Admin">\u2192 ' + CL_NOME[att.a] + '</span>' : '') + chips + '</div></div>'
        +   '<div class="cl-chiera">' + (chi ? '<b>' + clEsc(chi) + '</b>' : '') + '</div>'
@@ -11144,7 +11144,7 @@ function clScheda(){
   box.className = 'si'; box.style.setProperty('--pc', pc);
   box.innerHTML = '<div class="cs-testa"><span class="cs-nome">' + clEsc(c.id) + '</span><span class="cl-proto">' + (proto ? CL_NOME[proto] : 'nuovo') + '</span>'
                 + rf.map(function(f){ return '<span class="cl-rf">' + clEsc(f.name) + '</span>'; }).join('')
-                + '<button type="button" class="cs-chiudi" data-cl="' + clEsc(c.id) + '" aria-label="Chiudi">\u00d7</button></div>'
+                + '</div>'
                 + clGiu(c, proto);
 }
 window.addEventListener('load', function(){
@@ -11185,8 +11185,21 @@ window.addEventListener('load', function(){
   }
   lista.addEventListener('click', clClic);
   scheda.addEventListener('click', clClic);
+  /* LA SCHEDA SI CHIUDE cliccando in qualunque altro punto della pagina: fuori dalla scheda stessa e fuori dalle righe dei clienti
+     (un clic su un altro cliente apre lui, un clic sullo stesso lo richiude). */
+  ps.addEventListener('click', function(ev){
+    if(!_clAperto) return;
+    var t = ev.target;
+    if(t.closest('#cl-scheda') || t.closest('.cl-capo') || !document.documentElement.contains(t)) return;
+    _clAperto = null; _clPtScelto = null; _pasApre = null; _pasVisto = null; clDisegna();
+  });
   /* il mouse sopra un cliente accende la sua zona sulla griglia; uscendo torna quella del cliente aperto */
-  lista.addEventListener('mouseover', function(ev){ var r = ev.target.closest && ev.target.closest('.cl-r'); if(r && typeof window.mpMostra === 'function') window.mpMostra(r.getAttribute('data-clp'), r.getAttribute('data-clv')); });
+  lista.addEventListener('mouseover', function(ev){
+    if(typeof window.mpMostra !== 'function') return;
+    var r = ev.target.closest && ev.target.closest('.cl-r');
+    /* sulla riga del cliente già scelto resta l'evidenza piena; nello spazio tra due righe si torna a quella */
+    if(r && r.getAttribute('data-cl-id') !== _clAperto) window.mpMostra(r.getAttribute('data-clp'), r.getAttribute('data-clv')); else window.mpMostra('', '');
+  });
   lista.addEventListener('mouseleave', function(){ if(typeof window.mpMostra === 'function') window.mpMostra('', ''); });
   scheda.addEventListener('input', function(ev){ if(ev.target && ev.target.id === 'pas-nota' && _pasApre){ _pasApre.nota = ev.target.value; var m = scheda.querySelector('[data-pas-manda]'); if(m) m.disabled = !pasPronto(_pasApre); } });
   /* si ridisegna quando arriva l'elenco dei clienti e ogni volta che si torna qui */
@@ -12089,8 +12102,6 @@ window.addEventListener('load', function(){
   #cl-scheda.si{display:block;box-sizing:border-box;border:1px solid rgba(212,168,74,0.55);border-left:3px solid var(--pc);border-radius:0 3px 3px 0;background:rgba(212,168,74,0.04);padding:14px 18px 16px;font-family:var(--font);}
   .cs-testa{display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;}
   .cs-nome{font-size:19px;font-weight:400;letter-spacing:1px;color:#f0ebdc;}
-  .cs-chiudi{margin-left:auto;width:28px;height:28px;padding:0;background:none;border:1px solid rgba(180,195,210,0.25);border-radius:2px;cursor:pointer;font-size:17px;line-height:1;color:rgba(215,225,235,0.85);}
-  .cs-chiudi:hover{border-color:rgba(215,225,235,0.7);}
   #cl-scheda .cl-giu{border-top:0;padding:0;margin-top:12px;}
   /* Grid e Skip gruppo: due riquadri uguali, affiancati */
   #mp-leg{display:grid !important;grid-template-columns:1fr 1fr;gap:8px;}
@@ -12099,6 +12110,14 @@ window.addEventListener('load', function(){
   #mp-leg .mp-r.mp-skip{cursor:pointer;}
   #mp-leg .mp-r.mp-x.io{border-color:#f0ebdc !important;background:rgba(255,255,255,.06);}
   #mp-leg .mp-r.mp-x.verso{border:1px dashed #E4B85A !important;}
+  /* due evidenze: LEGGERA col mouse sopra un cliente (il resto si abbassa appena, la zona prende solo il bordo),
+     PIENA con il cliente scelto (il resto si spegne, la zona si colora) */
+  #mappa.foco.lieve .mp-k{opacity:0.62;}
+  #mappa.foco.lieve .mp-k.dentro{opacity:1;background:none;border-color:color-mix(in srgb, var(--fc) 70%, transparent);}
+  #mappa.foco.lieve .mp-k.dentro .mp-p:not(.io){opacity:0.6;}
+  #mappa.foco.lieve .mp-k.dentro .mp-s i:not(.io){opacity:0.5;}
+  #mappa.foco.lieve .mp-k.dentro .mp-p.io{color:#f0ebdc;}
+  #mappa.foco.lieve .mp-k.verso{border-style:dashed !important;}
   /* la zona dove un cliente chiede di andare (cambio in attesa): tratteggiata, e non si spegne */
   #mappa .mp-k.verso{opacity:1 !important;border:1px dashed #E4B85A !important;}
   #proto-chart-title{font-size:9px;letter-spacing:3px;color:rgba(190,204,218,0.5);}
@@ -12737,7 +12756,8 @@ window.addEventListener('load', function(){
       if(nome) [].forEach.call(leg.querySelectorAll('.mp-r'), function(x){ if(((x.querySelector('b') || {}).textContent || '') === nome) r = x; });
       return r;
     }
-    function mostra(proto, verso){
+    function mostra(proto, verso, lieve){
+      mappa.classList.toggle('lieve', !!lieve && !!proto);   /* col mouse sopra l'evidenza è leggera; con il cliente scelto è piena */
       accendi(proto ? rigaDi(proto) : null);
       [].forEach.call(mappa.querySelectorAll('.verso'), function(e){ e.classList.remove('verso'); });
       [].forEach.call(leg.querySelectorAll('.verso'), function(e){ e.classList.remove('verso'); });
@@ -12748,9 +12768,9 @@ window.addEventListener('load', function(){
       });
       var rv = rigaDi(verso); if(rv && rv.classList.contains('mp-x')) rv.classList.add('verso');
     }
-    window.mpMostra = function(proto, verso){ mostra(proto || fisso.p, proto ? (verso || '') : fisso.v); };
-    window.mpFissa = function(proto, verso){ fisso = {p:proto || '', v:verso || ''}; mostra(fisso.p, fisso.v); };
-    function torna(){ mostra(fisso.p, fisso.v); }
+    window.mpMostra = function(proto, verso){ if(proto) mostra(proto, verso || '', true); else torna(); };
+    window.mpFissa = function(proto, verso){ fisso = {p:proto || '', v:verso || ''}; mostra(fisso.p, fisso.v, false); };
+    function torna(){ mostra(fisso.p, fisso.v, false); }
     leg.addEventListener('mousemove', function(e){
       var trovata = null;
       [].forEach.call(leg.querySelectorAll('.mp-r'), function(r){
@@ -12758,7 +12778,7 @@ window.addEventListener('load', function(){
         if(r.classList.contains('mp-x')) return;
         if(e.clientY >= q.top && e.clientY < q.bottom && e.clientX >= q.left && e.clientX <= q.right) trovata = r;
       });
-      if(trovata) accendi(trovata); else torna();
+      if(trovata){ mappa.classList.remove('lieve'); accendi(trovata); } else torna();
     });
     leg.addEventListener('mouseleave', torna);
     /* lo stesso effetto dalla griglia: il mouse sopra il nome di un protocollo
@@ -12772,7 +12792,7 @@ window.addEventListener('load', function(){
       });
       var riga = null;
       if(nome) [].forEach.call(leg.querySelectorAll('.mp-r'), function(r){ if(!r.classList.contains('mp-x') && ((r.querySelector('b') || {}).textContent || '') === nome) riga = r; });
-      if(riga) accendi(riga); else torna();
+      if(riga){ mappa.classList.remove('lieve'); accendi(riga); } else torna();
     });
     mappa.addEventListener('mouseleave', torna);
   })();

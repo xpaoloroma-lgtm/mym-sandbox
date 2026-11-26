@@ -11188,7 +11188,8 @@ window.addEventListener('load', function(){
    - Di regola il cambio è una RICHIESTA: il cliente resta dov'è finché dall'Admin (dietro la sua password) non viene approvata o rifiutata.
    - Sono LIBERI, cioè avvengono subito ma lasciano comunque un avviso in Admin:
        · da Open con la progressione finita verso Self, Load o Lift (verso Move no: è una richiesta);
-       · da Move verso Open.
+       · da Move verso Open;
+       · da Grid verso qualunque protocollo. Verso Grid invece è sempre una richiesta.
    - Finché c'è una richiesta o un avviso non visto, il tasto Admin nella barra lampeggia.
    Tutto sta nella scheda del cliente (state.passaggi), quindi viaggia con lei sul database. */
 var PAS_MOTIVI = [
@@ -11199,7 +11200,7 @@ var PAS_MOTIVI = [
   {id:'rientro',      nome:'Rientro dopo uno stop lungo'},
   {id:'frequenza',    nome:'Cambia quante volte viene a settimana'}
 ];
-var PAS_PROTO = ['lift','load','self','open','move'];
+var PAS_PROTO = ['lift','load','self','open','move','grid'];
 var PAS_RF_GIORNI = 30;   /* "red flag nuova" = accesa negli ultimi 30 giorni: è una scelta, non una misura */
 var _pasApre = null, _pasVisto = null;
 
@@ -11237,6 +11238,7 @@ function pasRfNuova(c){
 function pasLibero(c, da, a){
   if(da === 'open' && pasOpenFinita(c) && (a === 'self' || a === 'load' || a === 'lift')) return true;
   if(da === 'move' && a === 'open') return true;
+  if(da === 'grid') return true;      /* da Grid si esce sempre, verso qualunque protocollo (anche Move). ENTRARE in Grid invece è sempre una richiesta */
   return false;
 }
 /* quello che la Sandbox sa da sola sul motivo scelto: '' = non lo può controllare */

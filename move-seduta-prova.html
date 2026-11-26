@@ -374,6 +374,8 @@ var RF = { ipertensione:{attivo:true, note:'ramipril 5 mg'}, osteoporosi:{attivo
    il nome e le red flag sono i suoi (state.redFlags), non l'esempio. Aperta da sola, o dalla mappa senza cliente, resta il cliente di esempio. */
 var SB = null; try{ if(window.parent && window.parent !== window && typeof window.parent.rfChiedi === 'function') SB = window.parent; }catch(x){ SB = null; }
 var CLIENTE = null;
+/* se la Sandbox riapre questa stessa pagina con un altro cliente cambia solo la parte dopo # e la pagina non ripartirebbe: la si fa ripartire */
+window.addEventListener('hashchange', function(){ location.reload(); });
 (function(){
   /* il cliente arriva nell'indirizzo (#c=nome). Si tiene a mente per questa scheda del browser, così andando nell'editor e tornando la seduta è ancora la sua.
      '#c=' vuoto vuol dire "nessun cliente" (Move aperto dalla mappa) e cancella quello di prima. */

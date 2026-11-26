@@ -11059,6 +11059,8 @@ function clEntra(clientId){
   if(!pt || !c) return;
   if(c.state && !csCurrentProto(c) && typeof pasInAttesa === 'function' && pasInAttesa(c)) return;   /* nuovo, in attesa dell'approvazione: non ha ancora un protocollo */
   var proto = (c.state && csCurrentProto(c)) || 'open';
+  if(proto === 'lift') return;
+  if(typeof pasEntrata === 'function') pasEntrata(c);   /* richiesta di cambio in attesa: l'entrata si conta, l'Admin la vede */
   if(proto === 'move'){ _currentPT = pt; _clAperto = null; window._navCli = clientId; moveSedutaApri(clientId); return; }
   /* Self e Load per adesso sono prototipi: si aprono quelli (non salvano). Lift non ha ancora una pagina. */
   if(proto === 'self' || proto === 'load'){ _currentPT = pt; _clAperto = null; window._navCli = clientId; prototipoOpen(proto + '.html', CL_NOME[proto]); return; }
@@ -11291,6 +11293,33 @@ function pasLista(c){ return (c && c.state && Array.isArray(c.state.passaggi)) ?
 function pasFatti(c){ return pasLista(c).filter(function(p){ return (p.stato === 'approvato' || p.stato === 'libero') && p.fatto; }).sort(function(a, b){ return a.fatto - b.fatto; }); }
 function pasUltimo(c){ var f = pasFatti(c); return f.length ? f[f.length - 1] : null; }
 function pasInAttesa(c){ return pasLista(c).filter(function(p){ return p.stato === 'attesa'; })[0] || null; }
+/* LA RICHIESTA NON BLOCCA LA SEDUTA: finché l'Admin non decide il cliente resta dov'è e il trainer entra e lavora.
+   Ma l'attesa lascia traccia: ogni giorno in cui un trainer entra nel cliente con la richiesta ancora aperta viene segnato sulla richiesta,
+   e l'Admin lo legge accanto ("entrato 2 volte"). Si contano i giorni di entrata, non le sedute: Self, Load e Move non salvano ancora la seduta. */
+function pasEntrata(c){
+  var p = pasInAttesa(c); if(!p) return;
+  var d = new Date(), g = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+  if(!Array.isArray(p.entrate)) p.entrate = [];
+  if(p.entrate.indexOf(g) !== -1) return;
+  p.entrate.push(g); pasSalva(c);
+}
+function pasEntrateTesto(p){ var n = (p.entrate || []).length; return n ? 'entrato ' + (n === 1 ? '1 volta' : n + ' volte') + ' da quando aspetta' : ''; }
+/* OPEN, PROGRESSIONE FINITA: nella schermata "Progressione completata" c'è anche il cambio di protocollo.
+   Non è obbligato: si può ricominciare con una nuova progressione. Il tasto porta alla scheda del cliente con il riquadro del cambio già aperto e il motivo già messo. */
+function pasFineOpen(){
+  var box = document.getElementById('complete-cambio'); if(!box) return;
+  var c = (typeof _csId !== 'undefined' && _csId) ? pasClienti().filter(function(z){ return z.id === _csId; })[0] : null, p = c ? pasInAttesa(c) : null;
+  box.innerHTML = p ? '<div class="cc-att">Cambio chiesto: <b>' + pasNome(p.da) + ' → ' + CL_NOME[p.a] + '</b> · in attesa</div>'
+                    : '<button type="button" class="nuova-prog-btn" onclick="pasDaFineOpen()">Cambia protocollo</button>';
+}
+function pasDaFineOpen(){
+  var id = _csId, pt = _currentPT; if(!id) return;
+  csOpen();
+  _clAperto = id; if(pt) _clPtScelto = {id:id, pt:pt};
+  _pasApre = {id:id, a:'', motivo:'finita', nota:''};
+  clDisegna();
+  var bx = document.querySelector('#cl-scheda .pas-box'); if(bx && bx.scrollIntoView) bx.scrollIntoView({block:'nearest'});
+}
 function pasMotivo(id){ var m = PAS_MOTIVI.filter(function(x){ return x.id === id; })[0]; return m ? m.nome : (id === 'nota' ? 'Nota' : ''); }
 /* il motivo come si legge: la voce della lista, oppure la riga scritta */
 function pasMotivoDi(p){ return p.motivo === 'nota' ? (p.nota || 'Nota') : pasMotivo(p.motivo); }
@@ -11432,6 +11461,7 @@ function pasRigaTesto(c, p, conNome){
        + '<span class="pk">' + clEsc(p.pt || '') + ' · ' + pasQuando(p.ts) + '</span>'
        + (conNome && p.punto ? '<span class="pk">era: ' + clEsc(p.punto) + '</span>' : '')
        + (conNome && p.controllo ? '<span class="pas-esito">' + clEsc(p.controllo) + '</span>' : '')
+       + (conNome && p.stato === 'attesa' && pasEntrateTesto(p) ? '<span class="pas-entr">' + pasEntrateTesto(p) + '</span>' : '')
        + (p.nota && p.motivo !== 'nota' ? '<span class="pas-nota">' + clEsc(p.nota) + '</span>' : '');
 }
 /* LA STORIA DEI PASSAGGI di un cliente, a colpo d'occhio: una riga per passaggio, il più recente in alto.
@@ -12533,6 +12563,11 @@ header > #breadcrumb, header > .bc{margin-right:auto!important;}
 }
 .pas-riga{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;margin-top:10px;padding:9px 12px;border:1px solid rgba(180,195,210,.18);border-radius:2px;font-size:12.5px;color:rgba(225,232,240,.92);}
 .pas-riga.attesa{border-color:rgba(228,184,90,.6);}
+.pas-riga .pas-entr{font-size:11px;font-weight:600;color:#e4b85a;}
+.complete-tasti{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:12px;margin-top:22px;}
+.complete-tasti .nuova-prog-btn{margin-top:0;min-width:230px;}
+#complete-cambio{display:contents;}
+.complete-tasti .cc-att{font-size:13px;color:rgba(225,232,240,.9);} .complete-tasti .cc-att b{color:#e4b85a;font-weight:600;}
 .pas-riga b{font-weight:600;color:#f0ebdc;}
 .pas-riga .pk{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(190,204,218,.6);}
 .pas-riga .pas-nota{flex:1 1 100%;color:rgba(225,232,240,.8);}
@@ -14363,7 +14398,7 @@ document.getElementById('nc-rf').addEventListener('click', function(e){
           Prima di passare a PACE, verifica che il cliente abbia gestito il bruciore degli esercizi glicolitici senza evitarli — 8–12 reps sono il riferimento — che abbia mantenuto il Cardio a un’intensità coerente con il resto della sessione, e che sulle stazioni Buffer abbia imparato ad arrivarci con una tattica, non di impulso. Se questi tre elementi ci sono, il sistema è pronto per un formato più strutturato.
         </div>
         <div style="margin-top:16px;font-family:var(--font);font-size:11px;font-weight:300;color:rgba(180,195,210,0.52);letter-spacing:1px;">Oppure è possibile ricominciare modificando il focus (scelta consigliata per il monosettimanale).</div>
-        <button type="button" class="nuova-prog-btn" onclick="nuovaProgressioneSplashOpen()">Nuova progressione</button>
+        <div class="complete-tasti"><button type="button" class="nuova-prog-btn" onclick="nuovaProgressioneSplashOpen()">Nuova progressione</button><span id="complete-cambio"></span></div>
       </div>
     </div>
     <!-- col 3: timeline -->
@@ -16843,6 +16878,7 @@ function renderObj(){
   if(state.current >= steps.length){
     panel.style.display = 'none';
     complete.classList.add('visible');
+    if(typeof pasFineOpen === 'function') pasFineOpen();
     updateProgress();
     return;
   }

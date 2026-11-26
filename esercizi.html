@@ -11,6 +11,7 @@ header{height:56px;display:flex;align-items:center;gap:18px;padding:0 24px;borde
  background:linear-gradient(180deg,rgba(212,168,74,.06),transparent)}
 .bc{font-size:13px;letter-spacing:3px;text-transform:uppercase;color:var(--lo)}
 .bc b{color:var(--hi);font-weight:500}
+.bc a{color:var(--gold);text-decoration:none}.bc a:hover{text-decoration:underline}
 .cnt{margin-left:auto;font-size:12px;color:var(--lo)}.cnt b{color:var(--gold);font-weight:600;font-size:14px}
 .bar{display:flex;flex-wrap:wrap;gap:10px;padding:12px 24px;border-bottom:1px solid var(--border);background:var(--panel)}
 .bar input,.bar select{height:32px;background:rgba(255,255,255,.03);border:1px solid rgba(180,195,210,.22);border-radius:4px;
@@ -117,7 +118,18 @@ td.ds{width:auto!important;max-width:none!important}
 #pm button{font-size:14px}
 .bar input,.flt{font-size:14px}
 
-col.c-op{width:110px}
+col.c-op{width:64px}
+col.c-ost{width:92px}
+/* a metà monitor le colonne si stringono, così il nome dell'esercizio si legge */
+@media (max-width:1250px){
+  col.c-id{width:54px!important} col.c-op{width:52px!important} col.c-ost{width:84px!important}
+  col.c-pk{width:148px!important} col.c-fil{width:160px!important} col.c-nm{width:auto!important} col.c-ds{width:0!important}
+  thead th, tbody td{padding-left:8px!important;padding-right:8px!important}
+}
+td.sp{text-align:center}
+.spunta{width:24px;height:24px;padding:0;border:1px solid rgba(180,195,210,.35);border-radius:2px;background:none;color:#9fd6b4;font-size:15px;line-height:1;cursor:pointer;vertical-align:middle}
+.spunta:hover{border-color:rgba(180,195,210,.7)}
+.spunta.on{border-color:rgba(120,205,155,.6);background:rgba(120,205,155,.12)}
 col.c-pk{width:180px}
 col.c-nm{width:30%}
 .ed-pos.o-si{color:#9fd6b4;border-color:rgba(120,205,155,.5);background:rgba(120,205,155,.1)}
@@ -135,6 +147,22 @@ td.nm i.nuovo{color:#9fd6b4}
 .add-n b{font-size:15px;color:var(--gold);letter-spacing:0;font-variant-numeric:tabular-nums;margin-left:4px}
 .add-msg{font-size:12.5px;min-width:120px}
 .add-msg.ok{color:#9fd6b4}.add-msg.err{color:#e89a9a}
+/* la scheda del nuovo esercizio */
+.bar.add [hidden]{display:none !important}
+#add-scheda{flex:1 1 100%;display:grid;gap:8px;padding:6px 0 4px}
+#add-scheda[hidden]{display:none}
+.as-r{display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-width:0}
+.as-k{flex:none;width:96px;font-size:10px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--lo)}
+.as-k2{width:auto;margin-left:14px}
+.as-r > input{flex:1 1 300px;min-width:0}
+.as-g{display:flex;flex-wrap:wrap;gap:6px}
+.as-c{height:28px;padding:0 11px;border:1px solid rgba(180,195,210,.3);border-radius:3px;background:none;color:var(--mid);font-family:var(--font);font-size:12.5px;cursor:pointer}
+.as-c:hover{border-color:rgba(180,195,210,.65)}
+.as-c.on{border-color:var(--gold);color:#f0d28c;background:rgba(212,168,74,.12)}
+#add-fam .as-c.on{border-color:var(--fc);color:var(--fc);background:none}
+#add-fam.off{opacity:.35;pointer-events:none}
+.as-f{padding-left:106px}
+@media (max-width:700px){ .as-f{padding-left:0} }
 .wrap{height:calc(100% - 56px - 57px - 57px)!important}
 
 /* link video */
@@ -301,21 +329,33 @@ body.p-int #sv{margin-left:auto}
 <div id="pm"></div>
 <div class="bar add">
  <span class="add-n">N. <b id="add-id"></b></span>
- <input id="add-nome" placeholder="Nuovo esercizio: scrivi il nome e premi Invio" spellcheck="false" autocomplete="off">
- <button id="add-btn" class="btn">+ Aggiungi</button>
+ <button id="add-apri" class="btn">+ Nuovo esercizio</button>
  <span id="add-msg" class="add-msg"></span>
+ <div id="add-scheda" hidden>
+  <div class="as-r"><span class="as-k">Nome</span><input id="add-nome" spellcheck="false" autocomplete="off"></div>
+  <div class="as-r"><span class="as-k">Link video</span><input id="add-link" spellcheck="false" autocomplete="off" inputmode="url"></div>
+  <div class="as-r"><span class="as-k">Open · Self</span><button type="button" class="spunta" id="add-open" role="checkbox" aria-checked="false" aria-label="Open e Self"></button>
+   <span class="as-k as-k2">Open Load</span><button type="button" class="spunta" id="add-ost" role="checkbox" aria-checked="false" aria-label="Open Load"></button></div>
+  <div class="as-r"><span class="as-k">Famiglia</span><span class="as-g" id="add-fam"></span></div>
+  <div class="as-r"><span class="as-k">Load</span><span class="as-g" id="add-ste"></span></div>
+  <div class="as-r"><span class="as-k">Move</span><span class="as-g" id="add-pos"></span></div>
+  <div class="as-r"><span class="as-k">Descrizione</span><input id="add-desc" spellcheck="false" autocomplete="off"></div>
+  <div class="as-r"><span class="as-k">Inserito da</span><span class="as-g" id="add-da"></span></div>
+  <div class="as-r as-f"><button id="add-btn" class="btn">Aggiungi</button><button id="add-no" class="btn btn-n">Annulla</button><span id="add-err" class="add-msg err"></span></div>
+ </div>
 </div>
 <div class="bar">
  <input id="q" placeholder="Cerca esercizio o descrizione…" spellcheck="false" autocomplete="off">
- <label>Open<select id="f-open"><option value="">tutti</option><option>Sì</option><option>No</option><option value="-">da decidere</option></select></label>
+ <label>Open · Self<select id="f-open"><option value="">tutti</option><option value="Sì">con la spunta</option><option value="No">senza</option></select></label>
+ <label>Open Load<select id="f-ost"><option value="">tutti</option><option value="Sì">con la spunta</option><option value="No">senza</option></select></label>
  <label>Famiglia<select id="f-fam"><option value="">tutte</option><option>Upper</option><option>Lower</option><option>Buffer</option><option>Core</option><option>Cardio Tempo</option></select></label>
- <label>Prot. Ste<select id="f-ste"><option value="">tutti</option><option>Fondamentale</option><option>Complementare</option><option>Fond./Compl.</option><option value="*">con ruolo</option><option value="!">da sistemare in Interdip.</option></select></label>
- <label>Prot. Fil<select id="f-pos"></select></label>
+ <label>Load<select id="f-ste"><option value="">tutti</option><option>Fondamentale</option><option>Complementare</option><option>Fond./Compl.</option><option value="*">con ruolo</option><option value="!">da sistemare in Interdip.</option></select></label>
+ <label>Move<select id="f-pos"></select></label>
  
 </div>
 <div class="wrap"><table>
-<colgroup><col class="c-id"><col class="c-nm"><col class="c-op"><col class="c-pk"><col class="c-pk"><col class="c-fil"><col class="c-ds"></colgroup>
-<thead><tr><th data-k="id">N.</th><th data-k="label">Esercizio</th><th data-k="open">Open</th><th data-k="fam">Famiglia Open</th><th data-k="ste">Prot. Ste</th><th data-k="pos">Prot. Fil</th><th data-k="desc">Descrizione</th></tr></thead>
+<colgroup><col class="c-id"><col class="c-nm"><col class="c-op"><col class="c-op"><col class="c-ost"><col class="c-pk"><col class="c-pk"><col class="c-fil"><col class="c-ds"></colgroup>
+<thead><tr><th data-k="id">N.</th><th data-k="label">Esercizio</th><th data-k="open">Open</th><th data-k="open">Self</th><th data-k="ost">Open Load</th><th data-k="fam">Famiglia</th><th data-k="ste">Load</th><th data-k="pos">Move</th><th data-k="desc">Descrizione</th></tr></thead>
 <tbody id="tb"></tbody></table></div>
 <div id="pg-int">
 <div class="iwrap">
@@ -352,8 +392,17 @@ ADD=STATO.ADD||[];
 /* numerazione: si tiene il numero dell'Excel; chi non l'ha prende i numeri successivi */
 var maxId=R0.reduce(function(m,r){ return typeof r.id==='number'&&r.id>m?r.id:m; },0);
 R0.forEach(function(r){ if(typeof r.id!=='number'){ r.id=++maxId; } });
-ADD.forEach(function(a){ R0.push({id:a.id,nome:a.nome,desc:'',pos:'',ste:'',fonte:'aggiunto'}); if(a.id>maxId) maxId=a.id; });
-var R=R0.map(function(r){ r.open=''; r.fam=''; r._k=r.nome; r.label=pulisci(r.nome); var m=MOD[r._k]; if(m){ ['desc','pos','ste','open','fam'].forEach(function(f){ if(f in m) r[f]=m[f]; }); } return r; });
+ADD.forEach(function(a){ R0.push({id:a.id,nome:a.nome,link:a.link||'',da:a.da||'',desc:'',pos:'',ste:'',fonte:'aggiunto'}); if(a.id>maxId) maxId=a.id; });
+/* GLI ESERCIZI CHE OPEN USA GIÀ (la lista dentro la Sandbox, con la sua famiglia): qui partono con la spunta.
+   Vale finché sulla riga non si tocca niente: da lì in poi conta quello che si è scelto a mano.
+   Push e Row di Open qui sono "Upper", Tempo è "Cardio Tempo". Si riconoscono dal nome, uguale lettera per lettera
+   (maiuscole, trattini e spazi a parte). */
+var OPEN_BASE={"Air Squat": "Lower", "Goblet Squat": "Lower", "Reverse Lunge": "Lower", "Walked Lunge": "Lower", "Surrender": "Lower", "Slam": "Buffer", "Sled Push": "Buffer", "Skill Climber": "Buffer", "Run": "Cardio Tempo", "Walk": "Cardio Tempo", "Uphill Walk": "Cardio Tempo", "Step (tempo)": "Cardio Tempo", "Step (slow)": "Lower", "Burpees": "Buffer", "Burpees Step-Out": "Buffer", "Ground to Stand": "Buffer", "Up & Down": "Buffer", "Farmer Carry": "Core", "Suitcase Walk": "Core", "Halo": "Core", "Plank": "Core", "Knee Plank": "Core", "Plank to Touch": "Core", "Knee Plank to Touch": "Core", "Cable Row": "Upper", "Cable Standing Low Row": "Upper", "TRX Row": "Upper", "TRX Jack Knife": "Core", "TRX Lunge": "Lower", "Rack Push Up": "Upper", "Knee Push Up": "Upper", "Push Up": "Upper", "Bench Push Up": "Upper", "Box Step Up": "Lower", "Vertical Traction": "Upper", "Paloff Press": "Core", "Gorilla Row": "Upper", "Renegade": "Core", "Renegade Push Up": "Upper", "Bike": "Cardio Tempo", "Jumping Jack": "Buffer", "Battlerope": "Buffer", "Sandbag Press": "Upper", "Sandbag V-Push": "Upper", "Ball Shot": "Lower", "Heavy Ball Shot": "Buffer", "Bear Walk": "Buffer", "Inchworm": "Buffer", "KB Swing": "Buffer", "Loaded Lunge": "Lower", "Hip Thrust": "Lower", "Wall Sit": "Lower", "Skill Power Walk": "Cardio Tempo", "Rower": "Cardio Tempo", "Skierg": "Cardio Tempo", "Hip Bridge": "Lower", "Deadbug": "Core", "Landmine Twister": "Core", "Fitball Rollout": "Core", "Rollout": "Core", "Hug & Walk": "Core", "Skill Back Walk": "Lower", "Deep Split": "Lower", "Deep Split Row": "Buffer", "Cable Pull Down": "Upper", "Fitball Wall Squat": "Lower", "Box Squat": "Lower", "Crunch": "Core", "Thruster": "Buffer", "Sit Up": "Core", "Climber": "Buffer", "Rack Squat": "Lower", "Australian": "Upper", "Easy Australian": "Upper", "Easy Up & Down": "Buffer", "Prone SRT": "Buffer", "Sandbag Bent Over Row": "Upper", "Russian Twist": "Core", "Wall Rollout": "Core", "Stretchers": "Upper", "Reaper": "Buffer", "Spider Rack Push Up": "Upper", "Half/Half Push Up": "Upper", "Deadstop Push Up": "Upper", "Seated Press": "Upper", "Press": "Upper", "Frogger": "Buffer", "3 Impulse Squat": "Lower", "Standing Bike": "Buffer", "Skierg (Sprint)": "Buffer", "BBJ": "Buffer", "Rower Seat Plank": "Core", "Rower Seat Spider Plank": "Core", "Rower Seat Body Saw": "Core", "Jack Knife Rower Seat": "Core", "Piledriver Squat": "Lower", "Cable Lift": "Core"};
+function chiaveNome(n){ return String(n).toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g,' ').trim(); }
+var OPEN_K={}; Object.keys(OPEN_BASE).forEach(function(n){ OPEN_K[chiaveNome(n)]=OPEN_BASE[n]; });
+var R=R0.map(function(r){ r.open=''; r.ost=''; r.fam=''; r._k=r.nome; r.label=pulisci(r.nome);
+  var b=OPEN_K[chiaveNome(r.nome)]; if(b){ r.open='Sì'; r.fam=b; }
+  var m=MOD[r._k]; if(m){ ['desc','pos','ste','open','ost','fam'].forEach(function(f){ if(f in m) r[f]=m[f]; }); } return r; });
 function salva(r,f,v){
   r[f]=v; MOD[r._k]=MOD[r._k]||{}; MOD[r._k][f]=v;
   autoSalva(r._k+'|'+f);
@@ -413,36 +462,49 @@ function mostraStato(quando){
 window.addEventListener('beforeunload',function(e){ if(NONSAL>0){ e.preventDefault(); e.returnValue=''; } });
 document.addEventListener('keydown',function(e){ if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'){ e.preventDefault(); salvaFile(); } });
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');}
-function opts(id,k){var v={};R.forEach(function(r){if(r[k])v[r[k]]=1;});
- var sel=document.getElementById(id), cur=sel.value, ks=Object.keys(v).sort();
+/* Move: le voci sono fisse (c'è anche Cardio, che vale con e senza SRT);
+   se nei dati ne esiste un'altra, si aggiunge in coda */
+var FIL=['In piedi','Seduto','Prono/Sup.','Quadrupedia','Cardio'];
+function filVoci(){ var ks=FIL.slice(); R.forEach(function(r){ if(r.pos&&ks.indexOf(r.pos)<0) ks.push(r.pos); }); return ks; }
+function opts(id,k){
+ var sel=document.getElementById(id), cur=sel.value, ks=filVoci();
  sel.innerHTML='<option value="">tutti</option>'+ks.map(function(x){return '<option>'+esc(x)+'</option>';}).join('');
  sel.value=cur;
 }
 opts('f-pos','pos');
 var PILL={'Fondamentale':'p-fond','Complementare':'p-comp','Fond./Compl.':'p-fc'};
-/* casella a menu: stessa per Info Filippo e Ruolo Ste */
+/* casella a menu: stessa per Move e Load */
 var STE=['Fondamentale','Complementare','Fond./Compl.'];
 var LISTE={ open:['Sì','No'], fam:['Upper','Lower','Buffer','Core','Cardio Tempo'], ste:STE };
-var FAMCOL={Upper:'#d8a65a',Lower:'#c9b27a',Buffer:'#d07878',Core:'#6fc896','Cardio Tempo':'#6f9ad8'};
+var FAMCOL={Upper:'#408cff',Lower:'#f28030',Buffer:'#9060f0',Core:'#f0e846','Cardio Tempo':'#58d086'};
 function pickCls(f,v,r){
   return 'ed-pos'+(v?' on':'')+(f==='ste'&&v?' '+PILL[v]:'')+(f==='open'&&v?(v==='Sì'?' o-si':' o-no'):'')
-    +(f==='fam'&&(!r||r.open!=='Sì')?' off':'');
+    +(f==='fam'&&(!r||!inProto(r))?' off':'');
 }
+/* IN CHE PROTOCOLLO VA UN ESERCIZIO, E LA SUA FAMIGLIA
+   - Open e Self: una spunta sola, la stessa (campo "open"). Per adesso usano gli stessi esercizi.
+   - Open Load: il pezzo di Open che sta dentro Load (campo "ost"). È un Open con esercizi in più o in meno: la sua spunta è a parte,
+     un esercizio può stare lì senza essere in Open e in Self, e il contrario.
+   - La famiglia è UNA ed è dell'esercizio, non del protocollo: la stessa per Open, Self e Open Load. Si sceglie se c'è almeno una spunta;
+     tolte tutte le spunte si svuota. */
+function inProto(r){ return r.open==='Sì' || r.ost==='Sì'; }
+function spunta(r,nome,campo){ campo=campo||'open'; var si=r[campo]==='Sì';
+  return '<button class="spunta'+(si?' on':'')+'" data-f="'+campo+'" data-i="'+R.indexOf(r)+'" role="checkbox" aria-checked="'+si+'" aria-label="'+nome+'">'+(si?'\u2713':'')+'</button>'; }
 function pick(r,f){ var i=R.indexOf(r), v=r[f];
   var st=(f==='fam'&&v&&FAMCOL[v])?' style="--fc:'+FAMCOL[v]+'"':'';
-  return '<button class="'+pickCls(f,v,r)+(f==='fam'&&v?' fam':'')+'"'+st+' data-i="'+i+'" data-f="'+f+'"'+(f==='fam'&&r.open!=='Sì'?' disabled title="Solo se Open = Sì"':'')+'>'
+  return '<button class="'+pickCls(f,v,r)+(f==='fam'&&v?' fam':'')+'"'+st+' data-i="'+i+'" data-f="'+f+'"'+(f==='fam'&&!inProto(r)?' disabled title="Serve almeno una spunta"':'')+'>'
     +'<span class="pv">'+(esc(v)||'—')+'</span>'+(f==='pos'&&SRT[v]?'<em class="srt" title="Richiede SRT">SRT</em>':'')
     +(f==='ste'&&window.INT_PROB&&INT_PROB[r._k]?'<em class="ste-x" title="'+esc(INT_PROB[r._k])+'">!</em>':'')+'<b>▾</b></button>'; }
-/* Prot. Fil: queste posizioni richiedono l'SRT */
+/* Move: queste posizioni richiedono l'SRT */
 var SRT={'Prono/Sup.':1,'Quadrupedia':1};
 var sortK='id',sortD=1;
 function draw(){
  var q=document.getElementById('q').value.trim().toLowerCase(),fs=document.getElementById('f-ste').value,
-  fp=document.getElementById('f-pos').value, fo=document.getElementById('f-open').value, ff=document.getElementById('f-fam').value;
+  fp=document.getElementById('f-pos').value, fo=document.getElementById('f-open').value, fl=document.getElementById('f-ost').value, ff=document.getElementById('f-fam').value;
  var L=R.filter(function(r){
   if(q&&(r.nome+' '+r.label+' '+r.desc).toLowerCase().indexOf(q)<0)return false;
   if(fs==='!'?!(window.INT_PROB&&INT_PROB[r._k]):fs==='*'?!r.ste:(fs&&r.ste!==fs))return false;
-  if(fp&&r.pos!==fp)return false; if(fo&&(fo==='-'?!!r.open:r.open!==fo))return false; if(ff&&r.fam!==ff)return false; return true;});
+  if(fp&&r.pos!==fp)return false; if(fo&&((r.open==='Sì')!==(fo==='Sì')))return false; if(fl&&((r.ost==='Sì')!==(fl==='Sì')))return false; if(ff&&r.fam!==ff)return false; return true;});
  L.sort(function(a,b){var x=a[sortK],y=b[sortK];if(x===''&&y!=='')return 1;if(y===''&&x!=='')return -1;
   return (typeof x==='number'&&typeof y==='number'?x-y:String(x).localeCompare(String(y)))*sortD;});
  document.getElementById('n').textContent=L.length;
@@ -451,8 +513,10 @@ function draw(){
   +'<td class="id">'+r.id+'</td>'
   +'<td class="nm" title="'+esc(r.nome)+'">'
     +(r.link?'<a class="vid" href="'+esc(r.link)+'" target="_blank" rel="noopener" title="Apri il video">\u25b6</a>':'<span class="vid no">\u25b6</span>')
-    +esc(r.label)+(r.fonte==='solo Ste'?'<i>solo Ste</i>':'')+(r.fonte==='aggiunto'?'<i class="nuovo">nuovo</i>':'')+'</td>'
-  +'<td>'+pick(r,'open')+'</td>'
+    +esc(r.label)+(r.fonte==='solo Ste'?'<i>solo Load</i>':'')+(r.fonte==='aggiunto'?'<i class="nuovo"'+(r.da?' title="Inserito da '+esc(r.da)+'"':'')+'>nuovo'+(r.da?' \u00b7 '+esc(r.da):'')+'</i>':'')+'</td>'
+  +'<td class="sp">'+spunta(r,'Open')+'</td>'
+  +'<td class="sp">'+spunta(r,'Self')+'</td>'
+  +'<td class="sp">'+spunta(r,'Open Load','ost')+'</td>'
   +'<td>'+pick(r,'fam')+'</td>'
   +'<td>'+pick(r,'ste')+'</td>'
   +'<td>'+pick(r,'pos')+'</td>'
@@ -464,10 +528,10 @@ tb.addEventListener('input',function(e){ var t=e.target; if(t.dataset.f!=='desc'
 });
 /* Invio chiude la descrizione invece di andare a capo */
 tb.addEventListener('keydown',function(e){ if(e.target.dataset.f==='desc' && (e.key==='Enter'||e.key==='Escape')){ e.preventDefault(); e.target.blur(); } });
-/* menu Info Filippo: tutti i valori usati + uno nuovo + vuoto */
+/* menu Move: tutti i valori usati + uno nuovo + vuoto */
 var pm=document.getElementById('pm'), pmBtn=null;
 function pmChiudi(){ pm.classList.remove('open'); pmBtn=null; }
-/* le opzioni del filtro Info Filippo cambiano: il bottone si aggiorna */
+/* le opzioni del filtro Move cambiano: il bottone si aggiorna */
 function fltAgg(){ var sel=document.getElementById('f-pos'); if(sel) sel.dispatchEvent(new Event('input')); }
 function pmScegli(v){
   if(!pmBtn) return; var f=pmBtn.dataset.f, r=R[+pmBtn.dataset.i];
@@ -475,15 +539,23 @@ function pmScegli(v){
   /* Open diverso da Sì: la famiglia non ha senso e si svuota */
   if(f==='open' && v!=='Sì' && r.fam) salva(r,'fam','');
   var tr=pmBtn.closest('tr'); pmChiudi();
-  ['open','fam','ste','pos'].forEach(function(k){ var c=tr.querySelector('[data-f="'+k+'"]'); if(c) c.outerHTML=pick(r,k); });
+  ['fam','ste','pos'].forEach(function(k){ var c=tr.querySelector('[data-f="'+k+'"]'); if(c) c.outerHTML=pick(r,k); });
   if(f==='pos') opts('f-pos','pos');
 }
 tb.addEventListener('click',function(e){
+  var sp=e.target.closest('.spunta');
+  if(sp){ var r0=R[+sp.dataset.i], cf=sp.dataset.f, on=r0[cf]!=='Sì'; pmChiudi();
+    salva(r0,cf,on?'Sì':'No');
+    if(on){ var fb=OPEN_K[chiaveNome(r0.nome)]; if(!r0.fam && fb) salva(r0,'fam',fb); }   /* messa una spunta, torna la famiglia che l'esercizio ha in Open */
+    else if(r0.fam && !inProto(r0)) salva(r0,'fam','');                                    /* senza nessuna spunta la famiglia si svuota */
+    var tr0=sp.closest('tr'); [].forEach.call(tr0.querySelectorAll('.spunta[data-f="'+cf+'"]'),function(x){ x.classList.toggle('on',on); x.textContent=on?'\u2713':''; x.setAttribute('aria-checked',on); });
+    var c0=tr0.querySelector('[data-f="fam"]'); if(c0) c0.outerHTML=pick(r0,'fam');
+    return; }
   var b=e.target.closest('.ed-pos'); if(!b) return;
   if(pmBtn===b){ pmChiudi(); return; }
   pmBtn=b; var f=b.dataset.f, cur=R[+b.dataset.i][f], lista;
   if(LISTE[f]) lista=LISTE[f];
-  else { var v={}; R.forEach(function(r){ if(r.pos) v[r.pos]=1; }); lista=Object.keys(v).sort(); }
+  else lista=filVoci();
   pm.innerHTML='<button data-v="" class="'+(cur?'':'sel')+'">— vuoto</button>'
     +lista.map(function(x){ return '<button data-v="'+esc(x)+'" class="'+(x===cur?'sel ':'')+(f==='ste'?'c-'+PILL[x]:'')+'"'+(f==='fam'?' style="color:'+FAMCOL[x]+'"':'')+'>'+esc(x)+(f==='pos'&&SRT[x]?'<em class="srt">SRT</em>':'')+'</button>'; }).join('')
     ;
@@ -498,7 +570,7 @@ pm.addEventListener('keydown',function(e){ if(e.key==='Enter' && e.target.tagNam
 document.addEventListener('click',function(){ if(pmBtn) pmChiudi(); });
 document.addEventListener('keydown',function(e){ if(e.key==='Escape') pmChiudi(); });
 document.querySelector('.wrap').addEventListener('scroll',pmChiudi);
-['f-open','f-fam','f-ste','f-pos'].forEach(function(id){
+['f-open','f-ost','f-fam','f-ste','f-pos'].forEach(function(id){
   var sel=document.getElementById(id), b=document.createElement('button');
   b.className='flt'; b.type='button'; sel.style.display='none'; sel.parentNode.appendChild(b);
   function etichetta(){ var o=sel.options[sel.selectedIndex]; b.innerHTML=esc(o?o.text:'tutti')+'<b>▾</b>'; b.classList.toggle('on',!!sel.value); }
@@ -520,7 +592,7 @@ pm.addEventListener('click',function(e){
 });
 document.getElementById('exp').onclick=function(){
   var q=function(x){ return '"'+String(x||'').replace(/"/g,'""')+'"'; };
-  var csv='\ufeffN.;Esercizio;Open;Famiglia Open;Prot. Ste;Prot. Fil;Descrizione;Video\n'+R.map(function(r){ return [r.id,r.nome,r.open,r.fam,r.ste,r.pos,r.desc,r.link].map(q).join(';'); }).join('\n');
+  var csv='\ufeffN.;Esercizio;Open;Self;Open Load;Famiglia;Load;Move;Descrizione;Video;Inserito da\n'+R.map(function(r){ return [r.id,r.nome,(r.open==='Sì'?'Sì':''),(r.open==='Sì'?'Sì':''),(r.ost==='Sì'?'Sì':''),r.fam,r.ste,r.pos,r.desc,r.link,r.da||''].map(q).join(';'); }).join('\n');
   var a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
   a.download='esercizi-flow.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(a.href); },1000);
 };
@@ -529,23 +601,53 @@ document.getElementById('lnk').onclick=salvaFile;
 mostraStato();
 /* aggiunta esercizi */
 function addMostraId(){ document.getElementById('add-id').textContent=maxId+1; }
+/* UN ESERCIZIO NUOVO SI COMPILA: nome, link del video se c'è, in che protocollo va e con che famiglia, i due ruoli, la descrizione,
+   e CHI lo ha inserito (il trainer), che resta salvato con l'esercizio. Obbligatori: il nome, chi lo inserisce, e la famiglia se c'è la spunta. */
+var NUOVO={open:false,ost:false,fam:'',ste:'',pos:'',da:''};
+function trainer(){ var l=null; try{ if(window.parent!==window && Array.isArray(window.parent.PT_LIST)) l=window.parent.PT_LIST.slice(); }catch(e){} return l||['Ale','Fil','Flower','Ile','PR','Ste']; }
+function addGruppo(id,voci,campo){
+  document.getElementById(id).innerHTML=voci.map(function(x){ return '<button type="button" class="as-c'+(NUOVO[campo]===x?' on':'')+'" data-c="'+campo+'" data-v="'+esc(x)+'"'+(campo==='fam'?' style="--fc:'+FAMCOL[x]+'"':'')+'>'+esc(x)+'</button>'; }).join('');
+}
+function addDisegna(){
+  [['add-open','open'],['add-ost','ost']].forEach(function(x){ var o=document.getElementById(x[0]), v=NUOVO[x[1]]; o.classList.toggle('on',v); o.textContent=v?'✓':''; o.setAttribute('aria-checked',v); });
+  document.getElementById('add-fam').classList.toggle('off',!(NUOVO.open||NUOVO.ost));
+  addGruppo('add-fam',LISTE.fam,'fam'); addGruppo('add-ste',STE,'ste'); addGruppo('add-pos',filVoci(),'pos'); addGruppo('add-da',trainer(),'da');
+}
+function addApri(){ var sc=document.getElementById('add-scheda'); sc.hidden=false; document.getElementById('add-apri').hidden=true; document.getElementById('add-msg').textContent=''; addDisegna(); document.getElementById('add-nome').focus(); }
+function addChiudi(){ NUOVO={open:false,ost:false,fam:'',ste:'',pos:'',da:''}; ['add-nome','add-link','add-desc'].forEach(function(i){ document.getElementById(i).value=''; });
+  document.getElementById('add-err').textContent=''; document.getElementById('add-scheda').hidden=true; document.getElementById('add-apri').hidden=false; }
+document.getElementById('add-scheda').addEventListener('click',function(e){
+  var c=e.target.closest('.as-c');
+  if(c || e.target.closest('.spunta')) document.getElementById('add-err').textContent='';
+  if(c){ var k=c.dataset.c; NUOVO[k]=(NUOVO[k]===c.dataset.v && k!=='da')?'':c.dataset.v; addDisegna(); return; }
+  var sq=e.target.closest('.spunta');
+  if(sq){ var kq=(sq.id==='add-ost')?'ost':'open'; NUOVO[kq]=!NUOVO[kq]; if(!NUOVO.open && !NUOVO.ost) NUOVO.fam=''; addDisegna(); }
+});
 function aggiungi(){
-  var inp=document.getElementById('add-nome'), msg=document.getElementById('add-msg'), n=inp.value.trim();
-  if(!n){ inp.focus(); return; }
-  if(R.some(function(r){ return r.nome.toLowerCase()===n.toLowerCase() || r.label.toLowerCase()===n.toLowerCase(); })){
-    msg.textContent='C\u2019\u00e8 gi\u00e0'; msg.className='add-msg err'; return; }
-  var a={id:++maxId,nome:n}; ADD.push(a);
+  var inp=document.getElementById('add-nome'), err=document.getElementById('add-err'), msg=document.getElementById('add-msg'), n=inp.value.trim();
+  var link=document.getElementById('add-link').value.trim(), desc=document.getElementById('add-desc').value.trim();
+  function no(t){ err.textContent=t; }
+  if(!n){ no('Manca il nome'); inp.focus(); return; }
+  if(R.some(function(r){ return r.nome.toLowerCase()===n.toLowerCase() || r.label.toLowerCase()===n.toLowerCase(); })){ no('C’è già un esercizio con questo nome'); return; }
+  if(link && !/^https?:\/\//i.test(link)){ no('Il link deve cominciare con http'); return; }
+  if((NUOVO.open || NUOVO.ost) && !NUOVO.fam){ no('Con una spunta serve la famiglia'); return; }
+  if(!NUOVO.da){ no('Manca chi lo inserisce'); return; }
+  var a={id:++maxId,nome:n,link:link,da:NUOVO.da,quando:new Date().toISOString()}; ADD.push(a);
+  var r={id:a.id,nome:n,label:pulisci(n),_k:n,link:link,da:a.da,desc:'',pos:'',ste:'',open:'',ost:'',fam:'',fonte:'aggiunto'}; R.push(r);
   autoSalva('nuovo|'+n);
-  var r={id:a.id,nome:n,label:pulisci(n),_k:n,desc:'',pos:'',ste:'',open:'',fam:'',fonte:'aggiunto'}; R.push(r);
-  inp.value=''; msg.textContent='Aggiunto n. '+a.id; msg.className='add-msg ok'; addMostraId();
+  salva(r,'open',NUOVO.open?'Sì':'No'); salva(r,'ost',NUOVO.ost?'Sì':'No'); if(NUOVO.fam) salva(r,'fam',NUOVO.fam);
+  if(NUOVO.ste) salva(r,'ste',NUOVO.ste); if(NUOVO.pos) salva(r,'pos',NUOVO.pos); if(desc) salva(r,'desc',desc);
+  addChiudi(); msg.textContent='Aggiunto n. '+a.id; msg.className='add-msg ok'; addMostraId(); opts('f-pos','pos');
   /* lo mostro subito in cima, anche se i filtri lo nasconderebbero */
   document.getElementById('q').value=''; sortK='id'; sortD=-1; draw();
 }
+document.getElementById('add-apri').onclick=addApri;
+document.getElementById('add-no').onclick=addChiudi;
 document.getElementById('add-btn').onclick=aggiungi;
-document.getElementById('add-nome').addEventListener('keydown',function(e){ if(e.key==='Enter') aggiungi(); });
+['add-nome','add-link','add-desc'].forEach(function(i){ document.getElementById(i).addEventListener('keydown',function(e){ if(e.key==='Enter') aggiungi(); if(e.key==='Escape') addChiudi(); }); });
 document.getElementById('add-nome').addEventListener('input',function(){ document.getElementById('add-msg').textContent=''; });
 addMostraId();
-['q','f-open','f-fam','f-ste','f-pos'].forEach(function(i){document.getElementById(i).addEventListener('input',draw);});
+['q','f-open','f-ost','f-fam','f-ste','f-pos'].forEach(function(i){document.getElementById(i).addEventListener('input',draw);});
 document.querySelectorAll('th[data-k]').forEach(function(th){th.onclick=function(){var k=th.dataset.k;sortD=(sortK===k?-sortD:1);sortK=k;draw();};});
 draw();
 
@@ -585,7 +687,7 @@ function ordina(g){
   g.b = stabile(g.b, function(r){ return r.reg ? -1 : (c.cb[r.id] || 0); });
 }
 
-/* ═══ CONTROLLO: tabella (Prot. Ste) contro interdipendenze ═══
+/* ═══ CONTROLLO: tabella (Load) contro interdipendenze ═══
    Fondamentale  -> deve stare almeno una volta tra i fondamentali
    Complementare -> almeno una volta tra i complementari
    Fond./Compl.  -> in tutti e due
@@ -618,18 +720,18 @@ function verifica(){
 }
 function testo(x, r){
   if (x.t === 'manca') return 'da mettere nei ' + LATO[x.l];
-  return 'è nei ' + LATO[x.l] + ', ma in tabella ' + (r.ste ? 'è ' + r.ste : 'non ha Prot. Ste');
+  return 'è nei ' + LATO[x.l] + ', ma in tabella ' + (r.ste ? 'è ' + r.ste : 'non ha Load');
 }
 function pannello(){
   var h = '', P = CHK.prob, N = CHK.na, tot = P.length + N.length;
   h += '<div class="dsw' + (tot ? '' : ' ok') + '"><div class="dsh"><h2>' + (tot ? 'Da sistemare · ' + tot : 'Tutto coerente') + '</h2>'
-    + '<span class="dss">' + (tot ? 'quello che hai messo in Prot. Ste nella tabella deve comparire qui, nello stesso posto' : 'tabella e interdipendenze dicono la stessa cosa') + '</span></div>';
+    + '<span class="dss">' + (tot ? 'quello che hai messo in Load nella tabella deve comparire qui, nello stesso posto' : 'tabella e interdipendenze dicono la stessa cosa') + '</span></div>';
   if (tot) {
     h += '<div class="dsl">';
     h += P.map(function(p){
       var r = p.r, pl = PILL[r.ste];
       return '<div class="dr"><span class="did">' + r.id + '</span><span class="dnm" title="' + esc(r.nome) + '">' + esc(r.label) + '</span>'
-        + '<span class="pl ' + (pl ? 'q-' + pl : 'no') + '">' + (r.ste ? esc(r.ste) : 'nessun Prot. Ste') + '</span>'
+        + '<span class="pl ' + (pl ? 'q-' + pl : 'no') + '">' + (r.ste ? esc(r.ste) : 'nessun Load') + '</span>'
         + '<span class="dact">' + p.m.map(function(x){
             return x.t === 'manca'
               ? '<button class="ibtn" data-ds="metti" data-k="' + esc(r._k) + '" data-l="' + x.l + '">Metti nei ' + LATO[x.l] + ' &#9662;</button>'

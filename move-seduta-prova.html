@@ -370,6 +370,24 @@ var RF_DATA = [
    patterns:'Ritorno immediato a HIIT dopo malattia, formati competitivi nella prima settimana di rientro'}
 ];
 var RF = { ipertensione:{attivo:true, note:'ramipril 5 mg'}, osteoporosi:{attivo:true, note:''}, __custom:{attivo:true, nome:'Protesi anca destra', cosaFare:'niente flessione oltre 90°'} };
+/* DENTRO LA SANDBOX. Se la pagina è aperta dalla Sandbox (SB) e nell'indirizzo c'è un cliente (#c=...), la seduta è di QUEL cliente:
+   il nome e le red flag sono i suoi (state.redFlags), non l'esempio. Aperta da sola, o dalla mappa senza cliente, resta il cliente di esempio. */
+var SB = null; try{ if(window.parent && window.parent !== window && typeof window.parent.rfChiedi === 'function') SB = window.parent; }catch(x){ SB = null; }
+var CLIENTE = null;
+(function(){
+  /* il cliente arriva nell'indirizzo (#c=nome). Si tiene a mente per questa scheda del browser, così andando nell'editor e tornando la seduta è ancora la sua.
+     '#c=' vuoto vuol dire "nessun cliente" (Move aperto dalla mappa) e cancella quello di prima. */
+  var m = /[#&]c=([^&]*)/.exec(location.hash || ''), id = '';
+  try{ if(m){ id = decodeURIComponent(m[1]); if(id) sessionStorage.setItem('move-cliente', id); else sessionStorage.removeItem('move-cliente'); } else id = sessionStorage.getItem('move-cliente') || ''; }catch(x){ id = m ? decodeURIComponent(m[1]) : ''; }
+  if(!id || !SB) return;
+  var c = null;
+  try{ c = (SB._csList || []).filter(function(z){ return z.id === id; })[0] || null; }catch(x){ c = null; }
+  if(!c) return;
+  CLIENTE = {id:id, pt:(c.state && c.state.pt) || ''};
+  var rf = (c.state && c.state.redFlags) || {}, f = rf.flags || {}, cu = rf.custom;
+  RF = {}; Object.keys(f).forEach(function(k){ RF[k] = {attivo:!!f[k].attivo, note:f[k].note || ''}; });
+  if(cu) RF.__custom = {attivo:!!cu.attivo, nome:cu.nome || '', cosaFare:cu.cosaFare || ''};
+})();
 function rfScheda(f, breve){
   var st = RF[f.id] || {}, on = !!st.attivo, ap = !!st.aperta && !breve;
   return '<div class="rfc' + (on ? ' on' : '') + (ap ? ' ap' : '') + '" style="--c:' + f.color + '">'
@@ -409,9 +427,16 @@ function rfTocca(e, dentroFinestra){
   var o = e.target.closest('[data-rfo]');
   if(o){
     var k = o.dataset.rfo, acceso = !!(RF[k] && RF[k].attivo), nome = k === '__custom' ? ((RF.__custom && RF.__custom.nome) || 'Custom') : (RF_DATA.filter(function(f){ return f.id === k; })[0] || {}).name;
-    var sb = null; try{ if(window.parent && window.parent !== window && typeof window.parent.rfChiedi === 'function') sb = window.parent; }catch(x){ sb = null; }
-    if(!sb){ avviso(o, 'La password la chiede la Sandbox: apri la seduta da lì (Sandbox › Move › Seduta)'); return true; }
-    sb.rfChiedi(!acceso, function(){ RF[k] = RF[k] || {}; RF[k].attivo = !acceso; if(RF[k].attivo && dentroFinestra) RF[k].aperta = true; rfLista(); rfSunto(); }, nome + ' · ' + document.querySelector('.chi .nome').textContent);
+    var sb = SB;
+    if(!sb){ avviso(o, 'La password la chiede la Sandbox: apri la seduta da lì (Sandbox › Move)'); return true; }
+    /* la Custom si accende e si toglie dalla finestra del cliente, dove si scrive anche il suo nome: qui si vede soltanto */
+    if(k === '__custom'){ avviso(o, 'La Custom si cambia dalla scheda del cliente'); return true; }
+    sb.rfChiedi(!acceso, function(){
+      RF[k] = RF[k] || {}; RF[k].attivo = !acceso; if(RF[k].attivo && dentroFinestra) RF[k].aperta = true;
+      /* con un cliente vero della Sandbox la red flag si scrive nella sua scheda, con la stessa funzione della pagina Red Flags */
+      if(CLIENTE && typeof sb.rfpMetti === 'function'){ try{ sb.rfpMetti(CLIENTE.id, k, !acceso); }catch(x){} }
+      rfLista(); rfSunto();
+    }, nome + ' · ' + document.querySelector('.chi .nome').textContent);
     return true;
   }
   var x = e.target.closest('[data-rfx]');
@@ -438,6 +463,16 @@ function chiudi(){ [].forEach.call(document.querySelectorAll('.velo.open'), func
 document.addEventListener('click', function(e){ if(e.target.closest('[data-chiudi]') || (e.target.classList && e.target.classList.contains('velo'))) chiudi(); });
 document.addEventListener('keydown', function(e){ if(e.key === 'Escape') chiudi(); });
 rfSunto();
+/* il riquadro del cliente e la barra in alto, quando c'è la Sandbox */
+(function(){
+  if(SB){ var h = document.querySelector('header'); if(h) h.style.display = 'none'; }   /* la barra in alto è quella della Sandbox */
+  if(!CLIENTE) return;
+  document.querySelector('.chi .nome').textContent = CLIENTE.id;
+  var et = document.querySelector('.chi > .et'); if(et) et.textContent = '';
+  /* di un cliente in Move la Sandbox oggi sa solo il PT: "dal", "ultima" e il numero della seduta non ci sono ancora, quindi non si mostrano */
+  document.querySelector('.chi .dati').innerHTML = CLIENTE.pt ? '<div><span class="et">PT</span><b>' + String(CLIENTE.pt).replace(/</g, '&lt;') + '</b></div>' : '';
+  document.getElementById('carta').innerHTML = '';
+})();
 
 /* ═══ LA SCELTA DEL BLOCCO ═══
    L'elenco è quello dei blocchi salvati con l'editor di Move (stesso posto nel browser: 'move-blocchi', fatti così: {id, nome, e:[es1, es2], cardio}).

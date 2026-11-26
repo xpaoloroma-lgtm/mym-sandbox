@@ -10522,7 +10522,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   <div id="cl-zona">
     <div id="cl-su"><input id="cl-cerca" type="text" placeholder="cerca cliente" autocomplete="off" spellcheck="false"><button type="button" id="nc-apri" onclick="ncApri()">+ Nuovo cliente</button></div>
     <div id="cl-filtri"></div>
-    <div id="cl-testa"><span class="a">cliente</span><span class="b">ultimo trainer</span><span class="c">ultimo</span></div>
+    <div id="cl-testa"><button type="button" class="a" data-ord="az">cliente</button><span class="b">trainer</span><button type="button" class="c" data-ord="ultimo">ultimo</button></div>
     <div id="cl-lista"></div>
   </div>
   <div id="proto-pt-strip" style="display:flex;gap:8px;align-items:center;justify-content:flex-end;">
@@ -10902,13 +10902,13 @@ function clRiga(c){
   /* "fermo" = nessuna seduta da più di 30 giorni: la stessa soglia che Sandbox
      usa già per dire se un cliente è attivo. È una scelta, non una misura. */
   var fermo = n !== null && n > 30, aperta = (_clAperto === c.id);
-  return '<div class="cl-r' + (fermo ? ' fermo' : '') + (aperta ? ' aperta' : '') + '" style="--pc:' + pc + '">'
+  var att = (typeof pasInAttesa === 'function') ? pasInAttesa(c) : null;
+  return '<div class="cl-r' + (fermo ? ' fermo' : '') + (aperta ? ' aperta' : '') + '" data-clp="' + (proto || '') + '" data-clv="' + (att ? att.a : '') + '" style="--pc:' + pc + '">'
        + '<button type="button" class="cl-capo" data-cl="' + clEsc(c.id) + '">'
-       +   '<div class="cl-chi"><div class="cl-nome">' + clEsc(c.id) + (c.state && c.state.nick ? '<span class="cl-nick">' + clEsc(c.state.nick) + '</span>' : '') + '</div><div class="cl-sotto"><span class="cl-proto">' + (proto ? CL_NOME[proto] : 'nuovo') + '</span>' + chips + '</div></div>'
+       +   '<div class="cl-chi"><div class="cl-nome">' + clEsc(c.id) + (c.state && c.state.nick ? '<span class="cl-nick">' + clEsc(c.state.nick) + '</span>' : '') + '</div><div class="cl-sotto"><span class="cl-proto">' + (proto ? CL_NOME[proto] : 'nuovo') + '</span>' + (att ? '<span class="cl-att" style="--vc:' + CL_COLORE[att.a] + '" title="Cambio di protocollo in attesa dell\u2019Admin">\u2192 ' + CL_NOME[att.a] + '</span>' : '') + chips + '</div></div>'
        +   '<div class="cl-chiera">' + (chi ? '<b>' + clEsc(chi) + '</b>' : '') + '</div>'
        +   '<div class="cl-ultimo">' + ult + '</div>'
        + '</button>'
-       + (aperta ? clGiu(c, proto) : '')
        + '</div>';
 }
 /* I tratti della timeline: per ogni periodo, in che protocollo stava.
@@ -11083,8 +11083,7 @@ function clFiltri(tutti){
   if(_clProto && !presenti[_clProto]) _clProto = '';
   function t(attr, val, testo, sel){ return '<button type="button" class="cl-f' + (sel ? ' sel' : '') + '" ' + attr + '="' + val + '">' + testo + '</button>'; }
   /* ogni filtro è un gruppo che non si spezza: il suo nome resta attaccato ai suoi tasti quando la riga va a capo */
-  var h = '<span class="cl-fg"><span class="cl-f-nome">ordine</span>' + t('data-ord', 'ultimo', 'ultimo allenamento', _clOrd === 'ultimo') + t('data-ord', 'az', 'A–Z', _clOrd === 'az') + '</span>';
-  h += '<span class="cl-fg"><span class="cl-f-nome">protocollo</span>' + t('data-proto', '', 'tutti', !_clProto)
+  var h = '<span class="cl-fg"><span class="cl-f-nome">protocollo</span>' + t('data-proto', '', 'tutti', !_clProto)
      + ordine.map(function(p){ return t('data-proto', p, p === 'nuovo' ? 'nuovi' : CL_NOME[p], _clProto === p); }).join('') + '</span>';
   var opz = [['', 'tutti'], ['si', 'con red flag'], ['no', 'senza red flag']];
   (window.RF_DATA || []).forEach(function(f){ opz.push([f.id, f.name]); });
@@ -11120,12 +11119,33 @@ function clDisegna(){
     visti.sort(function(a, b){ return ult[a.id] === ult[b.id] ? perNome(a, b) : (ult[a.id] > ult[b.id] ? -1 : 1); });
   }
   var h = visti.map(clRiga).join('');
+  if(typeof window.mpFissa === 'function'){
+    var ap = _clAperto ? tutti.filter(function(c){ return c.id === _clAperto; })[0] : null, apAtt = (ap && typeof pasInAttesa === 'function') ? pasInAttesa(ap) : null;
+    window.mpFissa(ap ? ((ap.state && csCurrentProto(ap)) || '') : '', apAtt ? apAtt.a : '');
+  }
   if(!visti.length){
     var filtrato = !!(_clProto || _clRf);
     h = (q && !filtrato) ? '<div class="cl-vuoto">Nessun cliente trovato.</div><button type="button" class="cl-nuovo" data-nuovo="' + clEsc(inp.value.trim()) + '">+ aggiungi <b>' + clEsc(inp.value.trim()) + '</b> come nuovo cliente</button>'
                          : '<div class="cl-vuoto">Nessun cliente' + (q || filtrato ? ' con questi filtri' : '') + '.</div>';
   }
   lista.innerHTML = h;
+  clScheda();
+  /* le due intestazioni che ordinano l'elenco */
+  [].forEach.call(document.querySelectorAll('#cl-testa [data-ord]'), function(b){ b.classList.toggle('sel', b.getAttribute('data-ord') === _clOrd); });
+}
+/* LA SCHEDA DEL CLIENTE APERTO sta nella colonna di destra, sotto la griglia: a sinistra CHI (l'elenco, che così non salta),
+   a destra DOVE (la griglia, con la sua zona accesa) e subito sotto la sua timeline, i passaggi e i tasti per entrare. */
+function clScheda(){
+  var box = document.getElementById('cl-scheda'); if(!box) return;
+  var c = _clAperto ? (_csList || []).filter(function(z){ return z && z.id === _clAperto; })[0] : null;
+  if(!c){ box.innerHTML = ''; box.className = ''; return; }
+  var proto = (c.state && csCurrentProto(c)) || null, pc = CL_COLORE[proto] || 'rgba(180,195,210,0.35)';
+  var rf = (typeof rfActiveFlagsForClient === 'function') ? rfActiveFlagsForClient(c.id) : [];
+  box.className = 'si'; box.style.setProperty('--pc', pc);
+  box.innerHTML = '<div class="cs-testa"><span class="cs-nome">' + clEsc(c.id) + '</span><span class="cl-proto">' + (proto ? CL_NOME[proto] : 'nuovo') + '</span>'
+                + rf.map(function(f){ return '<span class="cl-rf">' + clEsc(f.name) + '</span>'; }).join('')
+                + '<button type="button" class="cs-chiudi" data-cl="' + clEsc(c.id) + '" aria-label="Chiudi">\u00d7</button></div>'
+                + clGiu(c, proto);
 }
 window.addEventListener('load', function(){
   var lista = document.getElementById('cl-lista'), inp = document.getElementById('cl-cerca'), ps = document.getElementById('proto-select');
@@ -11138,28 +11158,37 @@ window.addEventListener('load', function(){
     /* i tre tasti restano fuori: sono il piè di pagina */
     ['home-riga','proto-chart-wrap'].forEach(function(i){ var e = document.getElementById(i); if(e) z.appendChild(e); });
   }
+  var scheda = document.createElement('div'); scheda.id = 'cl-scheda'; z.appendChild(scheda);
   inp.addEventListener('input', function(){ _clAperto = null; clDisegna(); });
   var filtri = document.getElementById('cl-filtri');
   if(filtri){
     filtri.addEventListener('click', function(ev){
       var e;
-      if((e = ev.target.closest('[data-ord]'))){ _clOrd = e.getAttribute('data-ord'); _clAperto = null; clDisegna(); lista.scrollTop = 0; return; }
       if((e = ev.target.closest('[data-proto]'))){ _clProto = e.getAttribute('data-proto'); _clAperto = null; clDisegna(); lista.scrollTop = 0; }
     });
     filtri.addEventListener('change', function(ev){
       if(ev.target && ev.target.id === 'cl-f-rf'){ _clRf = ev.target.value; _clAperto = null; clDisegna(); lista.scrollTop = 0; }
     });
   }
-  lista.addEventListener('click', function(ev){
+  /* l'ordine dell'elenco si sceglie dalle intestazioni: "cliente" = A–Z, "ultimo" = dall'ultimo allenamento */
+  var testa = document.getElementById('cl-testa');
+  if(testa) testa.addEventListener('click', function(ev){ var e = ev.target.closest('[data-ord]'); if(e){ _clOrd = e.getAttribute('data-ord'); clDisegna(); lista.scrollTop = 0; } });
+  function clClic(ev){
     var t = ev.target, e;
     if(pasClic(t)) return;
     if((e = t.closest('[data-pt]'))){ _clPtScelto = { id:_clAperto, pt:e.getAttribute('data-pt') }; clDisegna(); return; }
     if((e = t.closest('[data-entra]'))){ clEntra(e.getAttribute('data-entra')); return; }
     if((e = t.closest('[data-dettagli]'))){ cdOpen(e.getAttribute('data-dettagli')); return; }
     if((e = t.closest('[data-nuovo]'))){ var n = e.getAttribute('data-nuovo'); inp.value = ''; if(typeof csSearchAddNew === 'function') csSearchAddNew(n); clDisegna(); return; }
-    if((e = t.closest('[data-cl]'))){ var id = e.getAttribute('data-cl'); _clAperto = (_clAperto === id) ? null : id; _clPtScelto = null; _pasApre = null; _pasVisto = null; clDisegna(); }
-  });
-  lista.addEventListener('input', function(ev){ if(ev.target && ev.target.id === 'pas-nota' && _pasApre){ _pasApre.nota = ev.target.value; var m = lista.querySelector('[data-pas-manda]'); if(m) m.disabled = !pasPronto(_pasApre); } });
+    if((e = t.closest('[data-cl]'))){ var id = e.getAttribute('data-cl'); _clAperto = (_clAperto === id) ? null : id; _clPtScelto = null; _pasApre = null; _pasVisto = null; clDisegna();
+      if(_clAperto){ var zz = document.getElementById('pr-zona'); if(zz) zz.scrollTop = 0; } }
+  }
+  lista.addEventListener('click', clClic);
+  scheda.addEventListener('click', clClic);
+  /* il mouse sopra un cliente accende la sua zona sulla griglia; uscendo torna quella del cliente aperto */
+  lista.addEventListener('mouseover', function(ev){ var r = ev.target.closest && ev.target.closest('.cl-r'); if(r && typeof window.mpMostra === 'function') window.mpMostra(r.getAttribute('data-clp'), r.getAttribute('data-clv')); });
+  lista.addEventListener('mouseleave', function(){ if(typeof window.mpMostra === 'function') window.mpMostra('', ''); });
+  scheda.addEventListener('input', function(ev){ if(ev.target && ev.target.id === 'pas-nota' && _pasApre){ _pasApre.nota = ev.target.value; var m = scheda.querySelector('[data-pas-manda]'); if(m) m.disabled = !pasPronto(_pasApre); } });
   /* si ridisegna quando arriva l'elenco dei clienti e ogni volta che si torna qui */
   if(typeof gridRifareRender === 'function'){
     var _g = gridRifareRender;
@@ -11376,7 +11405,9 @@ function pasClic(t){
   var e, c = (_csList || []).filter(function(z){ return z.id === _clAperto; })[0];
   if((e = t.closest('[data-pas]')) || (e = t.closest('[data-pas-riga]'))){ var id = e.getAttribute('data-pas') || e.getAttribute('data-pas-riga'); _pasVisto = (_pasVisto === id) ? null : id; clDisegna(); return true; }
   if(t.closest('#pas-nota')) return true;
-  if((e = t.closest('[data-cambia]'))){ _pasApre = (_pasApre && _pasApre.id === _clAperto) ? null : {id:_clAperto, a:'', motivo:'', nota:''}; clDisegna(); return true; }
+  if((e = t.closest('[data-cambia]'))){ _pasApre = (_pasApre && _pasApre.id === _clAperto) ? null : {id:_clAperto, a:'', motivo:'', nota:''}; clDisegna();
+    var bx = document.querySelector('#cl-scheda .pas-box'); if(bx && bx.scrollIntoView) bx.scrollIntoView({block:'nearest'});   /* il riquadro del cambio si porta in vista */
+    return true; }
   if(!_pasApre) return false;
   if((e = t.closest('[data-pas-a]'))){ _pasApre.a = e.getAttribute('data-pas-a'); clDisegna(); return true; }
   if((e = t.closest('[data-pas-m]'))){ _pasApre.motivo = e.getAttribute('data-pas-m'); clDisegna(); if(_pasApre.motivo === 'nota'){ var i = document.getElementById('pas-nota'); if(i) i.focus(); } return true; }
@@ -12000,9 +12031,6 @@ window.addEventListener('load', function(){
 <style>
 /* ══ PROTOCOLLI E CLIENTI ══ (solo monitor) A sinistra i clienti, 60; a
    destra i protocolli, 40 (metà e metà quando la finestra è a metà monitor). Sul telefono resta tutto com'era. */
-@media (min-width:900px) and (max-width:1250px), (pointer:fine) and (max-width:1250px){
-  body #proto-select{grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;gap:0 28px !important;padding:24px 28px 0 !important;}
-}
 #cl-zona{display:none;}
 #pr-zona{display:contents;}   /* sul telefono è come se non ci fosse */
 @media (min-width:900px), (pointer:fine){
@@ -12033,22 +12061,79 @@ window.addEventListener('load', function(){
     border-top:1px solid var(--border);background:var(--bg-panel);
   }
   #cl-zona,#pr-zona{grid-row:1;}
-  /* LA COLONNA DEI PROTOCOLLI, pensata per la finestra a metà monitor:
-     - la griglia non prende più tutta l'altezza: ha un'altezza sua, così le caselle sono larghe più che alte;
-     - sotto, Grid e Skip gruppo affiancati, due riquadri uguali;
-     - a finestra stretta le due colonne della pagina sono metà e metà (prima 60 e 40), perché l'elenco ora ha righe più semplici. */
-  #pr-zona > #home-riga{flex:none !important;}
-  #mappa{flex:none !important;height:clamp(330px, 46vh, 430px);min-height:0 !important;}
-  #home-lato{margin-top:4px !important;}
+  /* ══ LA PAGINA PROTOCOLLI ══ pensata per funzionare a metà monitor e a schermo intero.
+     A SINISTRA, stretto (340–460): CHI. Cerca e nuovo cliente, i filtri, l'elenco. L'elenco non si allarga più quando apri un cliente.
+     A DESTRA, tutto il resto: DOVE. La griglia (larga, con un'altezza sua), e sotto la scheda del cliente aperto;
+       poi Grid e Skip gruppo affiancati, poi il grafico.
+     A schermo intero la colonna di destra si divide in due: la griglia a sinistra, scheda del cliente e il resto a destra.
+     Gli assi della griglia rubano meno: 92 punti a sinistra (erano 124) e 58 sotto (erano 78). */
+  body #proto-select{grid-template-columns:clamp(340px, 36vw, 460px) minmax(0,1fr) !important;gap:0 28px !important;padding:20px 28px 0 !important;}
+  #pr-zona{gap:14px !important;align-content:start;}
+  #pr-zona > #home-riga{display:contents !important;}
+  #mappa{order:1;flex:none !important;height:clamp(340px, 50vh, 600px);min-height:0 !important;}
+  #cl-scheda{order:2;display:none;}
+  #home-lato{order:3;margin:0 !important;}
+  #pr-zona > #proto-chart-wrap{order:4 !important;margin:0 !important;}
+  #mappa .mp-g{left:92px;right:14px;bottom:58px;}
+  #mappa .mp-ay{left:92px;bottom:58px;} #mappa .mp-ax{left:92px;bottom:58px;}
+  #mappa .mp-ys{width:84px;bottom:58px;} #mappa .mp-ey{width:84px;}
+  #mappa .mp-xs{left:92px;right:14px;height:52px;}
+  #mappa .mp-t[style*="left:136px"]{left:104px !important;}
+  #mappa .mp-t[style*="bottom:86px"]{bottom:64px !important;}
+  @media (min-width:1500px){
+    #pr-zona{display:grid !important;grid-template-columns:minmax(0,1.3fr) minmax(360px,1fr);grid-auto-rows:min-content;gap:14px 28px !important;}
+    #mappa{grid-column:1;grid-row:1 / span 8;height:clamp(420px, 70vh, 760px);}
+    #cl-scheda, #home-lato, #pr-zona > #proto-chart-wrap{grid-column:2;}
+  }
+  /* la scheda del cliente aperto */
+  #cl-scheda.si{display:block;box-sizing:border-box;border:1px solid rgba(212,168,74,0.55);border-left:3px solid var(--pc);border-radius:0 3px 3px 0;background:rgba(212,168,74,0.04);padding:14px 18px 16px;font-family:var(--font);}
+  .cs-testa{display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;}
+  .cs-nome{font-size:19px;font-weight:400;letter-spacing:1px;color:#f0ebdc;}
+  .cs-chiudi{margin-left:auto;width:28px;height:28px;padding:0;background:none;border:1px solid rgba(180,195,210,0.25);border-radius:2px;cursor:pointer;font-size:17px;line-height:1;color:rgba(215,225,235,0.85);}
+  .cs-chiudi:hover{border-color:rgba(215,225,235,0.7);}
+  #cl-scheda .cl-giu{border-top:0;padding:0;margin-top:12px;}
+  /* Grid e Skip gruppo: due riquadri uguali, affiancati */
   #mp-leg{display:grid !important;grid-template-columns:1fr 1fr;gap:8px;}
   #mp-leg .mp-r.mp-x{height:46px;padding:0 14px 0 0;border:1px solid rgba(180,195,210,0.18) !important;border-radius:4px;}
   #mp-leg .mp-r.mp-x > i{height:100%;margin-right:2px;}
   #mp-leg .mp-r.mp-skip{cursor:pointer;}
+  #mp-leg .mp-r.mp-x.io{border-color:#f0ebdc !important;background:rgba(255,255,255,.06);}
+  #mp-leg .mp-r.mp-x.verso{border:1px dashed #E4B85A !important;}
+  /* la zona dove un cliente chiede di andare (cambio in attesa): tratteggiata, e non si spegne */
+  #mappa .mp-k.verso{opacity:1 !important;border:1px dashed #E4B85A !important;}
   #proto-chart-title{font-size:9px;letter-spacing:3px;color:rgba(190,204,218,0.5);}
   /* i vecchi riquadri di Grid e Skip: restano solo le schede da rifare */
   #home-riga .proto-group-sandbox{display:none !important;}
   #home-riga .proto-card-grid{border:0 !important;background:none !important;}
   #home-riga .proto-card-grid > .proto-skip-label{display:none !important;}
+  /* le scritte sotto la griglia non si toccano tra loro */
+  #mappa .mp-ex{width:24% !important;padding:0 !important;}
+  /* nella scheda del cliente il motivo del passaggio si legge intero */
+  #cl-scheda .pas-s .pas-m{white-space:normal;}
+  /* ── A SINISTRA ── */
+  #cl-su #cl-cerca{height:44px !important;padding:0 14px !important;font-size:15px !important;letter-spacing:1.5px !important;}
+  #cl-filtri{margin-top:10px !important;gap:8px 16px !important;}
+  /* le intestazioni: "cliente" e "ultimo" ordinano l'elenco, quella scelta ha la freccia */
+  #cl-testa{margin:12px 0 6px !important;}
+  #cl-testa button{background:none;border:0;padding:0;margin:0;cursor:pointer;font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit;}
+  #cl-testa button:hover{color:#f0ebdc;}
+  #cl-testa button.sel{color:#E4B85A;}
+  #cl-testa button.sel::after{content:' \25BE';}
+  #cl-testa .a{flex:1;min-width:0;text-align:left;padding-left:16px !important;}
+  #cl-testa .b{width:64px !important;text-align:center;}
+  #cl-testa .c{width:86px !important;text-align:center;margin-right:4px;}
+  /* la riga: nome, protocollo ed eccezioni; il trainer dell'ultima seduta; quanto tempo fa */
+  .cl-capo{height:62px !important;}
+  .cl-chi{padding:0 8px 0 14px !important;}
+  .cl-chiera{width:64px !important;height:62px !important;}
+  .cl-ultimo{width:86px !important;height:62px !important;}
+  .cl-sotto{overflow:hidden;margin-top:6px !important;}
+  .cl-sotto .cl-proto, .cl-sotto .cl-att{flex:none;}
+  .cl-sotto .cl-rf{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;}
+  .cl-sotto .cl-rf + .cl-rf{flex:none;}
+  .cl-r.aperta{border-color:rgba(228,184,90,0.9) !important;border-left-color:var(--pc) !important;background:rgba(212,168,74,0.08) !important;}
+  /* nella riga del cliente: il cambio in attesa, accanto al protocollo */
+  .cl-att{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:2px 6px;border:1px dashed #E4B85A;border-radius:2px;color:var(--vc,#E4B85A);}
 
   #cl-cerca{
     flex:none;height:52px;box-sizing:border-box;padding:0 20px;outline:none;
@@ -12644,6 +12729,28 @@ window.addEventListener('load', function(){
         });
       });
     }
+    /* LA GRIGLIA RISPONDE AL CLIENTE: col mouse sopra un cliente dell'elenco si accende la zona del suo protocollo;
+       il cliente aperto (cliccato) la tiene accesa. Se ha un cambio di protocollo in attesa, la zona dove chiede di andare è tratteggiata. */
+    var fisso = {p:'', v:''};
+    function rigaDi(proto){
+      var nome = (typeof CL_NOME !== 'undefined' && CL_NOME[proto]) || '', r = null;
+      if(nome) [].forEach.call(leg.querySelectorAll('.mp-r'), function(x){ if(((x.querySelector('b') || {}).textContent || '') === nome) r = x; });
+      return r;
+    }
+    function mostra(proto, verso){
+      accendi(proto ? rigaDi(proto) : null);
+      [].forEach.call(mappa.querySelectorAll('.verso'), function(e){ e.classList.remove('verso'); });
+      [].forEach.call(leg.querySelectorAll('.verso'), function(e){ e.classList.remove('verso'); });
+      var nv = (verso && typeof CL_NOME !== 'undefined' && CL_NOME[verso]) || '';
+      if(!nv) return;
+      [].forEach.call(mappa.querySelectorAll('.mp-k'), function(k){
+        [].forEach.call(k.querySelectorAll('.mp-p'), function(n){ if(n.textContent.trim() === nv) k.classList.add('verso'); });
+      });
+      var rv = rigaDi(verso); if(rv && rv.classList.contains('mp-x')) rv.classList.add('verso');
+    }
+    window.mpMostra = function(proto, verso){ mostra(proto || fisso.p, proto ? (verso || '') : fisso.v); };
+    window.mpFissa = function(proto, verso){ fisso = {p:proto || '', v:verso || ''}; mostra(fisso.p, fisso.v); };
+    function torna(){ mostra(fisso.p, fisso.v); }
     leg.addEventListener('mousemove', function(e){
       var trovata = null;
       [].forEach.call(leg.querySelectorAll('.mp-r'), function(r){
@@ -12651,9 +12758,9 @@ window.addEventListener('load', function(){
         if(r.classList.contains('mp-x')) return;
         if(e.clientY >= q.top && e.clientY < q.bottom && e.clientX >= q.left && e.clientX <= q.right) trovata = r;
       });
-      accendi(trovata);
+      if(trovata) accendi(trovata); else torna();
     });
-    leg.addEventListener('mouseleave', function(){ accendi(null); });
+    leg.addEventListener('mouseleave', torna);
     /* lo stesso effetto dalla griglia: il mouse sopra il nome di un protocollo
        in una casella accende la sua zona. Così l'elenco dei cinque nomi sotto
        non serve più (restano solo Grid e Skip gruppo, che sulla griglia non ci sono). */
@@ -12665,9 +12772,9 @@ window.addEventListener('load', function(){
       });
       var riga = null;
       if(nome) [].forEach.call(leg.querySelectorAll('.mp-r'), function(r){ if(!r.classList.contains('mp-x') && ((r.querySelector('b') || {}).textContent || '') === nome) riga = r; });
-      accendi(riga);
+      if(riga) accendi(riga); else torna();
     });
-    mappa.addEventListener('mouseleave', function(){ accendi(null); });
+    mappa.addEventListener('mouseleave', torna);
   })();
   /* quanti clienti: quelli il cui protocollo attuale è quello (cioè l'ultimo
      in cui hanno fatto una seduta). Nei dati non c'è scritto in quale

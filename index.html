@@ -14394,10 +14394,7 @@ document.getElementById('nc-rf').addEventListener('click', function(e){
       <div id="complete-screen" class="complete-screen">
         <div class="complete-title">Progressione completata</div>
         <div class="complete-sub">Il cliente ha raggiunto il livello massimo su tutte le famiglie.</div>
-        <div style="max-width:480px;margin-top:12px;padding-top:20px;border-top:1px solid rgba(180,195,210,0.08);font-family:var(--font);font-size:12px;font-weight:300;color:rgba(180,195,210,0.58);line-height:1.85;text-align:center;">
-          Prima di passare a PACE, verifica che il cliente abbia gestito il bruciore degli esercizi glicolitici senza evitarli — 8–12 reps sono il riferimento — che abbia mantenuto il Cardio a un’intensità coerente con il resto della sessione, e che sulle stazioni Buffer abbia imparato ad arrivarci con una tattica, non di impulso. Se questi tre elementi ci sono, il sistema è pronto per un formato più strutturato.
-        </div>
-        <div style="margin-top:16px;font-family:var(--font);font-size:11px;font-weight:300;color:rgba(180,195,210,0.52);letter-spacing:1px;">Oppure è possibile ricominciare modificando il focus (scelta consigliata per il monosettimanale).</div>
+        <div style="margin-top:16px;font-family:var(--font);font-size:11px;font-weight:300;color:rgba(180,195,210,0.52);letter-spacing:1px;">È possibile ricominciare modificando il focus (scelta consigliata per il monosettimanale).</div>
         <div class="complete-tasti"><button type="button" class="nuova-prog-btn" onclick="nuovaProgressioneSplashOpen()">Nuova progressione</button><span id="complete-cambio"></span></div>
       </div>
     </div>
@@ -14868,7 +14865,7 @@ var SEQUENCES = {
       Object.assign({fam:'core',to:3},   S('Con tutto il resto a L2 la competizione respiratoria su Core smette di essere un problema isolato — diventa strutturale per tutta la sessione. Non è più una singola stazione che richiede attenzione: è la condizione in cui il sistema lavora.','Verifica che non ci siano apnee nelle transizioni tra stazioni e che gli altri distretti non degradino.','Pressione respiratoria strutturale')),
       Object.assign({fam:'buffer',to:3},   S('Core a L3 ha già alzato la pressione respiratoria su tutta la sessione. Buffer trova il sistema in quella condizione e aggiunge il picco metabolico più alto della progressione. Da questo punto nessuna stazione è più leggera delle altre.','Verifica che il ritmo tra respiro e gesto regga e che il movimento non rallenti nelle ultime visite.','Verifica finale del lavoro fatto')),
       Object.assign({fam:'lower',to:3},   S('Lower a L3 sale quando il pattern è stabile a livello 2 da più sessioni. Le due stazioni lower avanzano in modo indipendente — ognuna quando il proprio pattern non degrada nelle ultime visite alla stazione.','Verifica che appoggio plantare, allineamento delle ginocchia e ritmo anca-ginocchio reggano a livello 2 su più sessioni consecutive.','Pattern stabile a livello 2')),
-      Object.assign({fam:'cardio',to:3},   S('Questo è il punto che rende questa progressione la migliore per passare a PACE. Il cliente deve gestire il Cardio in autonomia in tutte le condizioni di sequenza — dopo Lower, dopo Core, dopo Buffer. Se riesce a tenere l\'intensità senza che tu debba intervenire, il sistema è pronto.','Verifica che l\'intensità regga per tutta la durata della stazione senza cali evidenti, in qualsiasi posizione della sequenza.','Gestione autonoma in tutte le condizioni'))
+      Object.assign({fam:'cardio',to:3},   S('Il cliente deve gestire il Cardio in autonomia in tutte le condizioni di sequenza — dopo Lower, dopo Core, dopo Buffer. Se riesce a tenere l\'intensità senza che tu debba intervenire, il sistema è pronto.','Verifica che l\'intensità regga per tutta la durata della stazione senza cali evidenti, in qualsiasi posizione della sequenza.','Gestione autonoma in tutte le condizioni'))
     ]
   },
 
@@ -16683,7 +16680,7 @@ var CARDIO_NARRATIVE = [
   "Con tutto il resto a L2 la competizione respiratoria su Core smette di essere un problema isolato — diventa strutturale per tutta la sessione. Non è più una singola stazione che richiede attenzione: è la condizione in cui il sistema lavora.",
   "Core a L3 ha già alzato la pressione respiratoria su tutta la sessione. Buffer trova il sistema in quella condizione e aggiunge il picco metabolico più alto della progressione. Da questo punto nessuna stazione è più leggera delle altre.",
   "Lower a L3 sale quando il pattern è stabile a livello 2 da più sessioni. Le due stazioni lower avanzano in modo indipendente — ognuna quando il proprio pattern non degrada nelle ultime visite alla stazione.",
-  "Questo è il punto che rende questa progressione la migliore per passare a PACE. Il cliente deve gestire il Cardio in autonomia in tutte le condizioni di sequenza — dopo Lower, dopo Core, dopo Buffer. Se riesce a tenere l\'intensità senza che tu debba intervenire, il sistema è pronto."
+  "Il cliente deve gestire il Cardio in autonomia in tutte le condizioni di sequenza — dopo Lower, dopo Core, dopo Buffer. Se riesce a tenere l\'intensità senza che tu debba intervenire, il sistema è pronto."
 ];
 var CARDIO_SEGMENT=[0,1,2,3,4,5,6,7,8];
 
@@ -23421,7 +23418,7 @@ function adminRender(){
       'font-family:var(--font);font-size:8px;font-weight:600;letter-spacing:1.5px;'+
       'color:'+(active?gold+'0.90)':'rgba(180,195,210,0.76)')+';padding:3px 9px;transition:all 0.12s;">'+(lbl||w)+'</button>';
   }
-  html+='<div id="admin-skip-badge" style="font-family:var(--font);font-size:9px;letter-spacing:1.5px;color:rgba(180,195,210,0.86);margin-bottom:20px;">Caricamento dati Skip…</div>';
+  html+='<div id="admin-skip-badge" style="font-family:var(--font);font-size:9px;letter-spacing:1.5px;color:rgba(180,195,210,0.86);margin-bottom:20px;"></div>';
   html+='<div class="admin-section-title" style="margin-top:8px;">Trend frequenza sistema</div>';
   html+='<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 6px;margin-bottom:12px;">'+
       '<span style="font-family:var(--font);font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(200,175,90,0.74);">⬡ veloce</span>'+
@@ -23448,7 +23445,7 @@ function adminRender(){
   html+='<div style="position:relative;height:200px;margin-bottom:8px;"><canvas id="admin-chart-delta"></canvas></div>';
   html+='<div class="admin-note" style="margin-bottom:28px;">'+
     '<strong>Come si legge:</strong> ogni linea è un PT. L\u2019asse orizzontale parte dal <strong>giorno 0 del sistema</strong> e avanza fino a oggi, alla granularità selezionata (giorni/settimane/mesi). '+
-    'Il valore è il <strong>numero di sessioni</strong> che quel PT ha loggato nel periodo, su tutti i clienti e tutti i protocolli (Open + Skip + Pace). '+
+    'Il valore è il <strong>numero di sessioni</strong> che quel PT ha loggato nel periodo, su tutti i clienti e tutti i protocolli. '+
     'Se la linea sale, quel PT sta usando di più il sistema.'+
   '</div>';
 
@@ -23552,7 +23549,7 @@ function adminBuildCharts(clients, rows){
     });
   } catch(ex){}
   var skipBadge=document.getElementById('admin-skip-badge');
-  if(skipBadge) skipBadge.textContent = skipSessionCount>0 ? '+ '+skipSessionCount+' sessioni Skip incluse' : 'Nessuna sessione Skip nel log';
+  if(skipBadge) skipBadge.textContent = skipSessionCount>0 ? '+ '+skipSessionCount+' sessioni Skip incluse' : '';
 
   var clientWeekData = clients.map(function(c){
     return { id:c.id, visits: getVisitsByWeek((c.state&&c.state.log)||[]) };
@@ -23873,8 +23870,8 @@ function adminRenderClients(){
       return '<tr class="admin-client-row" data-client-id="'+r.id.replace(/"/g,'&quot;')+'">'+
         '<td class="hi">'+r.id+'</td>'+
         protoCell(r.openPt, r.openCount, openExtra)+
-        protoCell(r.skipPt, r.skipCount, '')+
-        protoCell(r.pacePt, r.paceCount, '')+
+        (rows.some(function(z){ return z.skipCount > 0; }) ? protoCell(r.skipPt, r.skipCount, '') : '')+
+        (rows.some(function(z){ return z.paceCount > 0; }) ? protoCell(r.pacePt, r.paceCount, '') : '')+
         '<td class="dim">'+lastTxt+'</td>'+
         '<td class="'+sc+'">'+stato+'</td>'+
       '</tr>';
@@ -23911,8 +23908,8 @@ function adminRenderClients(){
   html+='<table class="admin-table" id="admin-client-table"><thead><tr>'+
     sortTh('id','Cliente')+
     sortTh('openCount','Open')+
-    sortTh('skipCount','Skip')+
-    sortTh('paceCount','Pace')+
+    (rows.some(function(r){ return r.skipCount > 0; }) ? sortTh('skipCount','Skip') : '')+   /* Skip e Pace non ci sono più: la colonna compare solo se nello storico ci sono sedute vere */
+    (rows.some(function(r){ return r.paceCount > 0; }) ? sortTh('paceCount','Pace') : '')+
     sortTh('lastDate','Ultima')+
     sortTh('daysSinceLast','Stato')+
     '</tr></thead><tbody id="admin-client-tbody"></tbody></table>';
@@ -24100,8 +24097,8 @@ function adminDetailRender(){
     '<div class="admin-detail-tabs">'+
       tab('timeline','Timeline',openSess+skipSess+paceSess+gridSess)+
       tab('open','Open',openSess)+
-      tab('skip','Skip',skipSess)+
-      tab('pace','Pace',paceSess)+
+      (skipSess ? tab('skip','Skip',skipSess) : '')+
+      (paceSess ? tab('pace','Pace',paceSess) : '')+
       tab('grid','Grid',gridSess)+
     '</div>'+
     stripHtml+
@@ -24221,8 +24218,8 @@ function adminDetailRenderTimeline(st){
     '<div class="adt-sum-item"><span class="adt-sum-v">'+totalSess+'</span><span class="adt-sum-l">Sessioni totali</span></div>'+
     '<div class="adt-sum-item"><span class="adt-sum-v">'+transitions+'</span><span class="adt-sum-l">Transizioni</span></div>'+
     '<div class="adt-sum-item"><span class="adt-sum-v">'+counts.open+'</span><span class="adt-sum-l adt-c-open">Open</span></div>'+
-    '<div class="adt-sum-item"><span class="adt-sum-v">'+counts.skip+'</span><span class="adt-sum-l adt-c-skip">Skip</span></div>'+
-    '<div class="adt-sum-item"><span class="adt-sum-v">'+counts.pace+'</span><span class="adt-sum-l adt-c-pace">Pace</span></div>'+
+    (counts.skip ? '<div class="adt-sum-item"><span class="adt-sum-v">'+counts.skip+'</span><span class="adt-sum-l adt-c-skip">Skip</span></div>' : '')+
+    (counts.pace ? '<div class="adt-sum-item"><span class="adt-sum-v">'+counts.pace+'</span><span class="adt-sum-l adt-c-pace">Pace</span></div>' : '')+
     '<div class="adt-sum-item"><span class="adt-sum-v">'+counts.grid+'</span><span class="adt-sum-l adt-c-grid">Grid</span></div>'+
   '</div>';
 

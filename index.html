@@ -11246,14 +11246,11 @@ window.addEventListener('load', function(){
    Un cliente sta in UN protocollo alla volta. Cambiarlo è un atto, con scritto: da dove a dove, il motivo, chi l'ha chiesto, quando,
    e a che punto era il cliente. Il motivo si sceglie da una lista: se è lì basta sceglierlo, senza scrivere niente.
    Solo se nessuna voce va bene si sceglie "Nota", e allora la riga scritta è obbligatoria.
-   - Di regola il cambio è una RICHIESTA: il cliente resta dov'è finché dall'Admin (dietro la sua password) non viene approvata o rifiutata.
-   - Sono LIBERI, cioè avvengono subito ma lasciano comunque un avviso in Admin:
-       · da Open verso Self, sempre;
-       · da Open con la progressione finita verso Load o Lift (verso Move e verso Grid no: è una richiesta);
-       · in Open, finita una progressione, aprirne un'altra;
-       · da Move verso Open;
-       · da Grid verso qualunque protocollo. Verso Grid invece è sempre una richiesta.
-   - Finché c'è una richiesta o un avviso non visto, il tasto Admin nella barra lampeggia.
+   Ogni passaggio è di tre tipi (la tabella è in PAS_REGOLE, qui sotto):
+   - LIBERO: avviene subito, e all'Admin arriva solo un avviso;
+   - RICHIESTA: il cliente resta dov'è finché dall'Admin (dietro la sua password) non viene approvata o rifiutata;
+   - NON SI PUÒ: quel passaggio non esiste (da Move non si va in Load né in Lift). Il tasto è spento.
+   Finché c'è una richiesta il tasto Admin nella barra lampeggia; con un solo avviso non visto resta acceso fermo.
    Tutto sta nella scheda del cliente (state.passaggi), quindi viaggia con lei sul database. */
 var PAS_MOTIVI = [
   {id:'obiettivo',    nome:'Cambio obiettivo comunicato dal cliente'},
@@ -11309,13 +11306,22 @@ function pasRfNuova(c){
   return Object.keys(f).some(function(k){ return f[k] && f[k].attivo && f[k].dal && f[k].dal >= lim; });
 }
 /* il cambio è libero o deve passare dall'Admin? */
-function pasLibero(c, da, a){
-  if(da === 'open' && a === 'self') return true;                                        /* Open → Self: sempre libero, a qualunque punto della progressione (stessi esercizi, stesse logiche) */
-  if(da === 'open' && pasOpenFinita(c) && (a === 'load' || a === 'lift')) return true;  /* Open → Load o Lift: libero solo a progressione finita */
-  if(da === 'move' && a === 'open') return true;
-  if(da === 'grid') return true;      /* da Grid si esce sempre, verso qualunque protocollo (anche Move). ENTRARE in Grid invece è sempre una richiesta */
-  return false;
+/* LE REGOLE DEI PASSAGGI, come le ha dettate Paolo il 26/11/2026. L = libero (solo avviso), R = richiesta da approvare, X = non si può.
+   Open ha due righe: a progressione finita e a metà. A metà serve sempre la richiesta, perché si vuole sapere perché si cambia. */
+var PAS_REGOLE = {
+  openMeta:   {self:'R', load:'R', lift:'R', move:'R', grid:'R'},
+  openFinita: {self:'L', load:'L', lift:'L', move:'R', grid:'R'},
+  self:       {open:'L', load:'L', lift:'L', move:'R', grid:'R'},   /* Self non ha una fine: verso Open si va in qualunque momento */
+  load:       {open:'L', self:'L', lift:'L', move:'R', grid:'R'},
+  lift:       {load:'L', open:'R', self:'R', move:'R', grid:'R'},
+  move:       {open:'L', self:'L', load:'X', lift:'X', grid:'R'},   /* da Move non si passa a Load né a Lift */
+  grid:       {open:'L', self:'L', move:'L', load:'R', lift:'R'}
+};
+function pasRegola(c, da, a){
+  var riga = PAS_REGOLE[da === 'open' ? (pasOpenFinita(c) ? 'openFinita' : 'openMeta') : da], r = riga && riga[a];
+  return r === 'L' ? 'libero' : r === 'X' ? 'no' : 'richiesta';
 }
+function pasLibero(c, da, a){ return pasRegola(c, da, a) === 'libero'; }
 /* quello che la Sandbox sa da sola sul motivo scelto: '' = non lo può controllare */
 function pasControllo(c, da, motivo){
   if(motivo === 'finita') return da !== 'open' ? 'solo Open ha una fine' : (pasOpenFinita(c) ? 'confermato: la progressione è finita' : 'non risulta: la progressione non è finita');
@@ -11356,7 +11362,7 @@ function pasEsegui(c, p){
 /* il trainer manda la richiesta (o fa il cambio, se è libero) */
 function pasManda(c, pt){
   var da = csCurrentProto(c), q = _pasApre;
-  if(!c || !pasPronto(q) || !pt || !da || pasInAttesa(c)) return;
+  if(!c || !pasPronto(q) || !pt || !da || pasInAttesa(c) || pasRegola(c, da, q.a) === 'no') return;
   if(!Array.isArray(c.state.passaggi)) c.state.passaggi = [];
   var p = {id:'p' + Date.now().toString(36), da:da, a:q.a, motivo:q.motivo, nota:(q.motivo === 'nota' ? (q.nota || '').trim() : ''), pt:pt, ts:Date.now(), punto:pasPunto(c, da), controllo:pasControllo(c, da, q.motivo), stato:'attesa'};
   c.state.passaggi.push(p);
@@ -11425,7 +11431,11 @@ function pasNellaFinestra(c, proto){
     h += '<div class="pas-box">'
        + '<div class="pas-su"><span class="pas-k">Adesso</span><span class="pas-punto">' + clEsc(pasPunto(c, proto)) + '</span></div>'
        + '<div class="pas-k">Verso</div>'
-       + '<div class="pas-g pas-verso">' + PAS_PROTO.filter(function(p){ return p !== proto; }).map(function(p){ return '<button type="button" class="pas-c' + (q.a === p ? ' sel' : '') + '" data-pas-a="' + p + '" style="--lc:' + CL_COLORE[p] + '">' + CL_NOME[p] + '</button>'; }).join('') + '</div>'
+       + '<div class="pas-g pas-verso">' + PAS_PROTO.filter(function(p){ return p !== proto; }).map(function(p){
+           /* ogni destinazione dice subito com'è il passaggio: libero, richiesta, oppure non si può (spento) */
+           var rg = pasRegola(c, proto, p), no = rg === 'no';
+           return '<button type="button" class="pas-c ' + rg + (q.a === p ? ' sel' : '') + '"' + (no ? ' disabled title="Da ' + CL_NOME[proto] + ' non si passa a ' + CL_NOME[p] + '"' : ' data-pas-a="' + p + '"') + ' style="--lc:' + CL_COLORE[p] + '"><b>' + CL_NOME[p] + '</b><i>' + (no ? 'non si può' : rg) + '</i></button>';
+         }).join('') + '</div>'
        + '<div class="pas-k">Motivo</div>'
        + '<div class="pas-g pas-motivi">' + PAS_MOTIVI.map(function(m){ return '<button type="button" class="pas-c' + (q.motivo === m.id ? ' sel' : '') + '" data-pas-m="' + m.id + '">' + clEsc(m.nome) + '</button>'; }).join('')
          + '<button type="button" class="pas-c' + (q.motivo === 'nota' ? ' sel' : '') + '" data-pas-m="nota">Nota</button></div>'
@@ -12425,10 +12435,16 @@ header > #breadcrumb, header > .bc{margin-right:auto!important;}
 .pas-punto{font-size:14px;color:#f0ebdc;}
 /* le scelte stanno in colonne uguali: niente a capo a caso */
 .pas-g{display:grid;gap:6px;}
-.pas-verso{grid-template-columns:repeat(auto-fit,minmax(64px,1fr));}
+.pas-verso{grid-template-columns:repeat(auto-fit,minmax(72px,1fr));}
 .pas-motivi{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));grid-auto-rows:1fr;}
 .pas-c{min-height:32px;padding:5px 10px;background:none;border:1px solid rgba(180,195,210,.25);border-radius:2px;cursor:pointer;font-family:var(--font);font-size:12px;line-height:1.25;color:rgba(215,225,235,.9);}
-.pas-verso .pas-c{text-align:center;padding:5px 4px;}
+.pas-verso .pas-c{text-align:center;padding:6px 4px 5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:46px;}
+.pas-verso .pas-c b{font-weight:400;font-size:13px;letter-spacing:1px;}
+.pas-verso .pas-c i{font-style:normal;font-size:8.5px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:rgba(190,204,218,.6);}
+.pas-verso .pas-c.richiesta i{color:#E4B85A;}
+.pas-verso .pas-c.no{cursor:default;border-style:dashed;opacity:.45;}
+.pas-verso .pas-c.no b{text-decoration:line-through;}
+.pas-verso .pas-c.no:hover{border-color:rgba(180,195,210,.25);}
 .pas-motivi .pas-c{text-align:left;}
 .pas-c:hover{border-color:rgba(180,195,210,.6);}
 .pas-c.sel{border-color:rgba(228,184,90,.9);color:#E4B85A;background:rgba(212,168,74,.12);}

@@ -10522,7 +10522,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   <div id="cl-zona">
     <div id="cl-su"><input id="cl-cerca" type="text" placeholder="cerca cliente" autocomplete="off" spellcheck="false"><button type="button" id="nc-apri" onclick="ncApri()">+ Nuovo cliente</button></div>
     <div id="cl-filtri"></div>
-    <div id="cl-testa"><span class="a">cliente</span><span class="b">ultimi tre allenamenti</span><span class="c">ultimo</span></div>
+    <div id="cl-testa"><span class="a">cliente</span><span class="b">ultimo trainer</span><span class="c">ultimo</span></div>
     <div id="cl-lista"></div>
   </div>
   <div id="proto-pt-strip" style="display:flex;gap:8px;align-items:center;justify-content:flex-end;">
@@ -10893,14 +10893,8 @@ function clRiga(c){
   var pc = CL_COLORE[proto] || 'rgba(180,195,210,0.35)';
   var rf = (typeof rfActiveFlagsForClient === 'function') ? rfActiveFlagsForClient(c.id) : [];
   var chips = rf.length ? '<span class="cl-rf">' + clEsc(rf[0].name) + '</span>' + (rf.length > 1 ? '<span class="cl-rf">+' + (rf.length - 1) + '</span>' : '') : '';
-  var tre = storia.slice(0, 3).reverse(), celle = '';
-  for(var i = 0; i < 3; i++){
-    var e = tre[i - (3 - tre.length)];
-    if(!e){ celle += '<div></div>'; continue; }
-    var d = clData(e.date);
-    celle += '<div><div class="cl-quando"><span>' + CL_GIORNI[d.getDay()] + ' ' + d.getDate() + ' ' + CL_MESI[d.getMonth()] + '</span><span>' + clEsc(e.pt || '') + '</span></div>'
-           + '<div class="cl-cosa">' + clEsc(e.proto === 'open' ? clCosa(c, e.date) : '') + '</div></div>';
-  }
+  /* in mezzo c'era "ultimi tre allenamenti": tre date piccole che nessuno leggeva. Resta una cosa sola, grande: il trainer dell'ultima seduta. */
+  var chi = storia.length ? (storia[0].pt || '') : '';
   var n = storia.length ? clGiorniDa(clData(storia[0].date)) : null;
   var ult = n === null ? '<b>—</b><span>mai allenato</span>'
           : n <= 0 ? '<b>oggi</b><span>&nbsp;</span>'
@@ -10911,7 +10905,7 @@ function clRiga(c){
   return '<div class="cl-r' + (fermo ? ' fermo' : '') + (aperta ? ' aperta' : '') + '" style="--pc:' + pc + '">'
        + '<button type="button" class="cl-capo" data-cl="' + clEsc(c.id) + '">'
        +   '<div class="cl-chi"><div class="cl-nome">' + clEsc(c.id) + (c.state && c.state.nick ? '<span class="cl-nick">' + clEsc(c.state.nick) + '</span>' : '') + '</div><div class="cl-sotto"><span class="cl-proto">' + (proto ? CL_NOME[proto] : 'nuovo') + '</span>' + chips + '</div></div>'
-       +   '<div class="cl-tre">' + celle + '</div>'
+       +   '<div class="cl-chiera">' + (chi ? '<b>' + clEsc(chi) + '</b>' : '') + '</div>'
        +   '<div class="cl-ultimo">' + ult + '</div>'
        + '</button>'
        + (aperta ? clGiu(c, proto) : '')
@@ -11088,14 +11082,15 @@ function clFiltri(tutti){
   var ordine = ['open','load','self','lift','move','grid','skip','pace','nuovo'].filter(function(p){ return presenti[p]; });
   if(_clProto && !presenti[_clProto]) _clProto = '';
   function t(attr, val, testo, sel){ return '<button type="button" class="cl-f' + (sel ? ' sel' : '') + '" ' + attr + '="' + val + '">' + testo + '</button>'; }
-  var h = '<span class="cl-f-nome">ordine</span>' + t('data-ord', 'ultimo', 'ultimo allenamento', _clOrd === 'ultimo') + t('data-ord', 'az', 'A–Z', _clOrd === 'az');
-  h += '<span class="cl-f-nome">protocollo</span>' + t('data-proto', '', 'tutti', !_clProto)
-     + ordine.map(function(p){ return t('data-proto', p, p === 'nuovo' ? 'nuovi' : CL_NOME[p], _clProto === p); }).join('');
+  /* ogni filtro è un gruppo che non si spezza: il suo nome resta attaccato ai suoi tasti quando la riga va a capo */
+  var h = '<span class="cl-fg"><span class="cl-f-nome">ordine</span>' + t('data-ord', 'ultimo', 'ultimo allenamento', _clOrd === 'ultimo') + t('data-ord', 'az', 'A–Z', _clOrd === 'az') + '</span>';
+  h += '<span class="cl-fg"><span class="cl-f-nome">protocollo</span>' + t('data-proto', '', 'tutti', !_clProto)
+     + ordine.map(function(p){ return t('data-proto', p, p === 'nuovo' ? 'nuovi' : CL_NOME[p], _clProto === p); }).join('') + '</span>';
   var opz = [['', 'tutti'], ['si', 'con red flag'], ['no', 'senza red flag']];
   (window.RF_DATA || []).forEach(function(f){ opz.push([f.id, f.name]); });
   opz.push(['__custom', 'Custom']);
-  h += '<span class="cl-f-nome">red flag</span><select class="cl-f' + (_clRf ? ' sel' : '') + '" id="cl-f-rf">'
-     + opz.map(function(o){ return '<option value="' + o[0] + '"' + (o[0] === _clRf ? ' selected' : '') + '>' + clEsc(o[1]) + '</option>'; }).join('') + '</select>';
+  h += '<span class="cl-fg"><span class="cl-f-nome">red flag</span><select class="cl-f' + (_clRf ? ' sel' : '') + '" id="cl-f-rf">'
+     + opz.map(function(o){ return '<option value="' + o[0] + '"' + (o[0] === _clRf ? ' selected' : '') + '>' + clEsc(o[1]) + '</option>'; }).join('') + '</select></span>';
   box.innerHTML = h;
 }
 function clDisegna(){
@@ -12004,7 +11999,10 @@ window.addEventListener('load', function(){
 </script>
 <style>
 /* ══ PROTOCOLLI E CLIENTI ══ (solo monitor) A sinistra i clienti, 60; a
-   destra i protocolli, 40. Sul telefono resta tutto com'era. */
+   destra i protocolli, 40 (metà e metà quando la finestra è a metà monitor). Sul telefono resta tutto com'era. */
+@media (min-width:900px) and (max-width:1250px), (pointer:fine) and (max-width:1250px){
+  body #proto-select{grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;gap:0 28px !important;padding:24px 28px 0 !important;}
+}
 #cl-zona{display:none;}
 #pr-zona{display:contents;}   /* sul telefono è come se non ci fosse */
 @media (min-width:900px), (pointer:fine){
@@ -12035,6 +12033,17 @@ window.addEventListener('load', function(){
     border-top:1px solid var(--border);background:var(--bg-panel);
   }
   #cl-zona,#pr-zona{grid-row:1;}
+  /* LA COLONNA DEI PROTOCOLLI, pensata per la finestra a metà monitor:
+     - la griglia non prende più tutta l'altezza: ha un'altezza sua, così le caselle sono larghe più che alte;
+     - sotto, Grid e Skip gruppo affiancati, due riquadri uguali;
+     - a finestra stretta le due colonne della pagina sono metà e metà (prima 60 e 40), perché l'elenco ora ha righe più semplici. */
+  #pr-zona > #home-riga{flex:none !important;}
+  #mappa{flex:none !important;height:clamp(330px, 46vh, 430px);min-height:0 !important;}
+  #home-lato{margin-top:4px !important;}
+  #mp-leg{display:grid !important;grid-template-columns:1fr 1fr;gap:8px;}
+  #mp-leg .mp-r.mp-x{height:46px;padding:0 14px 0 0;border:1px solid rgba(180,195,210,0.18) !important;border-radius:4px;}
+  #mp-leg .mp-r.mp-x > i{height:100%;margin-right:2px;}
+  #mp-leg .mp-r.mp-skip{cursor:pointer;}
   #proto-chart-title{font-size:9px;letter-spacing:3px;color:rgba(190,204,218,0.5);}
   /* i vecchi riquadri di Grid e Skip: restano solo le schede da rifare */
   #home-riga .proto-group-sandbox{display:none !important;}
@@ -12051,20 +12060,26 @@ window.addEventListener('load', function(){
   #cl-filtri{flex:none;display:flex;align-items:center;flex-wrap:wrap;gap:6px 6px;margin-top:12px;}
   .cl-f-nome{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(190,204,218,0.55);margin:0 4px 0 14px;}
   .cl-f-nome:first-child{margin-left:0;}
+  #cl-filtri{gap:8px 18px !important;}
+  .cl-fg{display:inline-flex;align-items:center;gap:6px;flex-wrap:nowrap;min-width:0;}
+  .cl-fg .cl-f-nome{margin:0 2px 0 0 !important;}
   .cl-f{height:28px;padding:0 10px;background:none;border:1px solid rgba(180,195,210,0.20);border-radius:2px;cursor:pointer;font-family:var(--font);font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(200,214,228,0.8);white-space:nowrap;}
   .cl-f.sel{border-color:rgba(228,184,90,0.9);color:#E4B85A;background:rgba(212,168,74,0.12);}
   select.cl-f{appearance:none;-webkit-appearance:none;padding-right:24px;background:rgba(0,0,0,0.25) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='5'><path d='M0 0l4 5 4-5z' fill='%23b4c3d2'/></svg>") no-repeat right 9px center;}
   select.cl-f option{background:#0c0b0a;color:#f0ebdc;}
   #cl-testa{flex:none;display:flex;align-items:center;margin:14px 0 8px;font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(190,204,218,0.6);}
-  #cl-testa .a{width:250px;padding-left:20px;box-sizing:border-box;}
-  #cl-testa .b{flex:1;text-align:center;}
-  #cl-testa .c{width:128px;text-align:center;}
+  #cl-testa .a{flex:1;min-width:0;padding-left:20px;box-sizing:border-box;}
+  #cl-testa .b{width:96px;text-align:center;}
+  #cl-testa .c{width:112px;text-align:center;margin-right:4px;}
   #cl-lista{flex:1;min-height:0;overflow-y:auto;padding-right:4px;}
   .cl-r{margin-bottom:8px;border:1px solid rgba(180,195,210,0.14);border-left:3px solid var(--pc);border-radius:0 3px 3px 0;background:rgba(0,0,0,0.18);}
   .cl-r.aperta{border-color:rgba(212,168,74,0.55);border-left-color:var(--pc);background:rgba(212,168,74,0.04);}
   .cl-capo{display:flex;align-items:center;width:100%;height:68px;padding:0;background:none;border:0;cursor:pointer;text-align:left;font-family:var(--font);color:inherit;}
   .cl-capo:hover{background:rgba(255,255,255,0.025);}
-  .cl-chi{width:250px;box-sizing:border-box;padding:0 12px 0 18px;min-width:0;}
+  .cl-chi{flex:1;box-sizing:border-box;padding:0 12px 0 18px;min-width:0;}
+  .cl-chiera{flex:none;width:96px;height:68px;box-sizing:border-box;border-left:1px solid rgba(180,195,210,0.10);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;}
+  .cl-chiera b{font-size:17px;font-weight:400;letter-spacing:1px;line-height:1;color:#f0ebdc;}
+  .cl-chiera span{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(190,204,218,0.6);}
   .cl-nome{font-size:16px;font-weight:400;letter-spacing:1px;color:#f0ebdc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .cl-sotto{margin-top:7px;display:flex;align-items:center;gap:8px;white-space:nowrap;}
   .cl-proto{font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--pc);}
@@ -12074,7 +12089,7 @@ window.addEventListener('load', function(){
   .cl-quando{display:flex;justify-content:space-between;gap:6px;font-size:11px;letter-spacing:1px;color:rgba(218,228,238,0.78);white-space:nowrap;}
   .cl-quando span:last-child{color:rgba(190,204,218,0.6);}
   .cl-cosa{margin-top:5px;font-size:11px;font-weight:500;letter-spacing:0.5px;color:#e8c878;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .cl-ultimo{width:128px;height:68px;box-sizing:border-box;border-left:1px solid rgba(180,195,210,0.14);background:rgba(240,235,220,0.035);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;}
+  .cl-ultimo{flex:none;width:112px;height:68px;box-sizing:border-box;border-left:1px solid rgba(180,195,210,0.14);background:rgba(240,235,220,0.035);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;}
   .cl-ultimo b{font-size:24px;font-weight:300;line-height:1;color:#f0ebdc;}
   .cl-ultimo span{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(190,204,218,0.72);}
   .cl-r.fermo .cl-ultimo{background:rgba(229,100,100,0.10);}
@@ -12237,7 +12252,13 @@ header > #breadcrumb, header > .bc{margin-right:auto!important;}
 .pas-s.rifiutato{color:rgba(190,204,218,.55);} .pas-s.rifiutato .pas-dove{color:rgba(190,204,218,.6);text-decoration:line-through;}
 .pas-s.sel .pas-m{white-space:normal;}
 .pas-altri{padding:6px 4px 0;font-size:9.5px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(190,204,218,.5);}
-@media (max-width:900px){ .pas-s{grid-template-columns:12px 80px 96px minmax(0,1fr) 66px;} .pas-s .pas-chi{display:none;} }
+/* a finestra stretta il motivo va su una riga sua, intero, sotto "da dove a dove" */
+@media (max-width:900px){
+  .pas-s{grid-template-columns:12px 84px minmax(0,1fr) auto;row-gap:3px;}
+  .pas-s .pas-chi{display:none;}
+  .pas-s .pas-m{grid-column:2 / -1;grid-row:2;white-space:normal;}
+  .mp-t{letter-spacing:2.5px !important;font-size:10px !important;}
+}
 .pas-riga{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;margin-top:10px;padding:9px 12px;border:1px solid rgba(180,195,210,.18);border-radius:2px;font-size:12.5px;color:rgba(225,232,240,.92);}
 .pas-riga.attesa{border-color:rgba(228,184,90,.6);}
 .pas-riga b{font-weight:600;color:#f0ebdc;}

@@ -10522,7 +10522,7 @@ tr.ore-scala td{border-top:1px solid var(--border);}
   <div id="cl-zona">
     <div id="cl-su"><input id="cl-cerca" type="text" placeholder="cerca cliente" autocomplete="off" spellcheck="false"><button type="button" id="nc-apri" onclick="ncApri()">+ Nuovo cliente</button></div>
     <div id="cl-filtri"></div>
-    <div id="cl-testa"><button type="button" class="a" data-ord="az">cliente</button><span class="b">trainer</span><button type="button" class="c" data-ord="ultimo">ultimo</button></div>
+    <div id="cl-testa"><button type="button" class="a" data-ord="az">cliente</button><span class="b">ultima seduta</span><span class="b">scheda</span><button type="button" class="c" data-ord="ultimo">ultimo</button></div>
     <div id="cl-lista"></div>
   </div>
   <div id="proto-pt-strip" style="display:flex;gap:8px;align-items:center;justify-content:flex-end;">
@@ -10887,6 +10887,18 @@ function clSedute(c){
   sedute.sort(function(x, y){ return x.date < y.date ? -1 : x.date > y.date ? 1 : 0; });
   return sedute;
 }
+/* CHI HA FATTO LA SCHEDA: il trainer che ha impostato quello che il cliente sta seguendo adesso.
+   In Open è chi ha aperto la progressione in corso. Negli altri è chi ha fatto l'ultimo passaggio verso quel protocollo;
+   se il passaggio non c'è (dati vecchi), chi ha aperto l'ultima progressione scritta nel diario. Se non si sa, resta vuoto. */
+function clChiScheda(c, proto){
+  var st = c && c.state; if(!st || !proto) return '';
+  if(proto === 'open'){ var o = st.open || st; if(o && o.pt) return o.pt; }
+  var up = (typeof pasUltimo === 'function') ? pasUltimo(c) : null;
+  if(up && up.a === proto && up.pt) return up.pt;
+  var j = Array.isArray(st.journal) ? st.journal : [];
+  for(var i = j.length - 1; i >= 0; i--){ if(j[i] && j[i].kind === 'progression_start' && j[i].proto === proto && j[i].pt) return j[i].pt; }
+  var b = st[proto]; return (b && b.pt) || '';
+}
 function clRiga(c){
   if(c.state && typeof migrateStateShape === 'function') migrateStateShape(c.state);
   var storia = c.state ? clSedute(c).reverse() : [];
@@ -10896,6 +10908,7 @@ function clRiga(c){
   var chips = rf.length ? '<span class="cl-rf">' + clEsc(rf[0].name) + '</span>' + (rf.length > 1 ? '<span class="cl-rf">+' + (rf.length - 1) + '</span>' : '') : '';
   /* in mezzo c'era "ultimi tre allenamenti": tre date piccole che nessuno leggeva. Resta una cosa sola, grande: il trainer dell'ultima seduta. */
   var chi = storia.length ? (storia[0].pt || '') : '';
+  var chiScheda = clChiScheda(c, proto);
   var n = storia.length ? clGiorniDa(clData(storia[0].date)) : null;
   var ult = n === null ? '<b>—</b><span>mai allenato</span>'
           : n <= 0 ? '<b>oggi</b><span>&nbsp;</span>'
@@ -10908,6 +10921,7 @@ function clRiga(c){
        + '<button type="button" class="cl-capo" data-cl="' + clEsc(c.id) + '">'
        +   '<div class="cl-chi"><div class="cl-nome">' + clEsc(c.id) + (c.state && c.state.nick ? '<span class="cl-nick">' + clEsc(c.state.nick) + '</span>' : '') + '</div><div class="cl-sotto"><span class="cl-proto">' + (proto ? CL_NOME[proto] : 'nuovo') + '</span>' + (att ? '<span class="cl-att" style="--vc:' + CL_COLORE[att.a] + '" title="Cambio di protocollo in attesa dell\u2019Admin">\u2192 ' + CL_NOME[att.a] + '</span>' : '') + chips + '</div></div>'
        +   '<div class="cl-chiera">' + (chi ? '<b>' + clEsc(chi) + '</b>' : '') + '</div>'
+       +   '<div class="cl-chiera">' + (chiScheda ? '<b>' + clEsc(chiScheda) + '</b>' : '') + '</div>'
        +   '<div class="cl-ultimo">' + ult + '</div>'
        + '</button>'
        + '</div>';
@@ -12086,7 +12100,7 @@ window.addEventListener('load', function(){
        La griglia, subito sotto Grid e Skip gruppo affiancati (sono parte della griglia), poi la scheda del cliente aperto, poi il grafico.
      A schermo intero la colonna di destra si divide in due: griglia con Grid e Skip a sinistra, scheda del cliente e grafico a destra.
      Gli assi della griglia: 104 punti a sinistra (erano 124) e 76 sotto (erano 78), con le scritte più grandi e leggibili. */
-  body #proto-select{grid-template-columns:clamp(340px, 36vw, 460px) minmax(0,1fr) !important;gap:0 28px !important;padding:20px 28px 0 !important;}
+  body #proto-select{grid-template-columns:clamp(350px, 38vw, 480px) minmax(0,1fr) !important;gap:0 28px !important;padding:20px 28px 0 !important;}
   #pr-zona{gap:14px !important;align-content:start;}
   #pr-zona > #home-riga{display:contents !important;}
   #mappa{order:1;flex:none !important;height:clamp(340px, 44vh, 600px);min-height:0 !important;}
@@ -12165,13 +12179,19 @@ window.addEventListener('load', function(){
   #cl-testa button.sel{color:#E4B85A;}
   #cl-testa button.sel::after{content:' \25BE';}
   #cl-testa .a{flex:1;min-width:0;text-align:left;padding-left:16px !important;}
-  #cl-testa .b{width:64px !important;text-align:center;}
-  #cl-testa .c{width:86px !important;text-align:center;margin-right:4px;}
+  /* due colonne con il nome di un trainer, e sopra scritto cosa vuol dire: chi l'ha seguito nell'ultima seduta, chi gli ha fatto la scheda */
+  #cl-testa{align-items:flex-end !important;}
+  #cl-testa .b{width:52px !important;text-align:center;font-size:8px;letter-spacing:0.8px;line-height:1.25;}
+  #cl-testa .c{width:66px !important;text-align:center;margin-right:4px;}
   /* la riga: nome, protocollo ed eccezioni; il trainer dell'ultima seduta; quanto tempo fa */
   .cl-capo{height:62px !important;}
   .cl-chi{padding:0 8px 0 14px !important;}
-  .cl-chiera{width:64px !important;height:62px !important;}
-  .cl-ultimo{width:86px !important;height:62px !important;}
+  .cl-chiera{width:52px !important;height:62px !important;}
+  .cl-chiera b{font-size:14px !important;letter-spacing:0.5px !important;}
+  .cl-ultimo{width:66px !important;height:62px !important;}
+  .cl-ultimo span{letter-spacing:0.5px !important;font-size:8px !important;}
+  .cl-ultimo b{font-size:21px !important;}
+  @media (min-width:1500px){ .cl-chiera, #cl-testa .b{width:76px !important;} .cl-chiera b{font-size:16px !important;} #cl-testa .b{font-size:9px;letter-spacing:2px;} .cl-ultimo, #cl-testa .c{width:96px !important;} }
   .cl-sotto{overflow:hidden;margin-top:6px !important;}
   .cl-sotto .cl-proto, .cl-sotto .cl-att{flex:none;}
   .cl-sotto .cl-rf{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;}

@@ -11215,7 +11215,18 @@ function pasMotivoDi(p){ return p.motivo === 'nota' ? (p.nota || 'Nota') : pasMo
 function pasPronto(q){ return !!(q && q.a && q.motivo && (q.motivo !== 'nota' || (q.nota || '').trim())); }
 function pasQuando(ts){ var d = new Date(ts); return d.getDate() + ' ' + CL_MESI[d.getMonth()] + ' ' + d.getFullYear(); }
 function pasClienti(){ return (typeof _csList !== 'undefined' && Array.isArray(_csList)) ? _csList.filter(function(c){ return c && c.id && c.state; }) : []; }
-function pasDaVedere(){ var n = 0; pasClienti().forEach(function(c){ pasLista(c).forEach(function(p){ if(p.stato === 'attesa' || (p.stato === 'libero' && !p.visto)) n++; }); }); return n; }
+/* quello che aspetta l'Admin: le richieste da approvare (il suo lavoro) e gli avvisi di cambi liberi non ancora visti (solo una notifica) */
+function pasDaApprovare(){ var n = 0; pasClienti().forEach(function(c){ pasLista(c).forEach(function(p){ if(p.stato === 'attesa') n++; }); }); return n; }
+function pasAvvisi(){ var n = 0; pasClienti().forEach(function(c){ pasLista(c).forEach(function(p){ if(p.stato === 'libero' && !p.visto) n++; }); }); return n; }
+function pasDaVedere(){ return pasDaApprovare() + pasAvvisi(); }
+/* Open: finita una progressione se ne apre un'altra. Non è un cambio di protocollo ed è libero, ma l'Admin riceve l'avviso. */
+function pasNuovaOpen(st, pt){
+  if(!st) return;
+  if(!Array.isArray(st.passaggi)) st.passaggi = [];
+  var ora = Date.now();
+  st.passaggi.push({id:'p' + ora.toString(36), da:'open', a:'open', motivo:'finita', nota:'', pt:pt || '', ts:ora, fatto:ora, punto:'Open, progressione finita', controllo:'', stato:'libero', visto:false});
+  try{ pasDemoTieni(); if(typeof navAggiorna === 'function') navAggiorna(); }catch(e){}
+}
 
 /* Open: la progressione è finita? */
 function pasOpenFinita(c){
@@ -11384,7 +11395,7 @@ function pasAdmin(){
   var h = '<h4>Cambi di protocollo da approvare' + (att.length ? ' · ' + att.length : '') + '</h4>';
   h += att.length ? att.map(function(x){ return '<div class="pas-riga attesa">' + pasRigaTesto(x[0], x[1], true) + '<span class="pas-fa"><button type="button" class="si" data-pas-si="' + clEsc(x[1].id) + '" data-pas-cl="' + clEsc(x[0].id) + '">Approva</button><button type="button" data-pas-no="' + clEsc(x[1].id) + '" data-pas-cl="' + clEsc(x[0].id) + '">Rifiuta</button></span></div>'; }).join('') : '<div class="pas-vuoto">Nessuna richiesta.</div>';
   if(avv.length){
-    h += '<h4 style="margin-top:18px">Cambi liberi già fatti · ' + avv.length + '</h4>'
+    h += '<h4 style="margin-top:18px">Avvisi · ' + avv.length + '</h4>'
        + avv.map(function(x){ return '<div class="pas-riga">' + pasRigaTesto(x[0], x[1], true) + '<span class="pas-fa"><button type="button" data-pas-ok="' + clEsc(x[1].id) + '" data-pas-cl="' + clEsc(x[0].id) + '">Visto</button></span></div>'; }).join('');
   }
   box.innerHTML = h;
@@ -12195,9 +12206,10 @@ window.addEventListener('load', function(){
 header > #breadcrumb, header > .bc{margin-right:auto!important;}
 /* ══ LE COSE DI SISTEMA nella barra, e quelle di Open in Open (monitor) ══ */
 .nv-sis.acceso{border-color:rgba(212,168,74,.85) !important;color:#E4B85A !important;background:rgba(212,168,74,.08);}
-/* Admin chiama: c'è un cambio di protocollo da approvare o da vedere */
+/* Admin: lampeggia = c'è un cambio da approvare; acceso fermo = c'è solo un avviso da vedere */
 @keyframes nvChiama{0%,100%{background:rgba(228,184,90,.10);box-shadow:0 0 0 0 rgba(228,184,90,0);}50%{background:rgba(228,184,90,.95);box-shadow:0 0 14px 2px rgba(228,184,90,.65);}}
 @keyframes nvChiamaT{0%,100%{color:#E4B85A;}50%{color:#14120e;}}
+#nv-adm.avviso{border-color:rgba(228,184,90,.9) !important;color:#E4B85A !important;background:rgba(212,168,74,.14);}
 #nv-adm.chiama{border-color:#E4B85A !important;animation:nvChiama 1.1s ease-in-out infinite, nvChiamaT 1.1s ease-in-out infinite;}
 /* ══ PASSAGGI DI PROTOCOLLO ══ */
 .cl-tl-pas{position:absolute;width:12px;height:12px;padding:0;border-radius:50%;border:1px solid #f0ebdc;background:#14120e;cursor:pointer;z-index:2;}
@@ -12456,7 +12468,10 @@ window.addEventListener('load', function(){
     $('nv-sf').classList.toggle('nv-no', !ese);
     /* i tasti di sistema ci sono sempre (non alla password); quello della pagina aperta resta lì, acceso */
     ['nv-rf','nv-ese','nv-adm'].forEach(function(i){ $(i).classList.toggle('nv-no', d === 'login'); });
-    $('nv-adm').classList.toggle('chiama', d !== 'login' && typeof pasDaVedere === 'function' && pasDaVedere() > 0);
+    /* Admin LAMPEGGIA solo se c'è qualcosa da approvare; se c'è solo un avviso resta acceso fermo */
+    var _daAppr = (d !== 'login' && typeof pasDaApprovare === 'function') ? pasDaApprovare() : 0;
+    $('nv-adm').classList.toggle('chiama', _daAppr > 0);
+    $('nv-adm').classList.toggle('avviso', !_daAppr && d !== 'login' && typeof pasAvvisi === 'function' && pasAvvisi() > 0);
     $('nv-rf').classList.toggle('acceso', sopra === 'Red Flags');
     $('nv-ese').classList.toggle('acceso', sopra === 'Esercizi');
     /* in Open il percorso finisce al cliente: il focus (es. "secondo buffer") non è un posto dove si va, non sta nella barra */
@@ -15989,6 +16004,7 @@ function startWithScheda(){
 
   /* Se c'era una progressione Open aperta, va chiusa e archiviata prima di
      essere sovrascritta: è così che resta traccia di quelle precedenti. */
+  var _eraFinita = !!base.completedAt || !!(base.type && SEQUENCES[base.type] && SEQUENCES[base.type].steps && (base.current || 0) >= SEQUENCES[base.type].steps.length);
   archiviaOpen(base, null);
 
   base.type        = type;
@@ -16022,6 +16038,7 @@ function startWithScheda(){
   migrateStateShape(state);
   /* Journal: progression_start */
   journalAppend(state, 'progression_start', 'open', _currentPT, seq && seq.label ? seq.label : type);
+  if(_eraFinita && typeof pasNuovaOpen === 'function') pasNuovaOpen(state, _currentPT);   /* finita una, ne parte un'altra: avviso all'Admin */
   save();
   document.getElementById('picker').classList.remove('open');
   document.getElementById('main-layout').style.display = 'flex';
@@ -21253,7 +21270,7 @@ var _ADMIN_PWD = 'ovolollo';
 /* ── PROTO PAGE CHART ── */
 var _protoChart = null;
 var _protoChartGran = 'week'; /* 'day' | 'week' | 'month' */
-var _adminDeltaGran = 'day'; /* 'day' | 'week' | 'month' */
+var _adminDeltaGran = 'month'; /* 'day' | 'week' | 'month' — si parte dai mesi: con i giorni il grafico è troppo fitto per leggerlo */
 
 function adminDeltaSetGran(g){
   _adminDeltaGran = g;

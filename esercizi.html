@@ -335,10 +335,10 @@ body.p-int #sv{margin-left:auto}
   <div class="as-r"><span class="as-k">Nome</span><input id="add-nome" spellcheck="false" autocomplete="off"></div>
   <div class="as-r"><span class="as-k">Link video</span><input id="add-link" spellcheck="false" autocomplete="off" inputmode="url"></div>
   <div class="as-r"><span class="as-k">Open · Self</span><button type="button" class="spunta" id="add-open" role="checkbox" aria-checked="false" aria-label="Open e Self"></button>
-   <span class="as-k as-k2">Open Ste</span><button type="button" class="spunta" id="add-ost" role="checkbox" aria-checked="false" aria-label="Open Ste"></button></div>
+   <span class="as-k as-k2">Open Load</span><button type="button" class="spunta" id="add-ost" role="checkbox" aria-checked="false" aria-label="Open Load"></button></div>
   <div class="as-r"><span class="as-k">Famiglia</span><span class="as-g" id="add-fam"></span></div>
-  <div class="as-r"><span class="as-k">Prot. Ste</span><span class="as-g" id="add-ste"></span></div>
-  <div class="as-r"><span class="as-k">Prot. Fil</span><span class="as-g" id="add-pos"></span></div>
+  <div class="as-r"><span class="as-k">Load</span><span class="as-g" id="add-ste"></span></div>
+  <div class="as-r"><span class="as-k">Move</span><span class="as-g" id="add-pos"></span></div>
   <div class="as-r"><span class="as-k">Descrizione</span><input id="add-desc" spellcheck="false" autocomplete="off"></div>
   <div class="as-r"><span class="as-k">Inserito da</span><span class="as-g" id="add-da"></span></div>
   <div class="as-r as-f"><button id="add-btn" class="btn">Aggiungi</button><button id="add-no" class="btn btn-n">Annulla</button><span id="add-err" class="add-msg err"></span></div>
@@ -347,15 +347,15 @@ body.p-int #sv{margin-left:auto}
 <div class="bar">
  <input id="q" placeholder="Cerca esercizio o descrizione…" spellcheck="false" autocomplete="off">
  <label>Open · Self<select id="f-open"><option value="">tutti</option><option value="Sì">con la spunta</option><option value="No">senza</option></select></label>
- <label>Open Ste<select id="f-ost"><option value="">tutti</option><option value="Sì">con la spunta</option><option value="No">senza</option></select></label>
+ <label>Open Load<select id="f-ost"><option value="">tutti</option><option value="Sì">con la spunta</option><option value="No">senza</option></select></label>
  <label>Famiglia<select id="f-fam"><option value="">tutte</option><option>Upper</option><option>Lower</option><option>Buffer</option><option>Core</option><option>Cardio Tempo</option></select></label>
- <label>Prot. Ste<select id="f-ste"><option value="">tutti</option><option>Fondamentale</option><option>Complementare</option><option>Fond./Compl.</option><option value="*">con ruolo</option><option value="!">da sistemare in Interdip.</option></select></label>
- <label>Prot. Fil<select id="f-pos"></select></label>
+ <label>Load<select id="f-ste"><option value="">tutti</option><option>Fondamentale</option><option>Complementare</option><option>Fond./Compl.</option><option value="*">con ruolo</option><option value="!">da sistemare in Interdip.</option></select></label>
+ <label>Move<select id="f-pos"></select></label>
  
 </div>
 <div class="wrap"><table>
 <colgroup><col class="c-id"><col class="c-nm"><col class="c-op"><col class="c-op"><col class="c-ost"><col class="c-pk"><col class="c-pk"><col class="c-fil"><col class="c-ds"></colgroup>
-<thead><tr><th data-k="id">N.</th><th data-k="label">Esercizio</th><th data-k="open">Open</th><th data-k="open">Self</th><th data-k="ost">Open Ste</th><th data-k="fam">Famiglia</th><th data-k="ste">Prot. Ste</th><th data-k="pos">Prot. Fil</th><th data-k="desc">Descrizione</th></tr></thead>
+<thead><tr><th data-k="id">N.</th><th data-k="label">Esercizio</th><th data-k="open">Open</th><th data-k="open">Self</th><th data-k="ost">Open Load</th><th data-k="fam">Famiglia</th><th data-k="ste">Load</th><th data-k="pos">Move</th><th data-k="desc">Descrizione</th></tr></thead>
 <tbody id="tb"></tbody></table></div>
 <div id="pg-int">
 <div class="iwrap">
@@ -462,7 +462,7 @@ function mostraStato(quando){
 window.addEventListener('beforeunload',function(e){ if(NONSAL>0){ e.preventDefault(); e.returnValue=''; } });
 document.addEventListener('keydown',function(e){ if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'){ e.preventDefault(); salvaFile(); } });
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');}
-/* Prot. Fil: le voci sono fisse (c'è anche Cardio, che vale con e senza SRT);
+/* Move: le voci sono fisse (c'è anche Cardio, che vale con e senza SRT);
    se nei dati ne esiste un'altra, si aggiunge in coda */
 var FIL=['In piedi','Seduto','Prono/Sup.','Quadrupedia','Cardio'];
 function filVoci(){ var ks=FIL.slice(); R.forEach(function(r){ if(r.pos&&ks.indexOf(r.pos)<0) ks.push(r.pos); }); return ks; }
@@ -473,7 +473,7 @@ function opts(id,k){
 }
 opts('f-pos','pos');
 var PILL={'Fondamentale':'p-fond','Complementare':'p-comp','Fond./Compl.':'p-fc'};
-/* casella a menu: stessa per Info Filippo e Ruolo Ste */
+/* casella a menu: stessa per Move e Load */
 var STE=['Fondamentale','Complementare','Fond./Compl.'];
 var LISTE={ open:['Sì','No'], fam:['Upper','Lower','Buffer','Core','Cardio Tempo'], ste:STE };
 var FAMCOL={Upper:'#408cff',Lower:'#f28030',Buffer:'#9060f0',Core:'#f0e846','Cardio Tempo':'#58d086'};
@@ -483,9 +483,9 @@ function pickCls(f,v,r){
 }
 /* IN CHE PROTOCOLLO VA UN ESERCIZIO, E LA SUA FAMIGLIA
    - Open e Self: una spunta sola, la stessa (campo "open"). Per adesso usano gli stessi esercizi.
-   - Open Ste: il pezzo di Open che sta dentro Load (campo "ost"). È un Open con esercizi in più o in meno: la sua spunta è a parte,
+   - Open Load: il pezzo di Open che sta dentro Load (campo "ost"). È un Open con esercizi in più o in meno: la sua spunta è a parte,
      un esercizio può stare lì senza essere in Open e in Self, e il contrario.
-   - La famiglia è UNA ed è dell'esercizio, non del protocollo: la stessa per Open, Self e Open Ste. Si sceglie se c'è almeno una spunta;
+   - La famiglia è UNA ed è dell'esercizio, non del protocollo: la stessa per Open, Self e Open Load. Si sceglie se c'è almeno una spunta;
      tolte tutte le spunte si svuota. */
 function inProto(r){ return r.open==='Sì' || r.ost==='Sì'; }
 function spunta(r,nome,campo){ campo=campo||'open'; var si=r[campo]==='Sì';
@@ -495,7 +495,7 @@ function pick(r,f){ var i=R.indexOf(r), v=r[f];
   return '<button class="'+pickCls(f,v,r)+(f==='fam'&&v?' fam':'')+'"'+st+' data-i="'+i+'" data-f="'+f+'"'+(f==='fam'&&!inProto(r)?' disabled title="Serve almeno una spunta"':'')+'>'
     +'<span class="pv">'+(esc(v)||'—')+'</span>'+(f==='pos'&&SRT[v]?'<em class="srt" title="Richiede SRT">SRT</em>':'')
     +(f==='ste'&&window.INT_PROB&&INT_PROB[r._k]?'<em class="ste-x" title="'+esc(INT_PROB[r._k])+'">!</em>':'')+'<b>▾</b></button>'; }
-/* Prot. Fil: queste posizioni richiedono l'SRT */
+/* Move: queste posizioni richiedono l'SRT */
 var SRT={'Prono/Sup.':1,'Quadrupedia':1};
 var sortK='id',sortD=1;
 function draw(){
@@ -513,10 +513,10 @@ function draw(){
   +'<td class="id">'+r.id+'</td>'
   +'<td class="nm" title="'+esc(r.nome)+'">'
     +(r.link?'<a class="vid" href="'+esc(r.link)+'" target="_blank" rel="noopener" title="Apri il video">\u25b6</a>':'<span class="vid no">\u25b6</span>')
-    +esc(r.label)+(r.fonte==='solo Ste'?'<i>solo Ste</i>':'')+(r.fonte==='aggiunto'?'<i class="nuovo"'+(r.da?' title="Inserito da '+esc(r.da)+'"':'')+'>nuovo'+(r.da?' \u00b7 '+esc(r.da):'')+'</i>':'')+'</td>'
+    +esc(r.label)+(r.fonte==='solo Ste'?'<i>solo Load</i>':'')+(r.fonte==='aggiunto'?'<i class="nuovo"'+(r.da?' title="Inserito da '+esc(r.da)+'"':'')+'>nuovo'+(r.da?' \u00b7 '+esc(r.da):'')+'</i>':'')+'</td>'
   +'<td class="sp">'+spunta(r,'Open')+'</td>'
   +'<td class="sp">'+spunta(r,'Self')+'</td>'
-  +'<td class="sp">'+spunta(r,'Open Ste','ost')+'</td>'
+  +'<td class="sp">'+spunta(r,'Open Load','ost')+'</td>'
   +'<td>'+pick(r,'fam')+'</td>'
   +'<td>'+pick(r,'ste')+'</td>'
   +'<td>'+pick(r,'pos')+'</td>'
@@ -528,10 +528,10 @@ tb.addEventListener('input',function(e){ var t=e.target; if(t.dataset.f!=='desc'
 });
 /* Invio chiude la descrizione invece di andare a capo */
 tb.addEventListener('keydown',function(e){ if(e.target.dataset.f==='desc' && (e.key==='Enter'||e.key==='Escape')){ e.preventDefault(); e.target.blur(); } });
-/* menu Info Filippo: tutti i valori usati + uno nuovo + vuoto */
+/* menu Move: tutti i valori usati + uno nuovo + vuoto */
 var pm=document.getElementById('pm'), pmBtn=null;
 function pmChiudi(){ pm.classList.remove('open'); pmBtn=null; }
-/* le opzioni del filtro Info Filippo cambiano: il bottone si aggiorna */
+/* le opzioni del filtro Move cambiano: il bottone si aggiorna */
 function fltAgg(){ var sel=document.getElementById('f-pos'); if(sel) sel.dispatchEvent(new Event('input')); }
 function pmScegli(v){
   if(!pmBtn) return; var f=pmBtn.dataset.f, r=R[+pmBtn.dataset.i];
@@ -592,7 +592,7 @@ pm.addEventListener('click',function(e){
 });
 document.getElementById('exp').onclick=function(){
   var q=function(x){ return '"'+String(x||'').replace(/"/g,'""')+'"'; };
-  var csv='\ufeffN.;Esercizio;Open;Self;Open Ste;Famiglia;Prot. Ste;Prot. Fil;Descrizione;Video;Inserito da\n'+R.map(function(r){ return [r.id,r.nome,(r.open==='Sì'?'Sì':''),(r.open==='Sì'?'Sì':''),(r.ost==='Sì'?'Sì':''),r.fam,r.ste,r.pos,r.desc,r.link,r.da||''].map(q).join(';'); }).join('\n');
+  var csv='\ufeffN.;Esercizio;Open;Self;Open Load;Famiglia;Load;Move;Descrizione;Video;Inserito da\n'+R.map(function(r){ return [r.id,r.nome,(r.open==='Sì'?'Sì':''),(r.open==='Sì'?'Sì':''),(r.ost==='Sì'?'Sì':''),r.fam,r.ste,r.pos,r.desc,r.link,r.da||''].map(q).join(';'); }).join('\n');
   var a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
   a.download='esercizi-flow.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(a.href); },1000);
 };
@@ -687,7 +687,7 @@ function ordina(g){
   g.b = stabile(g.b, function(r){ return r.reg ? -1 : (c.cb[r.id] || 0); });
 }
 
-/* ═══ CONTROLLO: tabella (Prot. Ste) contro interdipendenze ═══
+/* ═══ CONTROLLO: tabella (Load) contro interdipendenze ═══
    Fondamentale  -> deve stare almeno una volta tra i fondamentali
    Complementare -> almeno una volta tra i complementari
    Fond./Compl.  -> in tutti e due
@@ -720,18 +720,18 @@ function verifica(){
 }
 function testo(x, r){
   if (x.t === 'manca') return 'da mettere nei ' + LATO[x.l];
-  return 'è nei ' + LATO[x.l] + ', ma in tabella ' + (r.ste ? 'è ' + r.ste : 'non ha Prot. Ste');
+  return 'è nei ' + LATO[x.l] + ', ma in tabella ' + (r.ste ? 'è ' + r.ste : 'non ha Load');
 }
 function pannello(){
   var h = '', P = CHK.prob, N = CHK.na, tot = P.length + N.length;
   h += '<div class="dsw' + (tot ? '' : ' ok') + '"><div class="dsh"><h2>' + (tot ? 'Da sistemare · ' + tot : 'Tutto coerente') + '</h2>'
-    + '<span class="dss">' + (tot ? 'quello che hai messo in Prot. Ste nella tabella deve comparire qui, nello stesso posto' : 'tabella e interdipendenze dicono la stessa cosa') + '</span></div>';
+    + '<span class="dss">' + (tot ? 'quello che hai messo in Load nella tabella deve comparire qui, nello stesso posto' : 'tabella e interdipendenze dicono la stessa cosa') + '</span></div>';
   if (tot) {
     h += '<div class="dsl">';
     h += P.map(function(p){
       var r = p.r, pl = PILL[r.ste];
       return '<div class="dr"><span class="did">' + r.id + '</span><span class="dnm" title="' + esc(r.nome) + '">' + esc(r.label) + '</span>'
-        + '<span class="pl ' + (pl ? 'q-' + pl : 'no') + '">' + (r.ste ? esc(r.ste) : 'nessun Prot. Ste') + '</span>'
+        + '<span class="pl ' + (pl ? 'q-' + pl : 'no') + '">' + (r.ste ? esc(r.ste) : 'nessun Load') + '</span>'
         + '<span class="dact">' + p.m.map(function(x){
             return x.t === 'manca'
               ? '<button class="ibtn" data-ds="metti" data-k="' + esc(r._k) + '" data-l="' + x.l + '">Metti nei ' + LATO[x.l] + ' &#9662;</button>'

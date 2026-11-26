@@ -11113,7 +11113,8 @@ function clFiltri(tutti){
   /* ogni filtro è un gruppo che non si spezza: il suo nome resta attaccato ai suoi tasti quando la riga va a capo */
   var h = '<span class="cl-fg">' + t('data-proto', '', 'tutti', !_clProto)
      + ordine.map(function(p){ return '<button type="button" class="cl-f' + (_clProto === p ? ' sel' : '') + (presenti[p] ? '' : ' vuoto') + '" data-proto="' + p + '" style="--lc:' + (CL_COLORE[p] || '#b4c3d2') + '">' + (p === 'nuovo' ? 'nuovi' : CL_NOME[p]) + '</button>'; }).join('') + '</span>';
-  var opz = [['', 'red flag'], ['si', 'con red flag'], ['no', 'senza red flag']];   /* la prima voce dice cos'è il menu: non serve un'etichetta accanto */
+  /* la prima voce: a filtro spento dice cos'è il menu ("red flag"); a filtro acceso dice come toglierlo ("tutti") */
+  var opz = [['', _clRf ? 'tutti' : 'red flag'], ['si', 'con red flag'], ['no', 'senza red flag']];
   (window.RF_DATA || []).forEach(function(f){ opz.push([f.id, f.name]); });
   opz.push(['__custom', 'Custom']);
   /* il menu delle red flag sta nella riga del cerca: così la riga sotto è tutta dei protocolli */

@@ -10932,6 +10932,12 @@ function clTratti(c){
   (Array.isArray(st.demoPercorso) ? st.demoPercorso : []).forEach(function(p){
     tratti.push({proto:p.proto, da:clData(p.da), a:clData(p.a), finto:true});
   });
+  /* i passaggi di protocollo fatti: da quel giorno il cliente è nel protocollo nuovo, anche se lì non c'è ancora una seduta salvata */
+  if(typeof pasFatti === 'function') pasFatti(c).forEach(function(p){
+    var g = pasGiorno(p.fatto);
+    if(p.soloSegno) return;   /* clienti finti: il tratto c'è già in demoPercorso */
+    tratti.push({proto:p.a, da:clData(g), a:clOggi(), finto:true});
+  });
   tratti.sort(function(x, y){ return x.da - y.da; });
   /* un tratto finto spezza quello vero in cui cade */
   var out = [];
@@ -10967,7 +10973,9 @@ function clGiu(c, proto){
   /* in fondo: i due simboli, poi chi sei e "Entra" */
   var ptScelto = clPt();
   var pts = (typeof PT_LIST !== 'undefined' && Array.isArray(PT_LIST)) ? PT_LIST : [];
+  h += pasNellaFinestra(c, proto);
   h += '<div class="cl-piede"><div class="cl-legenda"><span><b>★</b>progressione finita</span><span><b>✕</b>interrotta</span></div>'
+     + (proto && !pasInAttesa(c) ? '<button type="button" class="cl-entra cl-cambia' + (_pasApre && _pasApre.id === c.id ? ' sel' : '') + '" data-cambia="' + clEsc(c.id) + '"' + (ptScelto ? '' : ' disabled title="Seleziona prima chi sei"') + '>Cambia protocollo</button>' : '')
      + '<div class="cl-azioni"><div class="cl-pts">'
      + pts.map(function(p){ return '<button type="button" class="cl-pt' + (p === ptScelto ? ' sel' : '') + '" data-pt="' + clEsc(p) + '">' + clEsc(p) + '</button>'; }).join('')
      + '</div><button type="button" class="cl-entra" data-dettagli="' + clEsc(c.id) + '">Dettagli</button>'
@@ -11010,6 +11018,12 @@ function clTimeline(c, dalGiorno){
     }
     prec = t;
   });
+  /* dove c'è stato un passaggio di protocollo: un punto sul salto. Toccandolo si legge perché, chi e quando */
+  if(c.state && typeof pasFatti === 'function') pasFatti(c).forEach(function(p){
+    var d = clData(pasGiorno(p.fatto)); if(d <= inizio) return;
+    var ya = yy(p.da), yb = yy(p.a), ym = (corsie.indexOf(p.da) === -1) ? yb : Math.round((ya + yb) / 2);
+    h += '<button type="button" class="cl-tl-pas' + (_pasVisto === p.id ? ' sel' : '') + '" data-pas="' + clEsc(p.id) + '" style="left:calc(' + x(d) + '% - 6px);top:' + (ym - 6) + 'px" aria-label="Passaggio di protocollo"></button>';
+  });
   segni.forEach(function(s){
     if(s.d <= inizio) return;
     var px = x(s.d), cy = yy('open');
@@ -11030,6 +11044,9 @@ function clEntra(clientId){
   if(!pt || !c) return;
   var proto = (c.state && csCurrentProto(c)) || 'open';
   if(proto === 'move'){ _currentPT = pt; _clAperto = null; moveSedutaApri(clientId); return; }
+  /* Self e Load per adesso sono prototipi: si aprono quelli (non salvano). Lift non ha ancora una pagina. */
+  if(proto === 'self' || proto === 'load'){ _currentPT = pt; _clAperto = null; prototipoOpen(proto + '.html', CL_NOME[proto]); return; }
+  if(proto === 'lift') return;
   _currentPT = pt;
   if(proto === 'skip'){
     _currentProto = 'skip';
@@ -11136,12 +11153,14 @@ window.addEventListener('load', function(){
   }
   lista.addEventListener('click', function(ev){
     var t = ev.target, e;
+    if(pasClic(t)) return;
     if((e = t.closest('[data-pt]'))){ _clPtScelto = { id:_clAperto, pt:e.getAttribute('data-pt') }; clDisegna(); return; }
     if((e = t.closest('[data-entra]'))){ clEntra(e.getAttribute('data-entra')); return; }
     if((e = t.closest('[data-dettagli]'))){ cdOpen(e.getAttribute('data-dettagli')); return; }
     if((e = t.closest('[data-nuovo]'))){ var n = e.getAttribute('data-nuovo'); inp.value = ''; if(typeof csSearchAddNew === 'function') csSearchAddNew(n); clDisegna(); return; }
-    if((e = t.closest('[data-cl]'))){ var id = e.getAttribute('data-cl'); _clAperto = (_clAperto === id) ? null : id; _clPtScelto = null; clDisegna(); }
+    if((e = t.closest('[data-cl]'))){ var id = e.getAttribute('data-cl'); _clAperto = (_clAperto === id) ? null : id; _clPtScelto = null; _pasApre = null; _pasVisto = null; clDisegna(); }
   });
+  lista.addEventListener('input', function(ev){ if(ev.target && ev.target.id === 'pas-nota' && _pasApre) _pasApre.nota = ev.target.value; });
   /* si ridisegna quando arriva l'elenco dei clienti e ogni volta che si torna qui */
   if(typeof gridRifareRender === 'function'){
     var _g = gridRifareRender;
@@ -11159,6 +11178,180 @@ window.addEventListener('load', function(){
   window.addEventListener('resize', prMisura);
   if(window.ResizeObserver){ var _mm = document.getElementById('mappa'); if(_mm) new ResizeObserver(prMisura).observe(_mm); }
   clDisegna(); prMisura();
+});
+</script>
+<script id="passaggi">
+/* ══ PASSAGGI DI PROTOCOLLO ══
+   Un cliente sta in UN protocollo alla volta. Cambiarlo è un atto, con scritto: da dove a dove, il motivo (da una lista chiusa),
+   una riga del trainer, chi l'ha chiesto, quando, e a che punto era il cliente.
+   - Di regola il cambio è una RICHIESTA: il cliente resta dov'è finché dall'Admin (dietro la sua password) non viene approvata o rifiutata.
+   - Sono LIBERI, cioè avvengono subito ma lasciano comunque un avviso in Admin:
+       · da Open con la progressione finita verso Self, Load o Lift (verso Move no: è una richiesta);
+       · da Move verso Open.
+   - Finché c'è una richiesta o un avviso non visto, il tasto Admin nella barra lampeggia.
+   Tutto sta nella scheda del cliente (state.passaggi), quindi viaggia con lei sul database. */
+var PAS_MOTIVI = [
+  {id:'obiettivo',    nome:'Cambio obiettivo comunicato dal cliente'},
+  {id:'finita',       nome:'Progressione finita'},
+  {id:'infortunio',   nome:'Infortunio o dolore'},
+  {id:'redflag',      nome:'Red flag nuova'},
+  {id:'rientro',      nome:'Rientro dopo uno stop lungo'},
+  {id:'frequenza',    nome:'Cambia quante volte viene a settimana'}
+];
+var PAS_PROTO = ['lift','load','self','open','move'];
+var PAS_RF_GIORNI = 30;   /* "red flag nuova" = accesa negli ultimi 30 giorni: è una scelta, non una misura */
+var _pasApre = null, _pasVisto = null;
+
+function pasGiorno(ts){ var d = new Date(ts); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+function pasLista(c){ return (c && c.state && Array.isArray(c.state.passaggi)) ? c.state.passaggi : []; }
+function pasFatti(c){ return pasLista(c).filter(function(p){ return (p.stato === 'approvato' || p.stato === 'libero') && p.fatto; }).sort(function(a, b){ return a.fatto - b.fatto; }); }
+function pasUltimo(c){ var f = pasFatti(c); return f.length ? f[f.length - 1] : null; }
+function pasInAttesa(c){ return pasLista(c).filter(function(p){ return p.stato === 'attesa'; })[0] || null; }
+function pasMotivo(id){ var m = PAS_MOTIVI.filter(function(x){ return x.id === id; })[0]; return m ? m.nome : ''; }
+function pasQuando(ts){ var d = new Date(ts); return d.getDate() + ' ' + CL_MESI[d.getMonth()] + ' ' + d.getFullYear(); }
+function pasClienti(){ return (typeof _csList !== 'undefined' && Array.isArray(_csList)) ? _csList.filter(function(c){ return c && c.id && c.state; }) : []; }
+function pasDaVedere(){ var n = 0; pasClienti().forEach(function(c){ pasLista(c).forEach(function(p){ if(p.stato === 'attesa' || (p.stato === 'libero' && !p.visto)) n++; }); }); return n; }
+
+/* Open: la progressione è finita? */
+function pasOpenFinita(c){
+  var st = c.state || {}, o = st.open || st, seq = (typeof SEQUENCES !== 'undefined' && o.type) ? SEQUENCES[o.type] : null;
+  return !!o.completedAt || !!(seq && seq.steps && (o.current || 0) >= seq.steps.length);
+}
+/* a che punto è il cliente adesso, detto in una riga */
+function pasPunto(c, proto){
+  if(proto !== 'open') return CL_NOME[proto] || '';
+  var st = c.state || {}, o = st.open || st, seq = (typeof SEQUENCES !== 'undefined' && o.type) ? SEQUENCES[o.type] : null;
+  if(!seq || !seq.steps) return 'Open';
+  if(pasOpenFinita(c)) return 'Open, progressione finita';
+  return 'Open, obiettivo ' + ((o.current || 0) + 1) + ' di ' + seq.steps.length;
+}
+function pasRfNuova(c){
+  var f = (c.state && c.state.redFlags && c.state.redFlags.flags) || {}, lim = Date.now() - PAS_RF_GIORNI * 86400000;
+  return Object.keys(f).some(function(k){ return f[k] && f[k].attivo && f[k].dal && f[k].dal >= lim; });
+}
+/* il cambio è libero o deve passare dall'Admin? */
+function pasLibero(c, da, a){
+  if(da === 'open' && pasOpenFinita(c) && (a === 'self' || a === 'load' || a === 'lift')) return true;
+  if(da === 'move' && a === 'open') return true;
+  return false;
+}
+/* quello che la Sandbox sa da sola sul motivo scelto: '' = non lo può controllare */
+function pasControllo(c, da, motivo){
+  if(motivo === 'finita') return da !== 'open' ? 'solo Open ha una fine' : (pasOpenFinita(c) ? 'confermato: la progressione è finita' : 'non risulta: la progressione non è finita');
+  if(motivo === 'redflag') return pasRfNuova(c) ? 'confermato: c’è una red flag accesa negli ultimi ' + PAS_RF_GIORNI + ' giorni' : 'non risulta: nessuna red flag accesa negli ultimi ' + PAS_RF_GIORNI + ' giorni';
+  return '';
+}
+function pasSalva(c){
+  c.ts = Date.now();
+  if(typeof _csSaveLocal === 'function') _csSaveLocal();
+  if(typeof sbSave === 'function') sbSave(c.id, c.state);
+  if(typeof navAggiorna === 'function') navAggiorna();
+}
+function pasEsegui(c, p){
+  p.fatto = Date.now();
+  if(c.state.demoProto) c.state.demoProto = p.a;
+  if(!Array.isArray(c.state.journal)) c.state.journal = [];
+  c.state.journal.push({ts:new Date(p.fatto).toISOString(), kind:'protocol_change', proto:p.a, pt:p.pt, detail:CL_NOME[p.da] + ' → ' + CL_NOME[p.a] + ' · ' + pasMotivo(p.motivo)});
+}
+/* il trainer manda la richiesta (o fa il cambio, se è libero) */
+function pasManda(c, pt){
+  var da = csCurrentProto(c), q = _pasApre;
+  if(!c || !q || !q.a || !q.motivo || !pt || !da || pasInAttesa(c)) return;
+  if(!Array.isArray(c.state.passaggi)) c.state.passaggi = [];
+  var p = {id:'p' + Date.now().toString(36), da:da, a:q.a, motivo:q.motivo, nota:(q.nota || '').trim(), pt:pt, ts:Date.now(), punto:pasPunto(c, da), controllo:pasControllo(c, da, q.motivo), stato:'attesa'};
+  c.state.passaggi.push(p);
+  if(pasLibero(c, da, q.a)){ p.stato = 'libero'; p.visto = false; pasEsegui(c, p); }
+  _pasApre = null;
+  pasSalva(c); clDisegna();
+}
+/* dall'Admin */
+function pasDecidi(clientId, id, come){
+  var c = pasClienti().filter(function(z){ return z.id === clientId; })[0]; if(!c) return;
+  var p = pasLista(c).filter(function(z){ return z.id === id; })[0]; if(!p) return;
+  if(come === 'visto'){ p.visto = true; }
+  else if(p.stato === 'attesa'){
+    p.deciso = Date.now();
+    if(come === 'si'){ p.stato = 'approvato'; pasEsegui(c, p); }
+    else {
+      p.stato = 'rifiutato';
+      if(!Array.isArray(c.state.journal)) c.state.journal = [];
+      c.state.journal.push({ts:new Date(p.deciso).toISOString(), kind:'protocol_change_refused', proto:p.da, pt:p.pt, detail:CL_NOME[p.da] + ' → ' + CL_NOME[p.a] + ' · ' + pasMotivo(p.motivo) + ' · rifiutato'});
+    }
+  }
+  pasSalva(c); pasAdmin(); try{ clDisegna(); }catch(e){}
+}
+function pasRigaTesto(c, p, conNome){
+  return (conNome ? '<b>' + clEsc(c.id) + '</b>' : '')
+       + '<span><b>' + CL_NOME[p.da] + ' → ' + CL_NOME[p.a] + '</b></span>'
+       + '<span>' + clEsc(pasMotivo(p.motivo)) + '</span>'
+       + '<span class="pk">' + clEsc(p.pt || '') + ' · ' + pasQuando(p.ts) + '</span>'
+       + (conNome && p.punto ? '<span class="pk">era: ' + clEsc(p.punto) + '</span>' : '')
+       + (conNome && p.controllo ? '<span class="pas-esito">' + clEsc(p.controllo) + '</span>' : '')
+       + (p.nota ? '<span class="pas-nota">' + clEsc(p.nota) + '</span>' : '');
+}
+/* dentro la finestra del cliente, sotto la timeline */
+function pasNellaFinestra(c, proto){
+  if(!c.state || !proto) return '';
+  var h = '', att = pasInAttesa(c);
+  if(_pasVisto){
+    var v = pasLista(c).filter(function(p){ return p.id === _pasVisto; })[0];
+    if(v) h += '<div class="pas-riga">' + pasRigaTesto(c, v, false) + '</div>';
+  }
+  if(att) h += '<div class="pas-riga attesa"><span class="pk">in attesa dell’Admin</span>' + pasRigaTesto(c, att, false) + '</div>';
+  if(!att && _pasApre && _pasApre.id === c.id){
+    var q = _pasApre, lib = q.a ? pasLibero(c, proto, q.a) : false;
+    if(lib && proto === 'open') q.motivo = 'finita';
+    var esito = q.motivo ? pasControllo(c, proto, q.motivo) : '';
+    h += '<div class="pas-box">'
+       + '<div class="pas-r"><span class="pas-k">Adesso</span><span class="pas-punto">' + clEsc(pasPunto(c, proto)) + '</span></div>'
+       + '<div class="pas-r"><span class="pas-k">Verso</span>' + PAS_PROTO.filter(function(p){ return p !== proto; }).map(function(p){ return '<button type="button" class="pas-c' + (q.a === p ? ' sel' : '') + '" data-pas-a="' + p + '" style="--lc:' + CL_COLORE[p] + '">' + CL_NOME[p] + '</button>'; }).join('') + '</div>'
+       + '<div class="pas-r"><span class="pas-k">Motivo</span>' + PAS_MOTIVI.map(function(m){ return '<button type="button" class="pas-c' + (q.motivo === m.id ? ' sel' : '') + '" data-pas-m="' + m.id + '">' + clEsc(m.nome) + '</button>'; }).join('') + (esito ? '<span class="pas-esito">' + clEsc(esito) + '</span>' : '') + '</div>'
+       + '<div class="pas-r"><span class="pas-k">Nota</span><input id="pas-nota" spellcheck="false" autocomplete="off" value="' + clEsc(q.nota || '').replace(/"/g, '&quot;') + '"></div>'
+       + '<div class="pas-r"><span class="pas-k"></span><button type="button" class="cl-entra" data-pas-manda="' + clEsc(c.id) + '"' + (q.a && q.motivo ? '' : ' disabled') + '>' + (lib ? 'Cambia' : 'Chiedi il cambio') + '</button>'
+       + (q.a ? '<span class="pas-esito">' + (lib ? 'questo cambio è libero: avviene subito, l’Admin viene avvisato' : 'il cliente resta in ' + CL_NOME[proto] + ' finché l’Admin non approva') + '</span>' : '') + '</div>'
+       + '</div>';
+  }
+  return h;
+}
+/* i clic dentro l'elenco che riguardano i passaggi: true = fatto */
+function pasClic(t){
+  var e, c = (_csList || []).filter(function(z){ return z.id === _clAperto; })[0];
+  if((e = t.closest('[data-pas]'))){ var id = e.getAttribute('data-pas'); _pasVisto = (_pasVisto === id) ? null : id; clDisegna(); return true; }
+  if(t.closest('#pas-nota')) return true;
+  if((e = t.closest('[data-cambia]'))){ _pasApre = (_pasApre && _pasApre.id === _clAperto) ? null : {id:_clAperto, a:'', motivo:'', nota:''}; clDisegna(); return true; }
+  if(!_pasApre) return false;
+  if((e = t.closest('[data-pas-a]'))){ _pasApre.a = e.getAttribute('data-pas-a'); clDisegna(); return true; }
+  if((e = t.closest('[data-pas-m]'))){ _pasApre.motivo = e.getAttribute('data-pas-m'); clDisegna(); return true; }
+  if((e = t.closest('[data-pas-manda]'))){ if(c) pasManda(c, clPt()); return true; }
+  return false;
+}
+/* in cima al pannello Admin */
+function pasAdmin(){
+  var body = document.getElementById('admin-body'); if(!body) return;
+  var box = document.getElementById('pas-admin');
+  if(!box){ box = document.createElement('div'); box.id = 'pas-admin'; body.insertBefore(box, body.firstChild); }
+  var att = [], avv = [];
+  pasClienti().forEach(function(c){ pasLista(c).forEach(function(p){ if(p.stato === 'attesa') att.push([c, p]); else if(p.stato === 'libero' && !p.visto) avv.push([c, p]); }); });
+  att.sort(function(a, b){ return a[1].ts - b[1].ts; }); avv.sort(function(a, b){ return a[1].ts - b[1].ts; });
+  var h = '<h4>Cambi di protocollo da approvare' + (att.length ? ' · ' + att.length : '') + '</h4>';
+  h += att.length ? att.map(function(x){ return '<div class="pas-riga attesa">' + pasRigaTesto(x[0], x[1], true) + '<span class="pas-fa"><button type="button" class="si" data-pas-si="' + clEsc(x[1].id) + '" data-pas-cl="' + clEsc(x[0].id) + '">Approva</button><button type="button" data-pas-no="' + clEsc(x[1].id) + '" data-pas-cl="' + clEsc(x[0].id) + '">Rifiuta</button></span></div>'; }).join('') : '<div class="pas-vuoto">Nessuna richiesta.</div>';
+  if(avv.length){
+    h += '<h4 style="margin-top:18px">Cambi liberi già fatti · ' + avv.length + '</h4>'
+       + avv.map(function(x){ return '<div class="pas-riga">' + pasRigaTesto(x[0], x[1], true) + '<span class="pas-fa"><button type="button" data-pas-ok="' + clEsc(x[1].id) + '" data-pas-cl="' + clEsc(x[0].id) + '">Visto</button></span></div>'; }).join('');
+  }
+  box.innerHTML = h;
+}
+window.addEventListener('load', function(){
+  if(typeof adminRender === 'function'){ var _ar = adminRender; adminRender = function(){ var r = _ar.apply(this, arguments); try{ pasAdmin(); }catch(e){} return r; }; }
+  var body = document.getElementById('admin-body');
+  if(body) body.addEventListener('click', function(ev){
+    var e, t = ev.target;
+    if((e = t.closest('[data-pas-si]'))) pasDecidi(e.getAttribute('data-pas-cl'), e.getAttribute('data-pas-si'), 'si');
+    else if((e = t.closest('[data-pas-no]'))) pasDecidi(e.getAttribute('data-pas-cl'), e.getAttribute('data-pas-no'), 'no');
+    else if((e = t.closest('[data-pas-ok]'))) pasDecidi(e.getAttribute('data-pas-cl'), e.getAttribute('data-pas-ok'), 'visto');
+  });
+  /* il tasto Admin si aggiorna anche quando l'elenco dei clienti arriva o cambia */
+  if(typeof clDisegna === 'function'){ var _cd = clDisegna; clDisegna = function(){ var r = _cd.apply(this, arguments); try{ if(typeof navAggiorna === 'function') navAggiorna(); }catch(e){} return r; }; }
 });
 </script>
 <script id="demo-clienti">
@@ -11380,6 +11573,20 @@ function demoGenera(){
     st.demoProto = 'move';
     st.demoPercorso = (st.demoPercorso || []).filter(function(t){ return t.da < dal; }).concat([{proto:'move', da:dal, a:iso(0)}]);
   });
+  /* I PASSAGGI dei clienti finti: ogni periodo passato fuori da Open ha il suo passaggio di andata (e di ritorno), con un motivo,
+     così sulla timeline si vedono i punti. In più c'è UNA richiesta in attesa, per vedere Admin che lampeggia. I motivi sono scelti a caso. */
+  var MOT = ['obiettivo','infortunio','redflag','rientro','frequenza'];
+  function quando(isoG){ var p = isoG.split('-'); return new Date(+p[0], +p[1]-1, +p[2], 18).getTime(); }
+  out.forEach(function(c){
+    var st = c.state; st.passaggi = [];
+    (st.demoPercorso || []).forEach(function(t, k){
+      var pt = st.pt || uno(PT), t0 = quando(t.da);
+      st.passaggi.push({id:'d' + k + 'a', da:'open', a:t.proto, motivo:uno(MOT), nota:'', pt:pt, ts:t0, fatto:t0, punto:'Open', stato:'approvato', soloSegno:true});
+      if(t.a < iso(0)){ var t1 = quando(t.a); st.passaggi.push({id:'d' + k + 'r', da:t.proto, a:'open', motivo:uno(MOT), nota:'', pt:pt, ts:t1, fatto:t1, punto:CL_NOME[t.proto], stato:(t.proto === 'move' ? 'libero' : 'approvato'), visto:true, soloSegno:true}); }
+    });
+  });
+  var inOpen = out.filter(function(c){ var st = c.state; return !st.demoProto && !st.completedAt && st.type && SEQUENCES[st.type] && (st.current || 0) < SEQUENCES[st.type].steps.length && (st.log || []).length; })[0];
+  if(inOpen){ var so = inOpen.state; so.passaggi.push({id:'d-attesa', da:'open', a:'load', motivo:'obiettivo', nota:'', pt:so.pt || PT[0], ts:giorno(2).getTime(), punto:'Open, obiettivo ' + ((so.current || 0) + 1) + ' di ' + SEQUENCES[so.type].steps.length, controllo:'', stato:'attesa'}); }
   window._demoStat = STAT;
   return out;
 }
@@ -11939,6 +12146,44 @@ window.addEventListener('load', function(){
 header > #breadcrumb, header > .bc{margin-right:auto!important;}
 /* ══ LE COSE DI SISTEMA nella barra, e quelle di Open in Open (monitor) ══ */
 .nv-sis.acceso{border-color:rgba(212,168,74,.85) !important;color:#E4B85A !important;background:rgba(212,168,74,.08);}
+/* Admin chiama: c'è un cambio di protocollo da approvare o da vedere */
+@keyframes nvChiama{0%,100%{background:rgba(228,184,90,.10);box-shadow:0 0 0 0 rgba(228,184,90,0);}50%{background:rgba(228,184,90,.95);box-shadow:0 0 14px 2px rgba(228,184,90,.65);}}
+@keyframes nvChiamaT{0%,100%{color:#E4B85A;}50%{color:#14120e;}}
+#nv-adm.chiama{border-color:#E4B85A !important;animation:nvChiama 1.1s ease-in-out infinite, nvChiamaT 1.1s ease-in-out infinite;}
+/* ══ PASSAGGI DI PROTOCOLLO ══ */
+.cl-tl-pas{position:absolute;width:12px;height:12px;padding:0;border-radius:50%;border:1px solid #f0ebdc;background:#14120e;cursor:pointer;z-index:2;}
+.cl-tl-pas:hover,.cl-tl-pas.sel{background:#f0ebdc;}
+.pas-riga{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;margin-top:10px;padding:9px 12px;border:1px solid rgba(180,195,210,.18);border-radius:2px;font-size:12.5px;color:rgba(225,232,240,.92);}
+.pas-riga.attesa{border-color:rgba(228,184,90,.6);}
+.pas-riga b{font-weight:600;color:#f0ebdc;}
+.pas-riga .pk{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(190,204,218,.6);}
+.pas-riga .pas-nota{flex:1 1 100%;color:rgba(225,232,240,.8);}
+.pas-box{margin-top:10px;padding:12px;border:1px solid rgba(200,175,90,.45);border-radius:2px;display:grid;gap:10px;}
+.pas-r{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px;min-width:0;}
+.pas-k{flex:none;width:86px;font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(190,204,218,.6);}
+.pas-c{height:28px;padding:0 10px;background:none;border:1px solid rgba(180,195,210,.25);border-radius:2px;cursor:pointer;font-family:var(--font);font-size:12px;color:rgba(215,225,235,.9);}
+.pas-c:hover{border-color:rgba(180,195,210,.6);}
+.pas-c.sel{border-color:rgba(228,184,90,.9);color:#E4B85A;background:rgba(212,168,74,.12);}
+.pas-c[data-pas-a].sel{border-color:var(--lc);color:var(--lc);background:none;}
+.pas-c i{font-style:normal;font-size:10px;margin-left:6px;opacity:.7;}
+#pas-nota{flex:1 1 260px;min-width:0;height:30px;padding:0 10px;background:rgba(0,0,0,.25);border:1px solid rgba(180,195,210,.25);border-radius:2px;color:#f0ebdc;font-family:var(--font);font-size:13px;}
+.pas-punto{font-size:12.5px;color:#f0ebdc;}
+.pas-esito{font-size:11px;color:rgba(190,204,218,.75);}
+/* il piede della finestra va su due righe quando non ci sta: sopra i simboli e "Cambia protocollo", sotto chi sei, Dettagli ed Entra */
+.cl-piede{flex-wrap:wrap;row-gap:10px;}
+.cl-piede .cl-azioni{flex-wrap:wrap;justify-content:flex-end;row-gap:8px;max-width:100%;}
+.cl-piede .cl-pts{display:flex;gap:4px;flex-wrap:wrap;}
+@media (max-width:1100px){ .cl-piede .cl-entra{padding:0 11px;letter-spacing:2px;} .cl-piede .cl-pt{min-width:0;padding:0 5px;letter-spacing:1px;} }
+.cl-cambia{margin-left:auto;height:28px !important;padding:0 12px !important;border-color:rgba(180,195,210,.35) !important;color:rgba(215,225,235,.9) !important;letter-spacing:2px !important;}
+.cl-piede .cl-cambia + .cl-azioni{margin-left:0;flex:1 1 auto;justify-content:flex-end;}
+.cl-cambia.sel{border-color:rgba(228,184,90,.9) !important;color:#E4B85A !important;}
+#pas-admin{margin:0 0 26px;padding:0 0 22px;border-bottom:1px solid rgba(180,195,210,.14);}
+#pas-admin h4{margin:0 0 10px;font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#E4B85A;}
+#pas-admin .pas-riga{margin-top:8px;}
+#pas-admin .pas-fa{margin-left:auto;display:flex;gap:8px;}
+#pas-admin .pas-fa button{height:28px;padding:0 14px;background:none;border:1px solid rgba(180,195,210,.35);border-radius:2px;cursor:pointer;font-family:var(--font);font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(215,225,235,.9);}
+#pas-admin .pas-fa button.si{border-color:rgba(228,184,90,.9);color:#E4B85A;}
+#pas-admin .pas-vuoto{font-size:12.5px;color:rgba(190,204,218,.6);}
 #nv-rf{border-color:rgba(200,120,120,.40);color:rgba(225,160,160,.92);}
 #nv-rf:hover{border-color:rgba(225,140,140,.85);color:rgba(240,180,180,1);}
 @media (max-width:899px) and (pointer:coarse){ .nv-sis{display:none !important;} }
@@ -12103,6 +12348,7 @@ window.addEventListener('load', function(){
     if(vis('cs')) return 'elenco';
     return 'dentro';
   }
+  window.navAggiorna = function(){ navAggiorna(); };   /* serve anche fuori: i passaggi di protocollo accendono Admin */
   function navAggiorna(){
     var d = navDove(), $ = function(i){ return document.getElementById(i); };
     var l1 = '', l2 = '';
@@ -12133,6 +12379,7 @@ window.addEventListener('load', function(){
     $('nv-sf').classList.toggle('nv-no', !ese);
     /* i tasti di sistema ci sono sempre (non alla password); quello della pagina aperta resta lì, acceso */
     ['nv-rf','nv-ese','nv-adm'].forEach(function(i){ $(i).classList.toggle('nv-no', d === 'login'); });
+    $('nv-adm').classList.toggle('chiama', d !== 'login' && typeof pasDaVedere === 'function' && pasDaVedere() > 0);
     $('nv-rf').classList.toggle('acceso', sopra === 'Red Flags');
     $('nv-ese').classList.toggle('acceso', sopra === 'Esercizi');
     /* in Open il percorso finisce al cliente: il focus (es. "secondo buffer") non è un posto dove si va, non sta nella barra */
@@ -21008,6 +21255,8 @@ function csCurrentProto(c){
   /* solo clienti finti: Move non ha ancora sedute salvate, il protocollo di adesso è scritto nel cliente */
   if(window.MYM_DEMO && c && c.state && c.state.demoProto) return c.state.demoProto;
   var h = csUnifiedHistory(c);
+  var up = (typeof pasUltimo === 'function') ? pasUltimo(c) : null;
+  if(up && (!h.length || String(h[0].date || '').slice(0, 10) <= pasGiorno(up.fatto))) return up.a;
   if(h.length) return h[0].proto;
   if(!c || !c.state) return null;
   var st = c.state;

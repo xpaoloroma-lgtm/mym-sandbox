@@ -11343,7 +11343,7 @@ function pasDopo(proto){
   var o = [];
   if(g.L.length) o.push('libero verso ' + g.L.join(', '));
   if(g.R.length) o.push('con approvazione verso ' + g.R.join(', '));
-  if(g.X.length) o.push('NON si può andare in ' + g.X.join(', '));
+  if(g.X.length) o.push('non è possibile andare in ' + g.X.join(', '));
   return o;
 }
 function pasRegola(c, da, a){
@@ -11466,7 +11466,7 @@ function pasNellaFinestra(c, proto){
        + '<div class="pas-g pas-verso">' + PAS_PROTO.filter(function(p){ return p !== proto; }).map(function(p){
            /* ogni destinazione dice subito com'è il passaggio: libero, richiesta, oppure non si può (spento) */
            var rg = pasRegola(c, proto, p), no = rg === 'no';
-           return '<button type="button" class="pas-c ' + rg + (q.a === p ? ' sel' : '') + '"' + (no ? ' disabled title="Da ' + pasNome(proto) + ' non si passa a ' + CL_NOME[p] + '"' : ' data-pas-a="' + p + '"') + ' style="--lc:' + CL_COLORE[p] + '"><b>' + CL_NOME[p] + '</b><i>' + (no ? 'non si può' : rg) + '</i></button>';
+           return '<button type="button" class="pas-c ' + rg + (q.a === p ? ' sel' : '') + '"' + (no ? ' disabled title="Da ' + pasNome(proto) + ' non si passa a ' + CL_NOME[p] + '"' : ' data-pas-a="' + p + '"') + ' style="--lc:' + CL_COLORE[p] + '"><b>' + CL_NOME[p] + '</b><i>' + (no ? 'non è possibile' : rg) + '</i></button>';
          }).join('') + '</div>'
        + '<div class="pas-k">Motivo</div>'
        + '<div class="pas-g pas-motivi">' + PAS_MOTIVI.map(function(m){ return '<button type="button" class="pas-c' + (q.motivo === m.id ? ' sel' : '') + '" data-pas-m="' + m.id + '">' + clEsc(m.nome) + '</button>'; }).join('')
@@ -11515,7 +11515,7 @@ function pasAdmin(){
 /* accese = le righe da mettere in evidenza (le altre si abbassano); note = con le righe di spiegazione sotto */
 function pasSchema(accese, note, titolo){
   var righe = [['nuovo','Cliente nuovo'],['openMeta','Open, a metà'],['openFinita','Open, finita'],['self','Self'],['load','Load'],['lift','Lift'],['move','Move'],['grid','Grid']];
-  var col = ['open','self','load','lift','move','grid'], nome = {L:'libero', R:'richiesta', X:'non si può'};
+  var col = ['open','self','load','lift','move','grid'], nome = {L:'libero', R:'richiesta', X:'non è possibile'};
   accese = accese || [];
   var h = (titolo === false ? '' : '<h4 class="ps-tit">Regole dei passaggi</h4>') + '<div class="pas-schema' + (accese.length ? ' foco' : '') + '"><div class="ps-r ps-testa"><span>da \u2193 &nbsp; verso \u2192</span>'
         + col.map(function(a){ return '<b style="color:' + CL_COLORE[a] + '">' + CL_NOME[a] + '</b>'; }).join('') + '</div>';
@@ -11527,14 +11527,6 @@ function pasSchema(accese, note, titolo){
     }).join('') + '</div>';
   });
   h += '</div>';
-  if(note !== false) h += '<div class="ps-note">'
-     + '<div><b>Libero</b>: avviene subito, all\u2019Admin arriva solo l\u2019avviso.</div>'
-     + '<div><b>Richiesta</b>: il cliente resta dov\u2019è finché l\u2019Admin non approva.</div>'
-     + '<div><b>Non si può</b>: il passaggio non esiste, non dipende dall\u2019approvazione.</div>'
-     + '<div>Open a metà chiede sempre: si vuole sapere perché si cambia. Finita una progressione Open se ne può aprire un\u2019altra, con avviso.</div>'
-     + '<div>Da Move si va solo in Open. Da Open non si salta in Lift: si passa da Load.</div>'
-     + '<div>Grid non è collegato a niente: ci si entra e se ne esce da qualunque protocollo, sempre con l\u2019approvazione.</div>'
-     + '</div>';
   return h;
 }
 /* la riga dello schema che vale per un cliente: per Open dipende da dove è arrivato */
@@ -12539,7 +12531,7 @@ header > #breadcrumb, header > .bc{margin-right:auto!important;}
 .pas-verso .pas-c i{font-style:normal;font-size:8.5px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:rgba(190,204,218,.6);}
 .pas-verso .pas-c.richiesta i{color:#E4B85A;}
 .pas-verso .pas-c.no{cursor:default;border-style:dashed;opacity:.45;}
-.pas-verso .pas-c.no b{text-decoration:line-through;}
+
 .pas-verso .pas-c.no:hover{border-color:rgba(180,195,210,.25);}
 .pas-motivi .pas-c{text-align:left;}
 .pas-c:hover{border-color:rgba(180,195,210,.6);}
@@ -12588,7 +12580,7 @@ header > #breadcrumb, header > .bc{margin-right:auto!important;}
 .ps-r > i{display:flex;align-items:center;justify-content:center;min-height:30px;font-style:normal;font-size:9.5px;font-weight:600;letter-spacing:1px;text-transform:uppercase;border-radius:2px;text-align:center;}
 .ps-L{background:rgba(120,205,155,.16);color:#9fe0bb;}
 .ps-R{background:rgba(228,184,90,.16);color:#E4B85A;}
-.ps-X{background:rgba(229,100,100,.10);color:rgba(240,150,150,.9);text-decoration:line-through;}
+.ps-X{background:rgba(229,100,100,.10);color:rgba(240,150,150,.9);}
 .ps-v{background:rgba(180,195,210,.05);}
 .ps-note{margin-top:12px;display:grid;gap:4px;max-width:820px;font-size:12.5px;line-height:1.45;color:rgba(215,225,235,.85);}
 .ps-note b{color:#f0ebdc;font-weight:600;}
@@ -14028,7 +14020,7 @@ function ncProtoDisegna(){
   dopo.className = 'si';
   /* prima di scegliere si vede lo schema con accesa la riga "Cliente nuovo": dove si può partire. Scelto il protocollo, si accende la sua riga: dove si potrà andare dopo. */
   dopo.innerHTML = !_ncProto ? '<div class="nc-dopo-t">Dove può partire un cliente nuovo</div><div class="nc-schema">' + pasSchema(['nuovo'], false, false) + '</div>' : '<div class="nc-dopo-t">Da ' + CL_NOME[_ncProto] + ' poi si potrà andare:</div>'
-                 + righe.map(function(r){ return '<div class="nc-dopo-r' + (r.indexOf('NON') === 0 ? ' no' : '') + '">' + clEsc(r) + '</div>'; }).join('')
+                 + righe.map(function(r){ return '<div class="nc-dopo-r' + (r.indexOf('non è possibile') === 0 ? ' no' : '') + '">' + clEsc(r) + '</div>'; }).join('')
                  + '<div class="nc-schema">' + pasSchema(_ncProto === 'open' ? ['openMeta','openFinita'] : [_ncProto], false, false) + '</div>'
                  + (grid ? '<div class="nc-dopo-r att">Per mettere un cliente in Grid serve l\u2019approvazione dell\u2019Admin: il cliente viene creato e la richiesta parte subito.</div>' : '');
   var nome = ncControlla();

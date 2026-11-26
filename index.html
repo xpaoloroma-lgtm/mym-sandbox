@@ -10984,7 +10984,7 @@ function clGiu(c, proto){
   var pts = (typeof PT_LIST !== 'undefined' && Array.isArray(PT_LIST)) ? PT_LIST : [];
   h += pasNellaFinestra(c, proto);
   h += '<div class="cl-piede"><div class="cl-legenda"><span><b>★</b>progressione finita</span><span><b>✕</b>interrotta</span></div>'
-     + (proto && !pasInAttesa(c) ? '<button type="button" class="cl-entra cl-cambia' + (_pasApre && _pasApre.id === c.id ? ' sel' : '') + '" data-cambia="' + clEsc(c.id) + '"' + (ptScelto ? '' : ' disabled title="Seleziona prima chi sei"') + '>Cambia protocollo</button>' : '')
+     + ((proto || (c.state && pasLista(c).length)) && !pasInAttesa(c) ? '<button type="button" class="cl-entra cl-cambia' + (_pasApre && _pasApre.id === c.id ? ' sel' : '') + '" data-cambia="' + clEsc(c.id) + '"' + (ptScelto ? '' : ' disabled title="Seleziona prima chi sei"') + '>Cambia protocollo</button>' : '')
      + '<div class="cl-azioni"><div class="cl-pts">'
      + pts.map(function(p){ return '<button type="button" class="cl-pt' + (p === ptScelto ? ' sel' : '') + '" data-pt="' + clEsc(p) + '">' + clEsc(p) + '</button>'; }).join('')
      + '</div><button type="button" class="cl-entra" data-dettagli="' + clEsc(c.id) + '">Dettagli</button>'
@@ -11051,6 +11051,7 @@ function clEntra(clientId){
   var pt = clPt();
   var c = (_csList || []).find(function(z){ return z.id === clientId; });
   if(!pt || !c) return;
+  if(c.state && !csCurrentProto(c) && typeof pasInAttesa === 'function' && pasInAttesa(c)) return;   /* nuovo, in attesa dell'approvazione: non ha ancora un protocollo */
   var proto = (c.state && csCurrentProto(c)) || 'open';
   if(proto === 'move'){ _currentPT = pt; _clAperto = null; moveSedutaApri(clientId); return; }
   /* Self e Load per adesso sono prototipi: si aprono quelli (non salvano). Lift non ha ancora una pagina. */
@@ -11295,6 +11296,7 @@ function pasOpenFinita(c){
 }
 /* a che punto è il cliente adesso, detto in una riga */
 function pasPunto(c, proto){
+  if(proto === 'nuovo') return 'Cliente nuovo';
   if(proto !== 'open') return CL_NOME[proto] || '';
   var st = c.state || {}, o = st.open || st, seq = (typeof SEQUENCES !== 'undefined' && o.type) ? SEQUENCES[o.type] : null;
   if(!seq || !seq.steps) return 'Open';
@@ -11307,16 +11309,32 @@ function pasRfNuova(c){
 }
 /* il cambio è libero o deve passare dall'Admin? */
 /* LE REGOLE DEI PASSAGGI, come le ha dettate Paolo il 26/11/2026. L = libero (solo avviso), R = richiesta da approvare, X = non si può.
-   Open ha due righe: a progressione finita e a metà. A metà serve sempre la richiesta, perché si vuole sapere perché si cambia. */
+   - "Non si può" non dipende dall'approvazione: quel passaggio non esiste. Move è per chi parte da zero o non può fare altro:
+     da Move si va SOLO in Open. Da Open non si salta in Lift: si passa da Load.
+   - Open ha due righe: a progressione finita e a metà. A metà serve sempre la richiesta, perché si vuole sapere perché si cambia.
+   - Grid non è collegato a niente: ci si arriva da qualunque protocollo e da Grid si va in qualunque protocollo, ma SEMPRE con l'approvazione,
+     in entrata e in uscita.
+   - "nuovo" è il cliente appena inserito, che sceglie il primo protocollo: libero ovunque, tranne Grid che passa dall'Admin. */
 var PAS_REGOLE = {
-  openMeta:   {self:'R', load:'R', lift:'R', move:'R', grid:'R'},
-  openFinita: {self:'L', load:'L', lift:'L', move:'R', grid:'R'},
-  self:       {open:'L', load:'L', lift:'L', move:'R', grid:'R'},   /* Self non ha una fine: verso Open si va in qualunque momento */
+  openMeta:   {self:'R', load:'R', lift:'X', move:'R', grid:'R'},
+  openFinita: {self:'L', load:'L', lift:'X', move:'R', grid:'R'},
+  self:       {open:'L', load:'L', lift:'R', move:'R', grid:'R'},   /* Self non ha una fine: verso Open si va in qualunque momento */
   load:       {open:'L', self:'L', lift:'L', move:'R', grid:'R'},
-  lift:       {load:'L', open:'R', self:'R', move:'R', grid:'R'},
-  move:       {open:'L', self:'L', load:'X', lift:'X', grid:'R'},   /* da Move non si passa a Load né a Lift */
-  grid:       {open:'L', self:'L', move:'L', load:'R', lift:'R'}
+  lift:       {load:'L', self:'L', open:'R', move:'R', grid:'R'},
+  move:       {open:'L', self:'X', load:'X', lift:'X', grid:'R'},
+  grid:       {open:'R', self:'R', load:'R', lift:'R', move:'R'},
+  nuovo:      {open:'L', self:'L', load:'L', lift:'L', move:'L', grid:'R'}
 };
+/* cosa si potrà fare partendo da un protocollo, detto in una riga (serve quando si sceglie il primo protocollo di un cliente) */
+function pasDopo(proto){
+  var r = PAS_REGOLE[proto === 'open' ? 'openFinita' : proto] || {}, g = {L:[], R:[], X:[]};
+  PAS_PROTO.forEach(function(a){ if(a !== proto && r[a]) g[r[a]].push(CL_NOME[a]); });
+  var o = [];
+  if(g.L.length) o.push('libero verso ' + g.L.join(', '));
+  if(g.R.length) o.push('con approvazione verso ' + g.R.join(', '));
+  if(g.X.length) o.push('NON si può andare in ' + g.X.join(', '));
+  return o;
+}
 function pasRegola(c, da, a){
   var riga = PAS_REGOLE[da === 'open' ? (pasOpenFinita(c) ? 'openFinita' : 'openMeta') : da], r = riga && riga[a];
   return r === 'L' ? 'libero' : r === 'X' ? 'no' : 'richiesta';
@@ -11357,11 +11375,11 @@ function pasEsegui(c, p){
   p.fatto = Date.now();
   if(c.state.demoProto) c.state.demoProto = p.a;
   if(!Array.isArray(c.state.journal)) c.state.journal = [];
-  c.state.journal.push({ts:new Date(p.fatto).toISOString(), kind:'protocol_change', proto:p.a, pt:p.pt, detail:CL_NOME[p.da] + ' → ' + CL_NOME[p.a] + ' · ' + pasMotivoDi(p)});
+  c.state.journal.push({ts:new Date(p.fatto).toISOString(), kind:'protocol_change', proto:p.a, pt:p.pt, detail:pasNome(p.da) + ' → ' + CL_NOME[p.a] + ' · ' + pasMotivoDi(p)});
 }
 /* il trainer manda la richiesta (o fa il cambio, se è libero) */
 function pasManda(c, pt){
-  var da = csCurrentProto(c), q = _pasApre;
+  var da = csCurrentProto(c) || 'nuovo', q = _pasApre;
   if(!c || !pasPronto(q) || !pt || !da || pasInAttesa(c) || pasRegola(c, da, q.a) === 'no') return;
   if(!Array.isArray(c.state.passaggi)) c.state.passaggi = [];
   var p = {id:'p' + Date.now().toString(36), da:da, a:q.a, motivo:q.motivo, nota:(q.motivo === 'nota' ? (q.nota || '').trim() : ''), pt:pt, ts:Date.now(), punto:pasPunto(c, da), controllo:pasControllo(c, da, q.motivo), stato:'attesa'};
@@ -11381,14 +11399,14 @@ function pasDecidi(clientId, id, come){
     else {
       p.stato = 'rifiutato';
       if(!Array.isArray(c.state.journal)) c.state.journal = [];
-      c.state.journal.push({ts:new Date(p.deciso).toISOString(), kind:'protocol_change_refused', proto:p.da, pt:p.pt, detail:CL_NOME[p.da] + ' → ' + CL_NOME[p.a] + ' · ' + pasMotivoDi(p) + ' · rifiutato'});
+      c.state.journal.push({ts:new Date(p.deciso).toISOString(), kind:'protocol_change_refused', proto:p.da, pt:p.pt, detail:pasNome(p.da) + ' → ' + CL_NOME[p.a] + ' · ' + pasMotivoDi(p) + ' · rifiutato'});
     }
   }
   pasSalva(c); pasAdmin(); try{ clDisegna(); }catch(e){}
 }
 function pasRigaTesto(c, p, conNome){
   return (conNome ? '<b>' + clEsc(c.id) + '</b>' : '')
-       + '<span><b>' + CL_NOME[p.da] + ' → ' + CL_NOME[p.a] + '</b></span>'
+       + '<span><b>' + pasNome(p.da) + ' → ' + CL_NOME[p.a] + '</b></span>'
        + '<span>' + clEsc(pasMotivoDi(p)) + '</span>'
        + '<span class="pk">' + clEsc(p.pt || '') + ' · ' + pasQuando(p.ts) + '</span>'
        + (conNome && p.punto ? '<span class="pk">era: ' + clEsc(p.punto) + '</span>' : '')
@@ -11401,6 +11419,7 @@ function pasRigaTesto(c, p, conNome){
    In attesa e rifiutato non hanno un punto sulla timeline, perché il passaggio non è avvenuto.
    quante = quante righe mostrare (0 = tutte): le altre si leggono nella pagina Dettagli. */
 var PAS_STATO = {approvato:'approvato', libero:'libero', attesa:'in attesa', rifiutato:'rifiutato'};
+function pasNome(p){ return p === 'nuovo' ? 'Nuovo' : (CL_NOME[p] || p); }
 function pasStoria(c, quante){
   var l = pasLista(c).slice().sort(function(a, b){ return (b.fatto || b.ts) - (a.fatto || a.ts); });
   if(!l.length) return '';
@@ -11411,7 +11430,7 @@ function pasStoria(c, quante){
     return '<div class="pas-s ' + p.stato + (_pasVisto === p.id ? ' sel' : '') + '" data-pas-riga="' + clEsc(p.id) + '">'
          + '<i class="pas-p"></i>'
          + '<span class="pas-q">' + pasQuando(p.fatto || p.ts) + '</span>'
-         + '<span class="pas-dove">' + CL_NOME[p.da] + ' \u2192 ' + CL_NOME[p.a] + '</span>'
+         + '<span class="pas-dove">' + pasNome(p.da) + ' \u2192 ' + CL_NOME[p.a] + '</span>'
          + '<span class="pas-m">' + clEsc(pasMotivoDi(p)) + '</span>'
          + '<span class="pas-chi">' + clEsc(p.pt || '') + '</span>'
          + '<span class="pas-st">' + PAS_STATO[p.stato] + '</span>'
@@ -11420,7 +11439,9 @@ function pasStoria(c, quante){
 }
 /* dentro la finestra del cliente, sotto la timeline */
 function pasNellaFinestra(c, proto){
-  if(!c.state || !proto) return '';
+  if(!c.state) return '';
+  /* un cliente nuovo che ha già scelto (o chiesto) il primo protocollo si tratta come gli altri, partendo da "nuovo" */
+  if(!proto){ if(!pasLista(c).length) return ''; proto = 'nuovo'; }
   var h = '', att = pasInAttesa(c);
   h += pasStoria(c, 4);
   if(!att && _pasApre && _pasApre.id === c.id){
@@ -11434,14 +11455,14 @@ function pasNellaFinestra(c, proto){
        + '<div class="pas-g pas-verso">' + PAS_PROTO.filter(function(p){ return p !== proto; }).map(function(p){
            /* ogni destinazione dice subito com'è il passaggio: libero, richiesta, oppure non si può (spento) */
            var rg = pasRegola(c, proto, p), no = rg === 'no';
-           return '<button type="button" class="pas-c ' + rg + (q.a === p ? ' sel' : '') + '"' + (no ? ' disabled title="Da ' + CL_NOME[proto] + ' non si passa a ' + CL_NOME[p] + '"' : ' data-pas-a="' + p + '"') + ' style="--lc:' + CL_COLORE[p] + '"><b>' + CL_NOME[p] + '</b><i>' + (no ? 'non si può' : rg) + '</i></button>';
+           return '<button type="button" class="pas-c ' + rg + (q.a === p ? ' sel' : '') + '"' + (no ? ' disabled title="Da ' + pasNome(proto) + ' non si passa a ' + CL_NOME[p] + '"' : ' data-pas-a="' + p + '"') + ' style="--lc:' + CL_COLORE[p] + '"><b>' + CL_NOME[p] + '</b><i>' + (no ? 'non si può' : rg) + '</i></button>';
          }).join('') + '</div>'
        + '<div class="pas-k">Motivo</div>'
        + '<div class="pas-g pas-motivi">' + PAS_MOTIVI.map(function(m){ return '<button type="button" class="pas-c' + (q.motivo === m.id ? ' sel' : '') + '" data-pas-m="' + m.id + '">' + clEsc(m.nome) + '</button>'; }).join('')
          + '<button type="button" class="pas-c' + (q.motivo === 'nota' ? ' sel' : '') + '" data-pas-m="nota">Nota</button></div>'
        + (esito ? '<div class="pas-esito">' + clEsc(esito) + '</div>' : '')
        + (q.motivo === 'nota' ? '<input id="pas-nota" spellcheck="false" autocomplete="off" value="' + clEsc(q.nota || '').replace(/"/g, '&quot;') + '">' : '')
-       + '<div class="pas-giu"><span class="pas-esito">' + (q.a ? (lib ? 'questo cambio è libero: avviene subito, l\u2019Admin viene avvisato' : 'il cliente resta in ' + CL_NOME[proto] + ' finché l\u2019Admin non approva') : '') + '</span>'
+       + '<div class="pas-giu"><span class="pas-esito">' + (q.a ? (lib ? 'questo cambio è libero: avviene subito, l\u2019Admin viene avvisato' : (proto === 'nuovo' ? 'il cliente resta senza protocollo' : 'il cliente resta in ' + CL_NOME[proto]) + ' finché l\u2019Admin non approva') : '') + '</span>'
        + '<button type="button" class="cl-entra" data-pas-manda="' + clEsc(c.id) + '"' + (pasPronto(q) ? '' : ' disabled') + '>' + (lib ? 'Cambia' : 'Chiedi il cambio') + '</button></div>'
        + '</div>';
   }
@@ -11475,7 +11496,32 @@ function pasAdmin(){
     h += '<h4 style="margin-top:18px">Avvisi · ' + avv.length + '</h4>'
        + avv.map(function(x){ return '<div class="pas-riga">' + pasRigaTesto(x[0], x[1], true) + '<span class="pas-fa"><button type="button" data-pas-ok="' + clEsc(x[1].id) + '" data-pas-cl="' + clEsc(x[0].id) + '">Visto</button></span></div>'; }).join('');
   }
+  h += pasSchema();
   box.innerHTML = h;
+}
+/* LO SCHEMA DELLE REGOLE DEI PASSAGGI. Si disegna da PAS_REGOLE, la stessa tabella che il programma usa: non può dire una cosa diversa da quello che succede.
+   Righe = da dove si parte, colonne = dove si va. */
+function pasSchema(){
+  var righe = [['nuovo','Cliente nuovo'],['openMeta','Open, a metà'],['openFinita','Open, finita'],['self','Self'],['load','Load'],['lift','Lift'],['move','Move'],['grid','Grid']];
+  var col = ['open','self','load','lift','move','grid'], nome = {L:'libero', R:'richiesta', X:'non si può'};
+  var h = '<h4 style="margin-top:22px">Regole dei passaggi</h4><div class="pas-schema"><div class="ps-r ps-testa"><span>da \u2193 &nbsp; verso \u2192</span>'
+        + col.map(function(a){ return '<b style="color:' + CL_COLORE[a] + '">' + CL_NOME[a] + '</b>'; }).join('') + '</div>';
+  righe.forEach(function(r){
+    var reg = PAS_REGOLE[r[0]] || {}, stesso = r[0].indexOf('open') === 0 ? 'open' : r[0];
+    h += '<div class="ps-r"><span>' + r[1] + '</span>' + col.map(function(a){
+      if(a === stesso) return '<i class="ps-v"></i>';
+      var v = reg[a] || 'R'; return '<i class="ps-' + v + '">' + nome[v] + '</i>';
+    }).join('') + '</div>';
+  });
+  h += '</div><div class="ps-note">'
+     + '<div><b>Libero</b>: avviene subito, all\u2019Admin arriva solo l\u2019avviso.</div>'
+     + '<div><b>Richiesta</b>: il cliente resta dov\u2019è finché l\u2019Admin non approva.</div>'
+     + '<div><b>Non si può</b>: il passaggio non esiste, non dipende dall\u2019approvazione.</div>'
+     + '<div>Open a metà chiede sempre: si vuole sapere perché si cambia. Finita una progressione Open se ne può aprire un\u2019altra, con avviso.</div>'
+     + '<div>Da Move si va solo in Open. Da Open non si salta in Lift: si passa da Load.</div>'
+     + '<div>Grid non è collegato a niente: ci si entra e se ne esce da qualunque protocollo, sempre con l\u2019approvazione.</div>'
+     + '</div>';
+  return h;
 }
 window.addEventListener('load', function(){
   if(typeof adminRender === 'function'){ var _ar = adminRender; adminRender = function(){ var r = _ar.apply(this, arguments); try{ pasAdmin(); }catch(e){} return r; }; }
@@ -12470,6 +12516,18 @@ header > #breadcrumb, header > .bc{margin-right:auto!important;}
 #pas-admin .pas-fa button{height:28px;padding:0 14px;background:none;border:1px solid rgba(180,195,210,.35);border-radius:2px;cursor:pointer;font-family:var(--font);font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(215,225,235,.9);}
 #pas-admin .pas-fa button.si{border-color:rgba(228,184,90,.9);color:#E4B85A;}
 #pas-admin .pas-vuoto{font-size:12.5px;color:rgba(190,204,218,.6);}
+.pas-schema{display:grid;gap:3px;max-width:820px;font-family:var(--font);}
+.ps-r{display:grid;grid-template-columns:128px repeat(6, minmax(0,1fr));gap:3px;align-items:stretch;}
+.ps-r > span{display:flex;align-items:center;font-size:12.5px;color:#f0ebdc;padding-right:8px;}
+.ps-testa > span{font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(190,204,218,.6);}
+.ps-testa > b{text-align:center;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:4px 0;}
+.ps-r > i{display:flex;align-items:center;justify-content:center;min-height:30px;font-style:normal;font-size:9.5px;font-weight:600;letter-spacing:1px;text-transform:uppercase;border-radius:2px;text-align:center;}
+.ps-L{background:rgba(120,205,155,.16);color:#9fe0bb;}
+.ps-R{background:rgba(228,184,90,.16);color:#E4B85A;}
+.ps-X{background:rgba(229,100,100,.10);color:rgba(240,150,150,.9);text-decoration:line-through;}
+.ps-v{background:rgba(180,195,210,.05);}
+.ps-note{margin-top:12px;display:grid;gap:4px;max-width:820px;font-size:12.5px;line-height:1.45;color:rgba(215,225,235,.85);}
+.ps-note b{color:#f0ebdc;font-weight:600;}
 #nv-rf{border-color:rgba(200,120,120,.40);color:rgba(225,160,160,.92);}
 #nv-rf:hover{border-color:rgba(225,140,140,.85);color:rgba(240,180,180,1);}
 @media (max-width:899px) and (pointer:coarse){ .nv-sis{display:none !important;} }
@@ -13829,7 +13887,12 @@ function eseClose(){
     <div id="nc-rf"></div>
     <div class="nc-k">Note</div>
     <textarea id="nc-nota" spellcheck="false"></textarea>
-    <div class="nc-tasti"><button type="button" class="nc-b" onclick="ncChiudi()">Annulla</button><button type="button" class="nc-b nc-ok" id="nc-ok" onclick="ncSalva()">Crea cliente</button></div>
+    <!-- IL PRIMO PROTOCOLLO: va scelto con attenzione, perché decide dove il cliente potrà andare dopo. Sotto la scelta c'è scritto cosa comporta,
+         e prima di creare il cliente si conferma una seconda volta. -->
+    <div class="nc-k" style="margin-top:16px">Primo protocollo</div>
+    <div id="nc-proto"></div>
+    <div id="nc-dopo"></div>
+    <div class="nc-tasti" id="nc-tasti"></div>
   </div>
 </div>
 <style>
@@ -13869,7 +13932,19 @@ function eseClose(){
 .nc-f.si i::after{left:18px;background:rgba(240,170,170,1);}
 .nc-f.si b{color:rgba(240,190,190,1);}
 @media (max-width:620px){ .nc-due{flex-direction:column;} .nc-c2{flex:1 1 auto;} .nc-f{grid-template-columns:38px minmax(0,1fr);} .nc-f span{grid-column:2;} }
-.nc-tasti{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;}
+.nc-tasti{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:20px;}
+#nc-proto{display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:6px;}
+.nc-p{height:40px;background:none;border:1px solid rgba(180,195,210,0.25);border-radius:2px;cursor:pointer;font-family:var(--font);font-size:13px;letter-spacing:2px;text-transform:uppercase;color:rgba(215,226,236,0.9);}
+.nc-p:hover:not(:disabled){border-color:rgba(180,195,210,0.6);}
+.nc-p.si{border-color:var(--lc);color:var(--lc);box-shadow:inset 0 -3px 0 var(--lc);}
+.nc-p:disabled{cursor:default;opacity:0.5;} .nc-p.si:disabled{opacity:1;}
+#nc-dopo{display:none;margin-top:10px;padding:12px 14px;border:1px solid rgba(228,184,90,0.6);border-radius:2px;background:rgba(212,168,74,0.06);}
+#nc-dopo.si{display:block;}
+.nc-dopo-t{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#E4B85A;margin-bottom:6px;}
+.nc-dopo-r{font-size:13.5px;line-height:1.5;color:#f0ebdc;}
+.nc-dopo-r.no{color:#f0aaaa;font-weight:600;}
+.nc-dopo-r.att{margin-top:6px;color:#E4B85A;}
+.nc-conf{margin-right:auto;font-size:14px;color:#f0ebdc;} .nc-conf b{font-weight:600;}
 .nc-b{height:32px;padding:0 14px;background:none;border:1px solid rgba(180,195,210,0.25);border-radius:2px;cursor:pointer;font-family:var(--font);font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(215,226,236,0.9);}
 .nc-b.nc-ok{border-color:rgba(212,168,74,0.6);color:rgba(232,207,143,0.95);background:rgba(200,175,90,0.05);}
 .nc-b:disabled{opacity:.3;cursor:default;}
@@ -13880,8 +13955,26 @@ function eseClose(){
    - I red flag scelti qui si accendono con la stessa regola di sempre: serve la password di accesso, una volta sola.
    - Il cliente nasce senza protocollo e senza sedute: compare nell'elenco, aperto, e da lì si entra. */
 var _ncRf = {};
+var _ncProto = '', _ncConferma = false;
+function ncProtoDisegna(){
+  var box = document.getElementById('nc-proto'), dopo = document.getElementById('nc-dopo'), tasti = document.getElementById('nc-tasti');
+  if(!box) return;
+  box.innerHTML = PAS_PROTO.map(function(p){ return '<button type="button" class="nc-p' + (_ncProto === p ? ' si' : '') + '" data-ncp="' + p + '" style="--lc:' + CL_COLORE[p] + '"' + (_ncConferma ? ' disabled' : '') + '>' + CL_NOME[p] + '</button>'; }).join('');
+  var righe = _ncProto ? pasDopo(_ncProto) : [], grid = _ncProto === 'grid';
+  dopo.className = _ncProto ? 'si' : '';
+  dopo.innerHTML = !_ncProto ? '' : '<div class="nc-dopo-t">Da ' + CL_NOME[_ncProto] + ' poi si potrà andare:</div>'
+                 + righe.map(function(r){ return '<div class="nc-dopo-r' + (r.indexOf('NON') === 0 ? ' no' : '') + '">' + clEsc(r) + '</div>'; }).join('')
+                 + (grid ? '<div class="nc-dopo-r att">Per mettere un cliente in Grid serve l\u2019approvazione dell\u2019Admin: il cliente viene creato e la richiesta parte subito.</div>' : '');
+  var nome = ncControlla();
+  if(!_ncConferma){
+    tasti.innerHTML = '<button type="button" class="nc-b" onclick="ncChiudi()">Annulla</button><button type="button" class="nc-b nc-ok" id="nc-ok" onclick="ncSalva()"' + (nome && _ncProto ? '' : ' disabled') + '>Crea cliente</button>';
+  } else {
+    tasti.innerHTML = '<div class="nc-conf"><b>' + clEsc(nome) + '</b> parte in <b style="color:' + CL_COLORE[_ncProto] + '">' + CL_NOME[_ncProto] + '</b>. Confermi?</div>'
+                    + '<button type="button" class="nc-b" onclick="_ncConferma=false;ncProtoDisegna()">Indietro</button><button type="button" class="nc-b nc-ok" id="nc-ok" onclick="ncSalva()">Conferma</button>';
+  }
+}
 function ncApri(){
-  _ncRf = {};
+  _ncRf = {}; _ncProto = ''; _ncConferma = false;
   var n = document.getElementById('nc-nome'); n.value = (document.getElementById('cl-cerca').value || '').trim();
   document.getElementById('nc-nick').value = ''; document.getElementById('nc-nota').value = '';
   document.getElementById('nc-err').textContent = '';
@@ -13894,16 +13987,18 @@ function ncDisegna(){
   document.getElementById('nc-rf').innerHTML = (window.RF_DATA || []).map(function(f){
     return '<button type="button" class="nc-f' + (_ncRf[f.id] ? ' si' : '') + '" data-rf="' + f.id + '"><i></i><b>' + clEsc(f.name) + '</b><span>' + clEsc(f.trigger || f.slug || '') + '</span></button>';
   }).join('');
-  ncControlla();
+  ncProtoDisegna();
 }
 function ncControlla(){
   var nome = document.getElementById('nc-nome').value.trim(), gia = nome ? csNomeGiaUsato(nome) : null;
   document.getElementById('nc-err').textContent = gia ? 'Questo cliente esiste già: ' + gia.id : '';
-  document.getElementById('nc-ok').disabled = !nome || !!gia;
+  var ok = document.getElementById('nc-ok'); if(ok) ok.disabled = !nome || !!gia || !_ncProto;
   return nome && !gia ? nome : '';
 }
 function ncSalva(){
-  var nome = ncControlla(); if(!nome) return;
+  var nome = ncControlla(); if(!nome || !_ncProto) return;
+  if(!_ncConferma){ _ncConferma = true; ncProtoDisegna(); return; }   /* prima la conferma: si rilegge dove parte e cosa comporta */
+  var primo = _ncProto;
   var scelti = Object.keys(_ncRf).filter(function(k){ return _ncRf[k]; });
   function crea(){
     var c = {id:nome, state:null, ts:Date.now()};
@@ -13918,10 +14013,17 @@ function ncSalva(){
       }
       try{ if(typeof migrateStateShape === 'function') migrateStateShape(c.state); }catch(e){}
     }
+    /* il primo protocollo è il primo passaggio del cliente: resta scritto nella sua storia, con chi l'ha scelto.
+       In Grid è una richiesta: finché l'Admin non approva il cliente resta "nuovo". */
+    if(!c.state) c.state = {};
+    var ora = Date.now(), lib = PAS_REGOLE.nuovo[primo] === 'L';
+    c.state.passaggi = [{id:'p' + ora.toString(36), da:'nuovo', a:primo, motivo:'nota', nota:'Primo protocollo', pt:(typeof _currentPT !== 'undefined' && _currentPT) || '', ts:ora, punto:'Cliente nuovo', controllo:'', stato:(lib ? 'libero' : 'attesa'), visto:false}];
+    if(lib) c.state.passaggi[0].fatto = ora;
     _csList.push(c);
     if(typeof _csSaveLocal === 'function') _csSaveLocal();
     if(typeof sbSave === 'function') sbSave(c.id, c.state);
     ncChiudi();
+    try{ pasDemoTieni(); if(typeof navAggiorna === 'function') navAggiorna(); }catch(e){}
     /* il cliente nuovo si vede subito: ricerca vuota, filtri tolti, riga aperta */
     document.getElementById('cl-cerca').value = '';
     _clProto = ''; _clRf = ''; _clAperto = c.id; _clPtScelto = null;
@@ -13933,7 +14035,8 @@ function ncSalva(){
     rfChiedi(true, crea, nome + ' · ' + scelti.map(function(id){ return rfNomeScheda(id); }).join(', '));
   } else crea();
 }
-document.getElementById('nc-nome').addEventListener('input', ncControlla);
+document.getElementById('nc-nome').addEventListener('input', function(){ _ncConferma = false; ncProtoDisegna(); });
+document.getElementById('nc-proto').addEventListener('click', function(e){ var b = e.target.closest('[data-ncp]'); if(!b || _ncConferma) return; _ncProto = b.getAttribute('data-ncp'); ncProtoDisegna(); });
 ['nc-nome','nc-nick','nc-nota'].forEach(function(i){ document.getElementById(i).addEventListener('keydown', function(e){ e.stopPropagation(); if(e.key === 'Enter' && i !== 'nc-nota') ncSalva(); if(e.key === 'Escape') ncChiudi(); }); });
 document.getElementById('nc-rf').addEventListener('click', function(e){
   var b = e.target.closest('[data-rf]'); if(!b) return;

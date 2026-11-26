@@ -11248,7 +11248,9 @@ window.addEventListener('load', function(){
    Solo se nessuna voce va bene si sceglie "Nota", e allora la riga scritta è obbligatoria.
    - Di regola il cambio è una RICHIESTA: il cliente resta dov'è finché dall'Admin (dietro la sua password) non viene approvata o rifiutata.
    - Sono LIBERI, cioè avvengono subito ma lasciano comunque un avviso in Admin:
-       · da Open con la progressione finita verso Self, Load o Lift (verso Move no: è una richiesta);
+       · da Open verso Self, sempre;
+       · da Open con la progressione finita verso Load o Lift (verso Move e verso Grid no: è una richiesta);
+       · in Open, finita una progressione, aprirne un'altra;
        · da Move verso Open;
        · da Grid verso qualunque protocollo. Verso Grid invece è sempre una richiesta.
    - Finché c'è una richiesta o un avviso non visto, il tasto Admin nella barra lampeggia.
@@ -11308,7 +11310,8 @@ function pasRfNuova(c){
 }
 /* il cambio è libero o deve passare dall'Admin? */
 function pasLibero(c, da, a){
-  if(da === 'open' && pasOpenFinita(c) && (a === 'self' || a === 'load' || a === 'lift')) return true;
+  if(da === 'open' && a === 'self') return true;                                        /* Open → Self: sempre libero, a qualunque punto della progressione (stessi esercizi, stesse logiche) */
+  if(da === 'open' && pasOpenFinita(c) && (a === 'load' || a === 'lift')) return true;  /* Open → Load o Lift: libero solo a progressione finita */
   if(da === 'move' && a === 'open') return true;
   if(da === 'grid') return true;      /* da Grid si esce sempre, verso qualunque protocollo (anche Move). ENTRARE in Grid invece è sempre una richiesta */
   return false;
@@ -11333,6 +11336,7 @@ function pasDemoRimetti(lista){
     var l = o[c.id]; if(!Array.isArray(l) || !c.state) return;
     if(!Array.isArray(c.state.passaggi)) c.state.passaggi = [];
     l.forEach(function(p){ c.state.passaggi.push(p); });
+    l.forEach(function(p){ if(p.stato === 'attesa' && pasLibero(c, p.da, p.a)){ p.stato = 'libero'; p.visto = false; p.fatto = p.ts; } });   /* le regole sono cambiate dopo la prova */
     var u = pasUltimo(c); if(u && c.state.demoProto && String(u.id).charAt(0) === 'p') c.state.demoProto = u.a;
   });
 }
@@ -11415,7 +11419,7 @@ function pasNellaFinestra(c, proto){
   h += pasStoria(c, 4);
   if(!att && _pasApre && _pasApre.id === c.id){
     var q = _pasApre, lib = q.a ? pasLibero(c, proto, q.a) : false;
-    if(lib && proto === 'open') q.motivo = 'finita';
+    if(lib && proto === 'open' && pasOpenFinita(c) && !q.motivo) q.motivo = 'finita';   /* a progressione finita il motivo è già quello (si può cambiare) */
     var esito = q.motivo ? pasControllo(c, proto, q.motivo) : '';
     /* in ordine: dov'è adesso, dove va, perché, e in fondo la riga che dice cosa succede con il tasto */
     h += '<div class="pas-box">'

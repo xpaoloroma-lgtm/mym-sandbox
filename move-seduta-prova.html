@@ -28,11 +28,7 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:232px minmax(0,1.12f
 .blocchi .bk-n{font-size:24px;font-weight:300;margin-bottom:12px;}
 .blocchi .bk-r{font-size:21px;color:rgb(250,246,236);line-height:1.75;}
 .blocchi .bk-r i{width:84px;font-size:11px;letter-spacing:2px;}
-.blocchi .bk.fatto{border-color:rgba(120,205,155,.5);border-left-color:rgba(120,205,155,.9);}
-.blocchi .bk.fatto .bk-r{color:rgba(250,246,236,.55);}
-.bk-n .ok{margin-left:auto;flex:none;white-space:nowrap;height:28px;padding:0 14px;border:1px solid rgba(212,168,74,.5);background:none;color:var(--gold-txt);font:600 10px "Exo 2",sans-serif;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;}
-.bk.fatto .bk-n .ok{border-color:rgba(120,205,155,.45);color:var(--move);}
-.bk-n .via{flex:none;width:28px;height:28px;border:1px solid var(--line);background:none;color:var(--lo);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
+.bk-n .via{margin-left:auto;flex:none;width:28px;height:28px;border:1px solid var(--line);background:none;color:var(--lo);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
 .bk-n .via:hover{border-color:rgba(212,168,74,.6);color:var(--gold-txt);}
 .bk-n .via svg{width:12px;height:12px;display:block;}
 /* ── LA COLONNA DEI BLOCCHI DA PRENDERE: gli stessi blocchi dell'editor, alla stessa misura. Si trascinano nella seduta (o un clic li mette in fondo). ── */
@@ -186,19 +182,15 @@ body.trascina{user-select:none;}
 </main>
 <div id="ghost"><span class="nm"></span><span class="why">torna tra i blocchi</span></div>
 <div class="velo" id="velo-rf"><div class="fin" role="dialog" aria-modal="true"><div class="fin-su"><b>Red Flags</b><button class="fin-x" type="button" data-chiudi>Chiudi</button></div><div class="fin-b"><div class="rf-lista" id="rf-lista"></div></div></div></div>
+<script src="move-esempi.js"></script>
 <script>
-/* dati di esempio: tre blocchi, ognuno con Esercizio 1, Esercizio 2 e Cardio, come nell'editor */
-var BLOCCHI = [
-  {id:'x1', nome:'In piedi alla sbarra', fatto:true,  e:['Sit to stand','Alzate sui talloni'], cardio:'Marcia sul posto'},
-  {id:'x2', nome:'Seduto',               fatto:false, e:['Estensione ginocchio','Tirate con elastico'], cardio:'Pedaliera'},
-  {id:'x3', nome:'A terra',              fatto:false, e:['Ponte','Quadrupedia, braccio avanti'], cardio:'Camminata'}
-];
+/* i blocchi: gli stessi dell'editor (vedi move-esempi.js). Nella seduta non si segna "fatto": un blocco messo nella seduta è un blocco della seduta. */
 function righe(b){ return '<div class="bk-r"><i>1</i>' + (b.e[0] || '—') + '</div><div class="bk-r"><i>2</i>' + (b.e[1] || '—') + '</div><div class="bk-r"><i>Cardio</i>' + (b.cardio || '—') + '</div>'; }
 /* ═══ LA SEDUTA: POSTI E TRASCINAMENTO, come in Self ═══
    La seduta ha dei POSTI: sempre almeno tre, numerati. Un posto vuoto si vede (numero + "trascina qui"); quando i posti sono tutti pieni ne compare uno in più in fondo.
    Il trascinamento è lo stesso di Self: un fantasma segue il mouse, il posto sotto si accende, e se il posto è occupato il blocco SI INSERISCE lì
    e gli altri scalano (li vedi spostarsi mentre trascini). Togliere un blocco (la X, o riportarlo sulla colonna dei blocchi) lo fa volare al suo posto nell'elenco. */
-var SED = BLOCCHI.slice();            /* i posti: un blocco oppure null */
+var SED = [];            /* i posti: un blocco oppure null */
 var anteprima = null, drag = null, zittoClic = false;
 function posti(a){ a = a.slice(); while(a.length > 3 && a[a.length - 1] == null) a.pop(); while(a.length < 3) a.push(null); if(a.every(function(x){ return x != null; })) a.push(null); return a; }
 function mostrati(){ return posti(anteprima || SED); }
@@ -207,7 +199,7 @@ function disegna(){
   var a = mostrati();
   document.getElementById('blocchi').innerHTML = a.map(function(b, i){
     if(!b) return '<div class="posto vuoto' + (i >= 3 ? ' oltre' : '') + '" data-i="' + i + '"><i class="pt"></i><span class="pn">' + (i + 1) + '</span><span class="ph">trascina qui</span></div>';
-    return '<div class="posto" data-i="' + i + '"><div class="bk' + (b.fatto ? ' fatto' : '') + '" data-key="' + b.id + '"><div class="bk-n"><span>' + (b.nome || 'Senza nome') + '</span><button class="ok" type="button" data-ok="' + b.id + '">' + (b.fatto ? '✓ fatto' : 'Fatto') + '</button>'
+    return '<div class="posto" data-i="' + i + '"><div class="bk" data-key="' + b.id + '"><div class="bk-n"><span>' + (b.nome || 'Senza nome') + '</span>'
       + '<button class="via" type="button" data-via="' + b.id + '" title="Togli il blocco" aria-label="Togli il blocco"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7"/></svg></button></div>' + righe(b) + '</div></div>';
   }).join('');
   if(drag && drag.on && drag.src.da === 'sed'){ var k = document.querySelector('#blocchi .bk[data-key="' + drag.src.id + '"]'); if(k) k.classList.add('alzato'); }
@@ -317,8 +309,6 @@ document.getElementById('blocchi').addEventListener('click', function(e){
     a.forEach(function(x, i){ if(x && x.id === id) a[i] = null; });
     SED = a; scivola(disegna, 0.42); blElenco(); vola(id, {left:da.left, top:da.top}); return;
   }
-  var o = e.target.closest('[data-ok]'); if(!o) return;
-  SED.forEach(function(x){ if(x && x.id === o.dataset.ok) x.fatto = !x.fatto; }); disegna();
 });
 disegna();
 /* ═══ RED FLAGS ═══ Stesso elenco e stessi testi di Open e Load (RF_DATA copiato da Load). Stato per cliente: attivo + nota, più la Custom.
@@ -482,21 +472,13 @@ rfSunto();
 })();
 
 /* ═══ LA SCELTA DEL BLOCCO ═══
-   L'elenco è quello dei blocchi salvati con l'editor di Move (stesso posto nel browser: 'move-blocchi', fatti così: {id, nome, e:[es1, es2], cardio}).
-   Se nell'editor non ce n'è ancora nessuno, la prova mostra blocchi di esempio.
-   I FILTRI sono da decidere: qui ci sono le posizioni dell'editor, e funzionano solo sui blocchi di esempio (quelli veri non hanno ancora una posizione). */
-var ESEMPI = [
-  {id:'x1', nome:'In piedi alla sbarra', e:['Sit to stand','Alzate sui talloni'], cardio:'Marcia sul posto', pos:'In piedi'},
-  {id:'x2', nome:'Seduto', e:['Estensione ginocchio','Tirate con elastico'], cardio:'Pedaliera', pos:'Seduto'},
-  {id:'x3', nome:'A terra', e:['Ponte','Quadrupedia, braccio avanti'], cardio:'Camminata', pos:'Quadrupedia'},
-  {id:'x4', nome:'Equilibrio', e:['Tandem alla sbarra','Appoggio su un piede'], cardio:'Step basso', pos:'In piedi'},
-  {id:'x5', nome:'Spalle da seduto', e:['Alzate laterali','Spinte sopra la testa'], cardio:'Pedaliera braccia', pos:'Seduto'},
-  {id:'x6', nome:'Supino', e:['Ponte a una gamba','Dead bug'], cardio:'Camminata', pos:'Prono/Sup.'},
-  {id:'x7', nome:'Camminata con ostacoli', e:['Passo laterale','Scavalco'], cardio:'Corridoio', pos:'In piedi'}
-];
-var LIB = []; try{ LIB = JSON.parse(localStorage.getItem('move-blocchi') || '[]') || []; }catch(e){ LIB = []; }
-var VERI = LIB.length > 0; if(!VERI) LIB = ESEMPI;
-if(VERI){ SED = []; disegna(); }   /* con i blocchi veri dell'editor la seduta parte vuota: i tre di esempio servono solo se l'editor è vuoto */
+   L'elenco è quello dei blocchi dell'editor di Move: stesso posto nel browser, fatti così: {id, nome, e:[es1, es2], cardio}.
+   Se nell'editor non ce n'è nessuno, anche qui non ce n'è nessuno.
+   I FILTRI sono da decidere: qui ci sono le posizioni dell'editor, e funzionano solo sui blocchi che hanno una posizione scritta (quelli di esempio). */
+var LIB = []; try{ LIB = JSON.parse(localStorage.getItem(moveChiave()) || '[]') || []; }catch(e){ LIB = []; }
+/* con i clienti di esempio la seduta parte con i primi tre blocchi, per vederla piena; con i clienti veri parte vuota (la seduta non si salva ancora) */
+if(moveDemo()){ SED = LIB.slice(0, 3).map(function(x){ return daLib(x.id); }); }
+disegna();
 var VOCI = ['Tutti','In piedi','Seduto','Prono/Sup.','Quadrupedia'], filtro = 'Tutti';
 function blElenco(){
   var q = document.getElementById('bq').value.trim().toLowerCase(), par = q.split(/\s+/).filter(Boolean);
@@ -510,7 +492,7 @@ function blElenco(){
 }
 document.getElementById('bq').addEventListener('input', blElenco);
 document.getElementById('filtri').addEventListener('click', function(e){ var f = e.target.closest('[data-f]'); if(f){ filtro = f.dataset.f; blElenco(); } });
-function daLib(id){ var x = LIB.filter(function(q){ return q.id === id; })[0]; return x ? {id:x.id, nome:x.nome || 'Senza nome', fatto:false, e:(x.e || []).slice(), cardio:x.cardio || ''} : null; }
+function daLib(id){ var x = LIB.filter(function(q){ return q.id === id; })[0]; return x ? {id:x.id, nome:x.nome || 'Senza nome', e:(x.e || []).slice(), cardio:x.cardio || ''} : null; }
 blElenco();
 /* i quattro comandi delle note: elenco puntato, elenco numerato, sottolineato, colore */
 document.querySelector('.barra').addEventListener('mousedown', function(e){

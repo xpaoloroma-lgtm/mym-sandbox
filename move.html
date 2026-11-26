@@ -256,6 +256,7 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
   <!-- qui niente storico: nell'edit dei blocchi non ha senso. Tornerà nella seduta con il cliente. -->
 </div>
 
+<script src="move-esempi.js"></script>
 <script>
 /* ═══ MOVE — costruzione dei blocchi (prototipo) ═══
    - Gli esercizi sono quelli che nella pagina Esercizi hanno una voce in "Prot. Fil".
@@ -268,7 +269,7 @@ header{position:relative;z-index:2;height:57px;flex:none;padding:0 28px;border-b
   var SRT = {'Prono/Sup.':1, 'Quadrupedia':1};
   var VOCI = ['In piedi','Seduto','Prono/Sup.','Quadrupedia','Cardio'];
   var MOVIMENTI = 50;
-  var CHIAVE = 'move-blocchi';
+  var CHIAVE = moveChiave();   /* clienti veri: 'move-blocchi'; demo: un elenco a parte, che parte con i blocchi di esempio (move-esempi.js) */
   var ESE = [];                    /* {nome, label, pos} */
   var blocchi = [];
   try{ blocchi = JSON.parse(localStorage.getItem(CHIAVE) || '[]') || []; }catch(e){ blocchi = []; }

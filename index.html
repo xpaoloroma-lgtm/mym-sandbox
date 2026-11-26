@@ -10488,8 +10488,8 @@ tr.ore-scala td{border-top:1px solid var(--border);}
     font-size:15px !important;font-weight:500;line-height:1.35;color:rgb(246,236,210);background:none !important;overflow-y:auto;scrollbar-width:thin;}
   #scheda-slots .scheda-slot .scheda-note-inp::placeholder{color:rgba(180,195,210,.30);font-size:10px;font-weight:400;letter-spacing:2px;text-transform:uppercase;}
   /* la famiglia su cui si lavora adesso: resta il segno dorato a sinistra, senza velare il colore della cella */
-  #scheda-slots .scheda-slot.active-fam{box-shadow:none;}
-  #scheda-slots .scheda-slot.active-fam::before{width:1px;box-shadow:none;background:rgba(212,168,74,.95);}
+  #scheda-slots .scheda-slot.active-fam{box-shadow:inset 0 0 0 1px rgba(212,168,74,.9);}
+  #scheda-slots .scheda-slot.active-fam::before{display:none;}
 }
 </style>
 </head>
@@ -12135,6 +12135,8 @@ window.addEventListener('load', function(){
     ['nv-rf','nv-ese','nv-adm'].forEach(function(i){ $(i).classList.toggle('nv-no', d === 'login'); });
     $('nv-rf').classList.toggle('acceso', sopra === 'Red Flags');
     $('nv-ese').classList.toggle('acceso', sopra === 'Esercizi');
+    /* in Open il percorso finisce al cliente: il focus (es. "secondo buffer") non è un posto dove si va, non sta nella barra */
+    if(typeof _currentProto !== 'undefined' && _currentProto === 'open'){ ['bc-focus','bc-sep-2'].forEach(function(i){ var e=$(i); if(e) e.classList.add('nv-no'); }); }
     var pezzi = ['nv-sb','nv-l1','nv-l2','nv-l3','bc-proto','bc-client','bc-focus','nv-fine'].map($).filter(function(e){
       return e && !e.classList.contains('nv-no') && e.style.display !== 'none';
     });
@@ -12176,7 +12178,8 @@ window.addEventListener('load', function(){
     }
     else if(dove === 'proto'){
       var p = (typeof _currentProto !== 'undefined') ? _currentProto : null;
-      if(d === 'dentro' && window._csId && (p === 'open' || p === 'grid') && typeof bcGoClient === 'function') bcGoClient();
+      /* il cliente si sceglie nella pagina Protocolli: la vecchia pagina di scelta non si apre più da qui */
+      if(d === 'dentro' && (p === 'open' || p === 'grid')) navFuoriDalCliente();
     }
     else if(dove === 'esci'){ navChiudiFinestre(); navFuoriDalCliente(); protoBack(); }
     navAggiorna();
@@ -12226,8 +12229,7 @@ window.addEventListener('load', function(){
     if(gg && gg.classList.contains('on') && typeof ggExit === 'function'){ ggExit(); return true; }
     if(vis('cs')){ csOpen(); return true; }
     var p = (typeof _currentProto !== 'undefined') ? _currentProto : null;
-    if(window._csId && (p === 'open' || p === 'grid') && typeof bcGoClient === 'function') bcGoClient();
-    else csOpen();
+    csOpen();   /* da dentro un cliente, Indietro porta alla pagina Protocolli */
     return true;
   }
   if(window.history && history.pushState){
@@ -13485,7 +13487,7 @@ document.getElementById('nc-rf').addEventListener('click', function(e){
     <span class="bc-sep" id="bc-sep-0" style="display:none">›</span>
     <span class="bc-item bc-link" id="bc-proto" onclick="navVai('proto')"></span>
     <span class="bc-sep" id="bc-sep-1" style="display:none">›</span>
-    <span class="bc-item bc-link" id="bc-client" style="display:none" onclick="bcGoClient()"></span>
+    <span class="bc-item bc-link" id="bc-client" style="display:none" onclick="navVai('proto')"></span>
     <span class="bc-rf-slot" id="bc-rf-indicator" style="display:none" onclick="rfOpenForCurrent()" title="Red Flags attivi su questo cliente"></span>
     <span class="bc-sep" id="bc-sep-2" style="display:none">›</span>
     <span class="bc-item bc-active" id="bc-focus" style="display:none"></span>

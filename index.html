@@ -51,7 +51,7 @@ header{height:57px;flex-shrink:0;padding:0 28px;border-bottom:1px solid var(--bo
   font-size:13px;color:rgba(180,195,210,0.82);
   margin:0 8px;flex-shrink:0;
 }
-.header-right{display:flex;align-items:center;gap:14px;}
+.header-right{display:flex;align-items:center;gap:14px;margin-left:16px;}
 .progress-label{font-size:10px;letter-spacing:2px;color:rgba(180,195,210,0.82);text-transform:uppercase;}
 .progress-bar{width:80px;height:1px;background:rgba(180,195,210,0.12);}
 .progress-fill{height:100%;background:var(--gold);transition:width 0.4s ease;}
@@ -11059,9 +11059,9 @@ function clEntra(clientId){
   if(!pt || !c) return;
   if(c.state && !csCurrentProto(c) && typeof pasInAttesa === 'function' && pasInAttesa(c)) return;   /* nuovo, in attesa dell'approvazione: non ha ancora un protocollo */
   var proto = (c.state && csCurrentProto(c)) || 'open';
-  if(proto === 'move'){ _currentPT = pt; _clAperto = null; moveSedutaApri(clientId); return; }
+  if(proto === 'move'){ _currentPT = pt; _clAperto = null; window._navCli = clientId; moveSedutaApri(clientId); return; }
   /* Self e Load per adesso sono prototipi: si aprono quelli (non salvano). Lift non ha ancora una pagina. */
-  if(proto === 'self' || proto === 'load'){ _currentPT = pt; _clAperto = null; prototipoOpen(proto + '.html', CL_NOME[proto]); return; }
+  if(proto === 'self' || proto === 'load'){ _currentPT = pt; _clAperto = null; window._navCli = clientId; prototipoOpen(proto + '.html', CL_NOME[proto]); return; }
   if(proto === 'lift') return;
   _currentPT = pt;
   if(proto === 'skip'){
@@ -12631,7 +12631,7 @@ header #breadcrumb{flex:0 1 auto;min-width:0;overflow:hidden;}
 header #breadcrumb .bc-item, header #breadcrumb .bc-sep{flex:none;}
 /* il nome del cliente si legge sempre intero; se manca posto si accorcia il focus, che è scritto anche sotto */
 header #breadcrumb #bc-focus{flex:0 100 auto;min-width:3ch;overflow:hidden;text-overflow:ellipsis;display:block;}
-header #breadcrumb #bc-client{flex:0 1 auto;min-width:90px;overflow:hidden;text-overflow:ellipsis;display:block;}
+header #breadcrumb #bc-client, header #breadcrumb #nv-l3:not(.nv-no){flex:0 1 auto;min-width:90px;overflow:hidden;text-overflow:ellipsis;display:block;}
 header .header-right{flex:none;}
 @media (max-width:1300px){
   header{padding:0 14px !important;}
@@ -12737,7 +12737,7 @@ window.addEventListener('load', function(){
   }
   /* ── La barra in alto ──
      Il percorso si ricava da quello che c'è sullo schermo in quel momento. */
-  var _navProtoNome = '';
+  var _navProtoNome = '', _navProtoCliente = '';   /* Move, Self, Load: il percorso è come in Open, protocollo › cliente */
   /* Esercizi si apre SOPRA la pagina dove sei: il percorso resta quello di sotto, con "Esercizi" in fondo */
   function navEse(){ return navSopra() !== ''; }
   /* Red Flags ed Esercizi stanno SOPRA la pagina dove sei: una sola alla volta */
@@ -12778,7 +12778,7 @@ window.addEventListener('load', function(){
     /* Esercizi aperto da dentro un prototipo (da Move): il prototipo resta nel percorso, e ci si torna */
     var l3 = '', sopra = navSopra(), ese = !!sopra;
     if(d === 'cd') l2 = 'Dettagli cliente';
-    if(d === 'load') l2 = _navProtoNome + (ese ? '' : ' · prototipo, non salva');
+    if(d === 'load'){ l2 = _navProtoNome; l3 = _navProtoCliente; if(!l3 && !ese) l2 += ' · prototipo, non salva'; }
     var conProto = (d === 'elenco' || d === 'dentro');
     $('nv-l1').textContent = l1;
     $('nv-l2').textContent = l2;
@@ -12823,7 +12823,7 @@ window.addEventListener('load', function(){
       if(u && casa && u.parentNode !== casa) casa.appendChild(u);
     }
     var pt = (typeof _currentPT !== 'undefined' && _currentPT) ? _currentPT : '';
-    $('nv-pt').textContent = (d === 'dentro' || d === 'elenco') ? pt : '';
+    $('nv-pt').textContent = (d === 'dentro' || d === 'elenco' || (d === 'load' && _navProtoCliente)) ? pt : '';
   }
   function navChiudiFinestre(){
     if(vis('load-screen')) prototipoClose();
@@ -12846,6 +12846,7 @@ window.addEventListener('load', function(){
       if(d === 'load' || d === 'cd'){ navChiudiFinestre(); }
       else if(d === 'elenco' || d === 'dentro'){ navFuoriDalCliente(); }
     }
+    else if(dove === 'l2'){ if(d === 'load' && _navProtoCliente) navChiudiFinestre(); }   /* come un clic su "Open": si torna ai Protocolli */
     else if(dove === 'proto'){
       var p = (typeof _currentProto !== 'undefined') ? _currentProto : null;
       /* il cliente si sceglie nella pagina Protocolli: la vecchia pagina di scelta non si apre più da qui */
@@ -12869,7 +12870,7 @@ window.addEventListener('load', function(){
   }
   if(typeof prototipoOpen === 'function'){
     var _po = prototipoOpen;
-    prototipoOpen = function(file, nome){ _navProtoNome = nome || ''; _po.apply(this, arguments); };
+    prototipoOpen = function(file, nome){ _navProtoNome = nome || ''; _navProtoCliente = window._navCli || ''; window._navCli = ''; _po.apply(this, arguments); };
   }
   if(window.MutationObserver){
     var _no = new MutationObserver(navAggiorna);

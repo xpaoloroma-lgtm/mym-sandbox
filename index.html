@@ -11937,6 +11937,26 @@ window.addEventListener('load', function(){
 #view-only-banner .view-only-text::before,#view-only-banner .vo-text::before{margin-right:0!important;}
 #view-only-banner .view-only-cta,#view-only-banner .vo-cta{padding:0 8px!important;letter-spacing:1.5px!important;}
 header > #breadcrumb, header > .bc{margin-right:auto!important;}
+/* ══ LE COSE DI SISTEMA nella barra, e quelle di Open in Open (monitor) ══ */
+.nv-sis.acceso{border-color:rgba(212,168,74,.85) !important;color:#E4B85A !important;background:rgba(212,168,74,.08);}
+#nv-rf{border-color:rgba(200,120,120,.40);color:rgba(225,160,160,.92);}
+#nv-rf:hover{border-color:rgba(225,140,140,.85);color:rgba(240,180,180,1);}
+@media (max-width:899px) and (pointer:coarse){ .nv-sis{display:none !important;} }
+@media (min-width:900px), (pointer:fine){
+  /* Red Flags ed Esercizi si aprono sopra qualunque pagina, prototipi compresi */
+  body #rfp-screen, body #ese-screen{z-index:10005;}
+  /* la fascia in basso della pagina Protocolli non c'è più: i suoi tasti sono nella barra */
+  body #proto-select > #proto-actions{display:none !important;}
+  header .progress-label, header .progress-bar{display:none !important;}
+  #open-su{flex:none;display:flex;align-items:center;gap:10px;margin:8px 28px 8px 12px;}
+  #open-su > #open-warm{flex:1;min-width:0;margin:0;}
+  #open-su > #view-only-banner{order:0 !important;margin:0 !important;height:46px !important;padding:0 10px 0 12px !important;}
+  #scheda-piede{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  #scheda-piede .reset-btn, #skip-config-bar #undo-btn, #skip-single-config-bar #undo-btn{height:32px;padding:0 14px;font-size:10px;letter-spacing:2px;box-sizing:border-box;}
+  #open-su > #undo-btn{flex:none;height:46px;padding:0 16px;font-size:10px;letter-spacing:2px;box-sizing:border-box;}
+  #scheda-piede .reset-btn{border:1px solid rgba(180,195,210,.25);border-radius:2px;}
+  body.view-only #undo-btn, body.view-only #hdr-reset-btn{display:none !important;}
+}
 body.view-only #main-layout, body.view-only #grid-layout{margin-top:0 !important;}
 /* La Sandbox si usa a metà monitor (Full HD, due finestre affiancate: circa 960).
    Lì la barra è stretta: l'avviso di consultazione resta solo il segno e il tasto,
@@ -11965,9 +11985,22 @@ header .header-right{flex:none;}
 
 </style>
 <script>
+/* LE COSE DI OPEN STANNO IN OPEN, non nella barra (sul monitor; sul telefono resta com'era):
+   - Conferma sessione: a destra della riga del warm-up, la prima riga della pagina;
+   - undo: anche lui a destra della riga del warm-up (lo sistema navAggiorna, perché serve anche a Skip);
+   - reset: in fondo alla scheda, accanto a "Cambia esercizi";
+   - il contatore "4 / 8" non serve: lo dice già il riquadro dell'obiettivo. */
 window.addEventListener('DOMContentLoaded', function(){
-  var b = document.getElementById('view-only-banner'), bc = document.getElementById('breadcrumb');
-  if(b && bc && bc.parentNode) bc.parentNode.insertBefore(b, bc.nextSibling);
+  var $ = function(i){ return document.getElementById(i); };
+  var b = $('view-only-banner'), bc = $('breadcrumb');
+  var monitor = !!(window.matchMedia && window.matchMedia('(min-width:900px), (pointer:fine)').matches);
+  if(!monitor){ if(b && bc && bc.parentNode) bc.parentNode.insertBefore(b, bc.nextSibling); return; }
+  var warm = $('open-warm'), piede = $('scheda-piede');
+  if(b && warm && warm.parentNode){
+    var su = document.createElement('div'); su.id = 'open-su';
+    warm.parentNode.insertBefore(su, warm); su.appendChild(warm); su.appendChild(b);
+  }
+  var r = $('hdr-reset-btn'); if(piede && r) piede.appendChild(r);
 });
 </script>
 <script>
@@ -12041,11 +12074,27 @@ window.addEventListener('load', function(){
      Il percorso si ricava da quello che c'è sullo schermo in quel momento. */
   var _navProtoNome = '';
   /* Esercizi si apre SOPRA la pagina dove sei: il percorso resta quello di sotto, con "Esercizi" in fondo */
-  function navEse(){ return vis('ese-screen') && !vis('login-splash'); }
+  function navEse(){ return navSopra() !== ''; }
+  /* Red Flags ed Esercizi stanno SOPRA la pagina dove sei: una sola alla volta */
+  function navSopra(){
+    if(vis('login-splash')) return '';
+    if(vis('ese-screen')) return 'Esercizi';
+    if(vis('rfp-screen')) return 'Red Flags';
+    return '';
+  }
+  function navSopraChiudi(){ if(vis('ese-screen')) eseClose(); if(vis('rfp-screen')) rfpClose(); }
+  /* i tasti di sistema della barra: un clic apre, un altro clic sullo stesso richiude e sei dov'eri */
+  window.navSis = function(k){
+    if(vis('login-splash')) return;
+    var era = navSopra();
+    navSopraChiudi();
+    if(k === 'ese' && era !== 'Esercizi') eseOpen();
+    if(k === 'rf' && era !== 'Red Flags') rfpOpen();
+    navAggiorna();
+  };
   function navDove(){
     if(vis('login-splash')) return 'login';
     if(vis('load-screen')) return 'load';
-    if(vis('rfp-screen')) return 'rfp';
     if(vis('cd-screen')) return 'cd';
     if(vis('ore-screen')) return 'ore';
     if(vis('riu-screen')) return 'riu';
@@ -12061,8 +12110,7 @@ window.addEventListener('load', function(){
     else if(d === 'riu') l1 = 'Riunioni';
     else if(d !== 'sandbox' && d !== 'login') l1 = 'Protocolli';
     /* Esercizi aperto da dentro un prototipo (da Move): il prototipo resta nel percorso, e ci si torna */
-    var l3 = '', ese = navEse();
-    if(d === 'rfp') l2 = 'Red Flags';
+    var l3 = '', sopra = navSopra(), ese = !!sopra;
     if(d === 'cd') l2 = 'Dettagli cliente';
     if(d === 'load') l2 = _navProtoNome + (ese ? '' : ' · prototipo, non salva');
     var conProto = (d === 'elenco' || d === 'dentro');
@@ -12080,11 +12128,13 @@ window.addEventListener('load', function(){
     $('bc-sep-0').style.display = conProto ? '' : 'none';
     ['bc-client','bc-sep-1','bc-focus','bc-sep-2','bc-rf-indicator'].forEach(function(i){ var e=$(i); if(e) e.classList.toggle('nv-no', !conProto); });
     /* l'ultimo pezzo visibile è dove si è: non è un tasto */
-    $('nv-fine').textContent = ese ? 'Esercizi' : '';
+    $('nv-fine').textContent = sopra;
     $('nv-fine').classList.toggle('nv-no', !ese);
     $('nv-sf').classList.toggle('nv-no', !ese);
-    /* il tasto Esercizi c'è dentro i protocolli (non quando Esercizi è già aperto) */
-    $('nv-ese').classList.toggle('nv-no', ese || !(d === 'dentro' || d === 'elenco' || d === 'load'));
+    /* i tasti di sistema ci sono sempre (non alla password); quello della pagina aperta resta lì, acceso */
+    ['nv-rf','nv-ese','nv-adm'].forEach(function(i){ $(i).classList.toggle('nv-no', d === 'login'); });
+    $('nv-rf').classList.toggle('acceso', sopra === 'Red Flags');
+    $('nv-ese').classList.toggle('acceso', sopra === 'Esercizi');
     var pezzi = ['nv-sb','nv-l1','nv-l2','nv-l3','bc-proto','bc-client','bc-focus','nv-fine'].map($).filter(function(e){
       return e && !e.classList.contains('nv-no') && e.style.display !== 'none';
     });
@@ -12094,6 +12144,12 @@ window.addEventListener('load', function(){
       e.classList.toggle('bc-link', !ultimo);
     });
     document.body.classList.toggle('nv-dentro', d === 'dentro');
+    /* undo serve a Open e a Skip: sta nella pagina del protocollo aperto (sul monitor), mai nella barra */
+    if(window.matchMedia && window.matchMedia('(min-width:900px), (pointer:fine)').matches){
+      var u = $('undo-btn'), pr = (typeof _currentProto !== 'undefined') ? _currentProto : '';
+      var casa = (pr === 'skip') ? $((typeof _skipMode !== 'undefined' && _skipMode === 'single') ? 'skip-single-config-bar' : 'skip-config-bar') : $('open-su');
+      if(u && casa && u.parentNode !== casa) casa.appendChild(u);
+    }
     var pt = (typeof _currentPT !== 'undefined' && _currentPT) ? _currentPT : '';
     $('nv-pt').textContent = (d === 'dentro' || d === 'elenco') ? pt : '';
   }
@@ -12115,7 +12171,7 @@ window.addEventListener('load', function(){
     var d = navDove();
     if(dove === 'sandbox'){ navChiudiFinestre(); navFuoriDalCliente(); ingressoOpen(); }
     else if(dove === 'l1'){
-      if(d === 'load' || d === 'rfp' || d === 'cd'){ navChiudiFinestre(); }
+      if(d === 'load' || d === 'cd'){ navChiudiFinestre(); }
       else if(d === 'elenco' || d === 'dentro'){ navFuoriDalCliente(); }
     }
     else if(dove === 'proto'){
@@ -12131,7 +12187,7 @@ window.addEventListener('load', function(){
     if(!navEse()) return;
     var pezzo = ev.target.closest('.bc-item'); if(!pezzo || pezzo.id === 'nv-fine') return;
     var visibili = [].filter.call(this.querySelectorAll('.bc-item'), function(e){ return e.id !== 'nv-fine' && !e.classList.contains('nv-no') && e.style.display !== 'none' && e.offsetParent; });
-    eseClose();
+    navSopraChiudi();
     if(pezzo === visibili[visibili.length - 1]){ ev.stopPropagation(); ev.preventDefault(); navAggiorna(); }
   }, true);
   if(typeof bcUpdate === 'function'){
@@ -12159,7 +12215,7 @@ window.addEventListener('load', function(){
      Dai tre riquadri (o dalla password) Indietro esce davvero. */
   function vis(id){ var e = document.getElementById(id); return !!e && !e.classList.contains('off'); }
   function passoIndietro(){
-    var fin = [['ese-screen', window.eseClose], ['load-screen', window.prototipoClose], ['rfp-screen', window.rfpClose], ['cd-screen', window.cdClose],
+    var fin = [['ese-screen', window.eseClose], ['rfp-screen', window.rfpClose], ['load-screen', window.prototipoClose], ['cd-screen', window.cdClose],
                ['ore-screen', window.oreClose], ['riu-screen', window.riuClose]];
     for(var i=0;i<fin.length;i++){
       if(vis(fin[i][0]) && typeof fin[i][1] === 'function'){ fin[i][1](); return true; }
@@ -13437,10 +13493,13 @@ document.getElementById('nc-rf').addEventListener('click', function(e){
     <span class="bc-item nv-no" id="nv-fine"></span>
   </nav>
   <div class="header-right">
+    <!-- LE COSE DI SISTEMA: stessi tasti, stesso posto, stesso ordine in ogni pagina. Red Flags ed Esercizi si aprono SOPRA la pagina dove sei
+         e richiudendoli torni lì; Admin chiede la password. Quello che serve a un protocollo solo sta nella sua pagina, non qui. -->
     <span class="nv-sempre" id="nv-pt"></span>
+    <button class="hdr-btn nv-sempre nv-sis" id="nv-rf" onclick="navSis('rf')">Red Flags</button>
+    <button class="hdr-btn nv-sempre nv-sis" id="nv-ese" onclick="navSis('ese')">Esercizi</button>
+    <button class="hdr-btn nv-sempre nv-sis" id="nv-adm" onclick="adminPwOpen()">Admin</button>
     <button class="hdr-btn nv-sempre" id="demo-btn" onclick="demoCambia()" title="Clienti finti per vedere le pagine piene. Non salva niente.">demo</button>
-    <!-- la pagina Esercizi: stesso tasto, stesso posto, da dentro qualunque protocollo. Si apre sopra e chiudendola si torna dov'eri. -->
-    <button class="hdr-btn nv-sempre nv-no" id="nv-ese" onclick="eseOpen()" title="Apri la pagina Esercizi">Esercizi</button>
     <button class="hdr-btn undo-btn" id="undo-btn" onclick="undoLast()" disabled>undo</button>
     <button class="reset-btn" id="hdr-reset-btn" onclick="resetSplashOpen()" style="display:none">reset</button>
     <span class="progress-label" id="progress-text">0 / 0</span>

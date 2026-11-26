@@ -2921,5 +2921,30 @@ load(); setUnit(); openDay();
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', parti); else parti();
 })();
 </script>
+
+<style id="in-sandbox-css">
+/* DENTRO LA SANDBOX la barra in alto è una sola, quella della Sandbox: qui la barra propria non c'è.
+   I tasti del protocollo stanno a destra della riga del warm-up, la prima riga della pagina (come in Open). */
+.in-sandbox > body > header, .in-sandbox header{display:none !important;}
+#su-riga{flex:none;display:flex;align-items:center;gap:10px;min-width:0;}
+#su-riga > .warm-riga, #su-riga > #warm{flex:1;min-width:0;margin:0 !important;}
+#su-riga > #view-only-banner{order:0 !important;margin:0 !important;height:46px !important;}
+#su-riga > .btn, #su-riga > .sess{flex:none;height:46px !important;}
+/* i tasti di simulazione (ci sono finché Self è una prova): in fondo alla colonna di destra */
+.in-sandbox #rk-col > .sim{flex:none;flex-wrap:wrap;justify-content:center;margin:10px 12px 12px;}
+</style>
+
+<script id="in-sandbox-js">
+(function(){
+  var dentro = false; try{ dentro = window.parent !== window; }catch(e){ dentro = true; }
+  if(!dentro) return;
+  var warm = document.querySelector('#work > .warm-riga'); if(!warm) return;
+  document.documentElement.classList.add('in-sandbox');
+  var su = document.createElement('div'); su.id = 'su-riga';
+  warm.parentNode.insertBefore(su, warm); su.appendChild(warm);
+  ['view-only-banner','undo'].forEach(function(i){ var e = document.getElementById(i); if(e) su.appendChild(e); });
+  var sim = document.querySelector('header .sim'), col = document.getElementById('rk-col'); if(sim && col) col.appendChild(sim);
+})();
+</script>
 </body>
 </html>

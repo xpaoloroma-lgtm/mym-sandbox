@@ -10917,7 +10917,7 @@ function clRiga(c){
      usa già per dire se un cliente è attivo. È una scelta, non una misura. */
   var fermo = n !== null && n > 30, aperta = (_clAperto === c.id);
   var att = (typeof pasInAttesa === 'function') ? pasInAttesa(c) : null;
-  return '<div class="cl-r' + (fermo ? ' fermo' : '') + (aperta ? ' aperta' : '') + '" data-cl-id="' + clEsc(c.id) + '" data-clp="' + (proto || '') + '" data-clv="' + (att ? att.a : '') + '" style="--pc:' + pc + '">'
+  return '<div class="cl-r' + (fermo ? ' fermo' : '') + (aperta ? ' aperta' : '') + '" data-cl-id="' + clEsc(c.id) + '" data-psk="' + ((typeof pasChiave === 'function') ? pasChiave(c) : '') + '" data-clp="' + (proto || '') + '" data-clv="' + (att ? att.a : '') + '" style="--pc:' + pc + '">'
        + '<button type="button" class="cl-capo" data-cl="' + clEsc(c.id) + '">'
        +   '<div class="cl-chi"><div class="cl-nome">' + clEsc(c.id) + (c.state && c.state.nick ? '<span class="cl-nick">' + clEsc(c.state.nick) + '</span>' : '') + '</div><div class="cl-sotto"><span class="cl-proto">' + (proto ? CL_NOME[proto] : 'nuovo') + '</span>' + (att ? '<span class="cl-att" style="--vc:' + CL_COLORE[att.a] + '" title="Cambio di protocollo in attesa dell\u2019Admin">\u2192 ' + CL_NOME[att.a] + '</span>' : '') + chips + '</div></div>'
        +   '<div class="cl-chiera">' + (chi ? '<b>' + clEsc(chi) + '</b>' : '') + '</div>'
@@ -11143,6 +11143,8 @@ function clDisegna(){
   if(typeof window.mpFissa === 'function'){
     var ap = _clAperto ? tutti.filter(function(c){ return c.id === _clAperto; })[0] : null, apAtt = (ap && typeof pasInAttesa === 'function') ? pasInAttesa(ap) : null;
     window.mpFissa(ap ? ((ap.state && csCurrentProto(ap)) || '') : '', apAtt ? apAtt.a : '');
+    _clSchemaFisso = (ap && typeof pasChiave === 'function') ? pasChiave(ap) : '';
+    if(typeof pasSchemaPagina === 'function') pasSchemaPagina(_clSchemaFisso);
   }
   if(!visti.length){
     var filtrato = !!(_clProto || _clRf);
@@ -11156,6 +11158,7 @@ function clDisegna(){
 }
 /* LA SCHEDA DEL CLIENTE APERTO sta nella colonna di destra, sotto la griglia: a sinistra CHI (l'elenco, che così non salta),
    a destra DOVE (la griglia, con la sua zona accesa) e subito sotto la sua timeline, i passaggi e i tasti per entrare. */
+var _clSchemaFisso = '';
 function clScheda(){
   var box = document.getElementById('cl-scheda'); if(!box) return;
   var c = _clAperto ? (_csList || []).filter(function(z){ return z && z.id === _clAperto; })[0] : null;
@@ -11179,7 +11182,12 @@ window.addEventListener('load', function(){
     /* i tre tasti restano fuori: sono il piè di pagina */
     ['home-riga','proto-chart-wrap'].forEach(function(i){ var e = document.getElementById(i); if(e) z.appendChild(e); });
   }
-  var scheda = document.createElement('div'); scheda.id = 'cl-scheda'; z.appendChild(scheda);
+  /* la colonna di destra ha due parti: a sinistra la griglia con Grid sotto (#home-riga), a destra scheda del cliente, schema delle regole e grafico (#pr-dx).
+     A metà monitor stanno una sotto l'altra, a schermo intero affiancate. */
+  var dx = document.createElement('div'); dx.id = 'pr-dx'; z.appendChild(dx);
+  var scheda = document.createElement('div'); scheda.id = 'cl-scheda'; dx.appendChild(scheda);
+  var psp = document.createElement('div'); psp.id = 'ps-pagina'; dx.appendChild(psp);
+  var gr = document.getElementById('proto-chart-wrap'); if(gr) dx.appendChild(gr);
   inp.addEventListener('input', function(){ _clAperto = null; clDisegna(); });
   var filtri = document.getElementById('cl-filtri');
   if(filtri){
@@ -11220,8 +11228,9 @@ window.addEventListener('load', function(){
     var r = ev.target.closest && ev.target.closest('.cl-r');
     /* sulla riga del cliente già scelto resta l'evidenza piena; nello spazio tra due righe si torna a quella */
     if(r && r.getAttribute('data-cl-id') !== _clAperto) window.mpMostra(r.getAttribute('data-clp'), r.getAttribute('data-clv')); else window.mpMostra('', '');
+    if(typeof pasSchemaPagina === 'function') pasSchemaPagina(r ? r.getAttribute('data-psk') : _clSchemaFisso);
   });
-  lista.addEventListener('mouseleave', function(){ if(typeof window.mpMostra === 'function') window.mpMostra('', ''); });
+  lista.addEventListener('mouseleave', function(){ if(typeof window.mpMostra === 'function') window.mpMostra('', ''); if(typeof pasSchemaPagina === 'function') pasSchemaPagina(_clSchemaFisso); });
   scheda.addEventListener('input', function(ev){ if(ev.target && ev.target.id === 'pas-nota' && _pasApre){ _pasApre.nota = ev.target.value; var m = scheda.querySelector('[data-pas-manda]'); if(m) m.disabled = !pasPronto(_pasApre); } });
   /* si ridisegna quando arriva l'elenco dei clienti e ogni volta che si torna qui */
   if(typeof gridRifareRender === 'function'){
@@ -11496,24 +11505,27 @@ function pasAdmin(){
     h += '<h4 style="margin-top:18px">Avvisi · ' + avv.length + '</h4>'
        + avv.map(function(x){ return '<div class="pas-riga">' + pasRigaTesto(x[0], x[1], true) + '<span class="pas-fa"><button type="button" data-pas-ok="' + clEsc(x[1].id) + '" data-pas-cl="' + clEsc(x[0].id) + '">Visto</button></span></div>'; }).join('');
   }
-  h += pasSchema();
+  h += pasSchema([], true);
   box.innerHTML = h;
 }
 /* LO SCHEMA DELLE REGOLE DEI PASSAGGI. Si disegna da PAS_REGOLE, la stessa tabella che il programma usa: non può dire una cosa diversa da quello che succede.
    Righe = da dove si parte, colonne = dove si va. */
-function pasSchema(){
+/* accese = le righe da mettere in evidenza (le altre si abbassano); note = con le righe di spiegazione sotto */
+function pasSchema(accese, note, titolo){
   var righe = [['nuovo','Cliente nuovo'],['openMeta','Open, a metà'],['openFinita','Open, finita'],['self','Self'],['load','Load'],['lift','Lift'],['move','Move'],['grid','Grid']];
   var col = ['open','self','load','lift','move','grid'], nome = {L:'libero', R:'richiesta', X:'non si può'};
-  var h = '<h4 style="margin-top:22px">Regole dei passaggi</h4><div class="pas-schema"><div class="ps-r ps-testa"><span>da \u2193 &nbsp; verso \u2192</span>'
+  accese = accese || [];
+  var h = (titolo === false ? '' : '<h4 class="ps-tit">Regole dei passaggi</h4>') + '<div class="pas-schema' + (accese.length ? ' foco' : '') + '"><div class="ps-r ps-testa"><span>da \u2193 &nbsp; verso \u2192</span>'
         + col.map(function(a){ return '<b style="color:' + CL_COLORE[a] + '">' + CL_NOME[a] + '</b>'; }).join('') + '</div>';
   righe.forEach(function(r){
     var reg = PAS_REGOLE[r[0]] || {}, stesso = r[0].indexOf('open') === 0 ? 'open' : r[0];
-    h += '<div class="ps-r"><span>' + r[1] + '</span>' + col.map(function(a){
+    h += '<div class="ps-r' + (accese.indexOf(r[0]) !== -1 ? ' on' : '') + '" data-psk="' + r[0] + '"><span>' + r[1] + '</span>' + col.map(function(a){
       if(a === stesso) return '<i class="ps-v"></i>';
       var v = reg[a] || 'R'; return '<i class="ps-' + v + '">' + nome[v] + '</i>';
     }).join('') + '</div>';
   });
-  h += '</div><div class="ps-note">'
+  h += '</div>';
+  if(note !== false) h += '<div class="ps-note">'
      + '<div><b>Libero</b>: avviene subito, all\u2019Admin arriva solo l\u2019avviso.</div>'
      + '<div><b>Richiesta</b>: il cliente resta dov\u2019è finché l\u2019Admin non approva.</div>'
      + '<div><b>Non si può</b>: il passaggio non esiste, non dipende dall\u2019approvazione.</div>'
@@ -11522,6 +11534,19 @@ function pasSchema(){
      + '<div>Grid non è collegato a niente: ci si entra e se ne esce da qualunque protocollo, sempre con l\u2019approvazione.</div>'
      + '</div>';
   return h;
+}
+/* la riga dello schema che vale per un cliente: per Open dipende da dove è arrivato */
+function pasChiave(c){
+  var p = (c && c.state && csCurrentProto(c)) || 'nuovo';
+  return p === 'open' ? (pasOpenFinita(c) ? 'openFinita' : 'openMeta') : p;
+}
+/* LO SCHEMA NELLA PAGINA PROTOCOLLI, sotto la griglia: accende la riga del cliente su cui sei (mouse sopra) o che hai scelto */
+function pasSchemaPagina(chiave){
+  var box = document.getElementById('ps-pagina'); if(!box) return;
+  if(!box.firstChild) box.innerHTML = pasSchema([], false);
+  var sc = box.querySelector('.pas-schema'); if(!sc) return;
+  sc.classList.toggle('foco', !!chiave);
+  [].forEach.call(sc.querySelectorAll('.ps-r[data-psk]'), function(r){ r.classList.toggle('on', r.getAttribute('data-psk') === chiave); });
 }
 window.addEventListener('load', function(){
   if(typeof adminRender === 'function'){ var _ar = adminRender; adminRender = function(){ var r = _ar.apply(this, arguments); try{ pasAdmin(); }catch(e){} return r; }; }
@@ -12162,12 +12187,13 @@ window.addEventListener('load', function(){
      Gli assi della griglia: 104 punti a sinistra (erano 124) e 76 sotto (erano 78), con le scritte più grandi e leggibili. */
   body #proto-select{grid-template-columns:clamp(350px, 38vw, 480px) minmax(0,1fr) !important;gap:0 28px !important;padding:20px 28px 0 !important;}
   #pr-zona{gap:14px !important;align-content:start;}
-  #pr-zona > #home-riga{display:contents !important;}
-  #mappa{order:1;flex:none !important;height:clamp(340px, 44vh, 600px);min-height:0 !important;}
-  /* Grid e Skip gruppo fanno parte della griglia: stanno subito sotto di lei. La scheda del cliente viene dopo. */
-  #home-lato{order:2;margin:0 !important;}
-  #cl-scheda{order:3;display:none;}
-  #pr-zona > #proto-chart-wrap{order:4 !important;margin:0 !important;}
+  #pr-zona > #home-riga{display:flex !important;flex-direction:column;gap:14px;flex:none !important;}
+  #pr-dx{display:flex;flex-direction:column;gap:14px;flex:none;min-width:0;}
+  #mappa{flex:none !important;height:clamp(340px, 44vh, 600px);min-height:0 !important;}
+  /* Grid fa parte della griglia: sta subito sotto di lei. La scheda del cliente, lo schema e il grafico vengono dopo. */
+  #home-lato{margin:0 !important;}
+  #cl-scheda{display:none;}
+  #pr-dx > #proto-chart-wrap{flex:none;display:flex;flex-direction:column;box-sizing:border-box;margin:0;padding:0;width:auto;}
   #mappa .mp-g{left:104px;right:14px;bottom:76px;}
   #mappa .mp-ay{left:104px;bottom:76px;} #mappa .mp-ax{left:104px;bottom:76px;}
   #mappa .mp-ys{width:96px;bottom:76px;} #mappa .mp-ey{width:96px;}
@@ -12187,11 +12213,8 @@ window.addEventListener('load', function(){
     #mappa .mp-e, #mappa .mp-ex{font-size:11px !important;}
   }
   @media (min-width:1500px){
-    #pr-zona{display:grid !important;grid-template-columns:minmax(0,1.3fr) minmax(360px,1fr);grid-auto-rows:min-content;gap:14px 28px !important;}
-    #mappa{grid-column:1;grid-row:1;height:clamp(420px, 66vh, 720px);}
-    #home-lato{grid-column:1;grid-row:2;}
-    #cl-scheda{grid-column:2;grid-row:1 / span 2;align-self:start;}
-    #pr-zona > #proto-chart-wrap{grid-column:2;grid-row:3;}
+    #pr-zona{display:grid !important;grid-template-columns:minmax(0,1.3fr) minmax(360px,1fr);align-items:start;gap:14px 28px !important;}
+    #mappa{height:clamp(420px, 66vh, 720px);}
   }
   /* la scheda del cliente aperto */
   #cl-scheda.si{display:block;box-sizing:border-box;border:1px solid rgba(212,168,74,0.55);border-left:3px solid var(--pc);border-radius:0 3px 3px 0;background:rgba(212,168,74,0.04);padding:14px 18px 16px;font-family:var(--font);}
@@ -12517,6 +12540,25 @@ header > #breadcrumb, header > .bc{margin-right:auto!important;}
 #pas-admin .pas-fa button.si{border-color:rgba(228,184,90,.9);color:#E4B85A;}
 #pas-admin .pas-vuoto{font-size:12.5px;color:rgba(190,204,218,.6);}
 .pas-schema{display:grid;gap:3px;max-width:820px;font-family:var(--font);}
+.ps-tit{margin:22px 0 10px;font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#E4B85A;}
+/* una riga accesa: le altre si abbassano, lei prende il bordo */
+.pas-schema.foco .ps-r[data-psk]{opacity:.28;transition:opacity .15s;}
+.pas-schema.foco .ps-r.on{opacity:1;}
+.pas-schema.foco .ps-r.on > span{color:#E4B85A;font-weight:600;}
+.pas-schema.foco .ps-r.on > i:not(.ps-v){box-shadow:inset 0 0 0 1px currentColor;}
+/* nella pagina Protocolli, sotto la griglia */
+#ps-pagina{display:none;}
+@media (min-width:900px), (pointer:fine){
+  #ps-pagina{display:block;font-family:var(--font);}
+  #ps-pagina .ps-tit{margin:6px 0 8px;color:rgba(190,204,218,.6);}
+  #ps-pagina .pas-schema{max-width:none;}
+  #ps-pagina .ps-r{grid-template-columns:104px repeat(6, minmax(0,1fr));}
+  #ps-pagina .ps-r > span{font-size:12px;}
+  #ps-pagina .ps-r > i{min-height:24px;font-size:8.5px;letter-spacing:.4px;}
+  #ps-pagina .ps-testa > b{font-size:10px;letter-spacing:1.5px;}
+}
+@media (min-width:1500px){ #ps-pagina .ps-r > i{font-size:9.5px;letter-spacing:1px;min-height:28px;} }
+.nc-schema{margin-top:10px;} .nc-schema .ps-r{grid-template-columns:112px repeat(6, minmax(0,1fr));} .nc-schema .ps-r > i{min-height:24px;font-size:8.5px;letter-spacing:.4px;}
 .ps-r{display:grid;grid-template-columns:128px repeat(6, minmax(0,1fr));gap:3px;align-items:stretch;}
 .ps-r > span{display:flex;align-items:center;font-size:12.5px;color:#f0ebdc;padding-right:8px;}
 .ps-testa > span{font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(190,204,218,.6);}
@@ -13961,9 +14003,11 @@ function ncProtoDisegna(){
   if(!box) return;
   box.innerHTML = PAS_PROTO.map(function(p){ return '<button type="button" class="nc-p' + (_ncProto === p ? ' si' : '') + '" data-ncp="' + p + '" style="--lc:' + CL_COLORE[p] + '"' + (_ncConferma ? ' disabled' : '') + '>' + CL_NOME[p] + '</button>'; }).join('');
   var righe = _ncProto ? pasDopo(_ncProto) : [], grid = _ncProto === 'grid';
-  dopo.className = _ncProto ? 'si' : '';
-  dopo.innerHTML = !_ncProto ? '' : '<div class="nc-dopo-t">Da ' + CL_NOME[_ncProto] + ' poi si potrà andare:</div>'
+  dopo.className = 'si';
+  /* prima di scegliere si vede lo schema con accesa la riga "Cliente nuovo": dove si può partire. Scelto il protocollo, si accende la sua riga: dove si potrà andare dopo. */
+  dopo.innerHTML = !_ncProto ? '<div class="nc-dopo-t">Dove può partire un cliente nuovo</div><div class="nc-schema">' + pasSchema(['nuovo'], false, false) + '</div>' : '<div class="nc-dopo-t">Da ' + CL_NOME[_ncProto] + ' poi si potrà andare:</div>'
                  + righe.map(function(r){ return '<div class="nc-dopo-r' + (r.indexOf('NON') === 0 ? ' no' : '') + '">' + clEsc(r) + '</div>'; }).join('')
+                 + '<div class="nc-schema">' + pasSchema(_ncProto === 'open' ? ['openMeta','openFinita'] : [_ncProto], false, false) + '</div>'
                  + (grid ? '<div class="nc-dopo-r att">Per mettere un cliente in Grid serve l\u2019approvazione dell\u2019Admin: il cliente viene creato e la richiesta parte subito.</div>' : '');
   var nome = ncControlla();
   if(!_ncConferma){

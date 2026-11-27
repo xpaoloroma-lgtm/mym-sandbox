@@ -11821,14 +11821,17 @@ function demoGenera(){
      entrando, si apre la seduta di Move. Move non salva ancora niente, quindi "è in Move" è scritto solo qui (demoProto)
      e il periodo sta nella linea del tempo come tratto finto. Le sedute Open dopo il passaggio si tolgono, perché da quel giorno non è più in Open.
      Quali clienti (uno ogni nove) e da quanti giorni sono scelte. */
+  /* CLIENTI FINTI IN SELF E IN LOAD (27/11): stessa cosa, per poter aprire Self e Load da un cliente. Quattro e quattro: quali sono è una scelta. */
+  var DEMO_SELF = [5, 9, 18, 27], DEMO_LOAD = [2, 8, 23, 30];
   out.forEach(function(c, i){
-    if(i % 9 !== 4) return;
+    var dove = i % 9 === 4 ? 'move' : DEMO_SELF.indexOf(i) !== -1 ? 'self' : DEMO_LOAD.indexOf(i) !== -1 ? 'load' : '';
+    if(!dove) return;
     var st = c.state, fa = tra(25, 70), dal = iso(fa);
     st.log = (st.log || []).filter(function(e){ return String(e.date || '') < dal; });
     st.journal = (st.journal || []).filter(function(e){ return String(e.ts || '').slice(0, 10) < dal; });
     if(st.open) st.open.log = st.log;
-    st.demoProto = 'move';
-    st.demoPercorso = (st.demoPercorso || []).filter(function(t){ return t.da < dal; }).concat([{proto:'move', da:dal, a:iso(0)}]);
+    st.demoProto = dove;
+    st.demoPercorso = (st.demoPercorso || []).filter(function(t){ return t.da < dal; }).concat([{proto:dove, da:dal, a:iso(0)}]);
   });
   /* I PASSAGGI dei clienti finti: ogni periodo passato fuori da Open ha il suo passaggio di andata (e di ritorno), con un motivo,
      così sulla timeline si vedono i punti. I motivi sono scelti a caso, ma il tipo di passaggio segue le regole vere (PAS_REGOLE):
